@@ -220,7 +220,8 @@ body{font-family:'DM Sans',sans-serif;display:flex;justify-content:center;align-
     <div style="font-size:13px;color:var(--txt2);line-height:1.6;margin-bottom:20px">Liro s&apos;adapte &agrave; votre fa&ccedil;on de lire.</div>
   </div>
 
-  <div class="profil-card" id="ob-attn" onclick="obSelect('attn')">
+  <div id="profile-cards">
+<div class="profil-card" id="ob-attn" onclick="obSelect('attn')">
     <div class="p-icon" style="background:var(--bl3)">&#9889;</div>
     <div style="flex:1">
       <div style="font-weight:500;font-size:14px;color:var(--txt);margin-bottom:2px">Mon attention est difficile &agrave; canaliser</div>
@@ -246,6 +247,8 @@ body{font-family:'DM Sans',sans-serif;display:flex;justify-content:center;align-
     </div>
     <div id="ck-plaisir" style="display:none;color:var(--vt);font-size:18px;font-weight:600">&#10003;</div>
   </div>
+</div>
+<div id="profile-return-hint" style="display:none;text-align:center;padding:4px 0 16px;font-size:12px;color:var(--txt3)"></div>
 
   <div style="padding:16px 20px 0">
     <div style="font-size:13px;color:var(--txt2);margin-bottom:8px">Votre pr&eacute;nom</div>
@@ -344,7 +347,7 @@ body{font-family:'DM Sans',sans-serif;display:flex;justify-content:center;align-
 
   <!-- Header sticky -->
   <div class="hdr">
-    <div style="display:flex;align-items:center;gap:7px">
+    <div style="display:flex;align-items:center;gap:7px;cursor:pointer" onclick="goHome()" title="Accueil">
   <div style="width:24px;height:24px;border-radius:5px;background:#fdf0e8;border:0.5px solid #d4a088;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 46 46">
 <path d="M 2 4 L 2 42 Q 2 44 4 44 L 23 44 L 23 4 Q 18 2 4 2 Q 2 2 2 4 Z" fill="#fff" stroke="#8b3a1a" stroke-width="1.5"/>
 <path d="M 44 4 L 44 42 Q 44 44 42 44 L 23 44 L 23 4 Q 28 2 42 2 Q 44 2 44 4 Z" fill="#fff" stroke="#8b3a1a" stroke-width="1.5"/>
@@ -505,6 +508,14 @@ body{font-family:'DM Sans',sans-serif;display:flex;justify-content:center;align-
     <div id="conseil-intro" style="margin-bottom:14px"></div>
     <div id="conseil-items"></div>
   </div>
+  <!-- Footer fixe -->
+  <div id="app-footer" style="position:fixed;bottom:0;left:0;right:0;max-width:430px;margin:0 auto;background:var(--bg);border-top:0.5px solid var(--border);padding:8px 16px;display:flex;justify-content:space-around;z-index:90">
+    <button onclick="goSc('s-faq')" style="background:none;border:none;font-size:11px;color:var(--txt3);cursor:pointer;font-family:var(--sans);padding:4px 6px">FAQ</button>
+    <button onclick="goSc('s-impact')" style="background:none;border:none;font-size:11px;color:var(--txt3);cursor:pointer;font-family:var(--sans);padding:4px 6px">Impact</button>
+    <button onclick="goSc('s-about')" style="background:none;border:none;font-size:11px;color:var(--txt3);cursor:pointer;font-family:var(--sans);padding:4px 6px">À propos</button>
+    <button onclick="goSc('s-rgpd')" style="background:none;border:none;font-size:11px;color:var(--txt3);cursor:pointer;font-family:var(--sans);padding:4px 6px">Confidentialité</button>
+  </div>
+  <div style="height:42px"></div>
 
 </div>
 
@@ -668,9 +679,7 @@ body{font-family:'DM Sans',sans-serif;display:flex;justify-content:center;align-
   <div class="drawer" onclick="event.stopPropagation()">
     <div class="handle"></div>
     <div id="drawer-content"></div>
-  </div>
-</div>
-</div><!-- fin .phone -->
+
 <script>
 // ════════════════════════════════════════════════════════
 // LIRO v17 — JavaScript complet
@@ -988,7 +997,7 @@ async function fetchBookSuggestions(q){
 
 
 // ── API LIRO ──────────────────────────────────────────────
-async function callLiro(prompt){
+async function callLiro(prompt, cb){
   var key = localStorage.getItem(LS_API) || LIRO_API_KEY || '';
   if(!key){ goSc('s-apikey'); return ''; }
   LIRO_API_KEY = key;
@@ -1023,15 +1032,14 @@ async function callLiro(prompt){
     });
     clearTimeout(tid);
     if(resp.status === 401){ goSc('s-apikey'); return ''; }
-    if(resp.status === 429) return '<p>Liro est tr\u00e8s sollicit\u00e9. R\u00e9essayez dans quelques secondes.</p>';
-    if(!resp.ok) return '<p>Une erreur est survenue (' + resp.status + '). R\u00e9essayez.</p>';
+    if(resp.status === 429) var e1='<p>Liro est très sollicité. Réessayez dans quelques secondes.</p>'; if(cb)cb(e1); return e1;
+    if(!resp.ok) var e2='<p>Une erreur est survenue ('+resp.status+'). Réessayez.</p>'; if(cb)cb(e2); return e2;
     var data = await resp.json();
-    if(data.content && data.content[0] && data.content[0].text) return data.content[0].text;
-    return '<p>R\u00e9ponse incompl\u00e8te. R\u00e9essayez.</p>';
+    var txt = (data.content && data.content[0] && data.content[0].text) ? data.content[0].text : '<p>Réponse incomplète. Réessayez.</p>';
+    if(cb) cb(txt); return txt;
   }catch(e){
     clearTimeout(tid);
-    if(e.name === 'AbortError') return '<p>Liro met trop de temps. V\u00e9rifiez votre connexion.</p>';
-    return '<p>Erreur de connexion. V\u00e9rifiez votre r\u00e9seau.</p>';
+    var e3=e.name==='AbortError'?'<p>Liro met trop de temps.</p>':'<p>Erreur de connexion.</p>'; if(cb)cb(e3); return e3;
   }
 }
 
@@ -1172,6 +1180,7 @@ async function sendChat(profil){
   var prompt='Tu es Liro, compagnon de lecture bienveillant. Livre: "' + (book.title||'inconnu') + '" de ' + (book.author||'inconnu') + ', page ' + (book.page||0) + '/' + (book.total||0) + '. R\u00e8gle absolue: ne d\u00e9voile JAMAIS ce qui se passe apr\u00e8s la page ' + (book.page||0) + '. Si le livre est peu connu, dis-le honn\u00eament. R\u00e9ponds bri\u00e8vement et chaleureusement. Question: ' + q;
   callLiro(prompt,function(answer){
     msgs.removeChild(typing);
+    if(!answer) return;
     var lb=document.createElement('div');
     lb.style.cssText='align-self:flex-start;background:var(--card);border:0.5px solid var(--border);border-radius:12px 12px 12px 2px;padding:8px 12px;font-size:13px;color:var(--txt);max-width:90%;line-height:1.6;word-break:break-word;margin-bottom:2px';
     lb.textContent=answer; msgs.appendChild(lb); msgs.scrollTop=msgs.scrollHeight;
@@ -1507,45 +1516,73 @@ async function enrichBookCards(){
 // ── NIVEAU 3 : Suggestions IA personnalisées ────────────────────────────────
 async function getAISuggestions(){
   var btn = document.getElementById('ai-suggest-btn');
-  if(btn){ btn.textContent = 'Liro réfléchit...'; btn.disabled = true; }
+  if(btn){ btn.textContent = 'Liro r\u00e9fl\u00e9chit...'; btn.disabled = true; }
   var resDiv = document.getElementById('ai-results');
   if(!resDiv) return;
   var color = PROF_COLOR[curProfil];
   var bg = curProfil==='attn'?'var(--bl3)':curProfil==='memoire'?'var(--ru3)':'var(--vt3)';
   var brd = curProfil==='attn'?'var(--bl2)':curProfil==='memoire'?'var(--ru2)':'var(--vt2)';
-  // Construire le contexte
+  var profDesc = {attn:'lecteur TDAH cherchant des livres courts et captivants',memoire:'lecteur qui veut des personnages m\u00e9morables pour ne pas perdre le fil',plaisir:'lecteur qui reprend la lecture apr\u00e8s une pause'};
   var books = curUser ? getBooks(curUser.id) : [];
-  var history = books.slice(0,5).map(function(b){ return b.title + (b.author?' de '+b.author:''); }).join(', ');
+  var history = books.slice(0,5).map(function(b){ return '"'+b.title+'"'+(b.author?' de '+b.author:''); }).join(', ');
   var qAnswers = Q_ANSWERS.filter(Boolean).join(', ');
-  var prompt = 'Tu es un bibliothérapeute expert. L’utilisateur a le profil "'+curProfil+'" ('+({'attn':'TDAH/attention','memoire':'mémoire/repères','plaisir':'retour au plaisir de lire'}[curProfil]||curProfil)+').'
-    + (history ? ' Livres récents : '+history+'.' : '')
-    + (qAnswers ? ' En ce moment : '+qAnswers+'.' : '')
-    + ' Propose exactement 3 romans avec pour chacun : titre, auteur, année, et 2 phrases sur pourquoi ce livre lui convient maintenant. Format JSON strict : [{"title":"...","author":"...","year":"...","why":"..."}]. Aucun texte avant ou après le JSON.';
-  callLiro(prompt, function(answer){
-    if(btn){ btn.textContent = 'Affiner avec l’IA'; btn.disabled = false; }
-    try{
-      var clean = answer.replace(/```json|```/g,'').trim();
-      var suggestions = JSON.parse(clean);
-      resDiv.innerHTML = '<div style="background:'+bg+';border:0.5px solid '+brd+';border-radius:var(--r);padding:14px 16px;margin-bottom:12px"><div style="font-family:var(--serif);font-size:16px;color:'+color+';margin-bottom:4px">Suggestions personnalisées</div><div style="font-size:12px;color:var(--txt2)">Basées sur votre profil et votre humeur du moment</div></div>';
-      suggestions.forEach(function(s,i){
-        var card = document.createElement('div');
-        card.style.cssText = 'background:var(--card);border:0.5px solid var(--border);border-radius:var(--r-sm);padding:14px;margin-bottom:10px';
-        if(i===0) card.style.borderColor = color;
-        card.innerHTML = '<div style="font-family:var(--serif);font-size:16px;color:var(--txt);margin-bottom:2px">'+s.title+'</div>'
-          +'<div style="font-size:12px;color:var(--txt3);margin-bottom:8px">'+(s.author||'')+' · '+(s.year||'')+'</div>'
-          +'<div style="font-size:13px;color:var(--txt2);line-height:1.6;background:'+bg+';border-radius:6px;padding:8px 10px">'+(s.why||'')+'</div>';
-        resDiv.appendChild(card);
-      });
-      var rb = document.createElement('button');
-      rb.textContent = 'Autres suggestions';
-      rb.style.cssText = 'font-size:12px;color:var(--txt3);background:none;border:none;cursor:pointer;font-family:var(--sans);text-decoration:underline;display:block;text-align:center;margin:8px auto 24px';
-      rb.onclick = function(){ resDiv.innerHTML=''; getAISuggestions(); };
-      resDiv.appendChild(rb);
-    }catch(e){
-      resDiv.innerHTML = '<div style="font-size:13px;color:var(--txt3);padding:12px 0">'+answer+'</div>';
+  var prompt = 'Tu es un biblioth\u00e9rapeute expert. Profil lecteur : '+(profDesc[curProfil]||curProfil)+'.'
+    + (history?' Livres r\u00e9cents : '+history+'.':'')
+    + (qAnswers?' Humeur du moment : '+qAnswers+'.':', sans indication d\u2019humeur.')
+    + ' Propose exactement 3 romans (pas ceux d\u00e9j\u00e0 lus) avec pour chacun title, author, year, why (2 phrases pourquoi ce livre convient maintenant).'
+    + ' R\u00e9ponds UNIQUEMENT en JSON valide : [{"title":"...","author":"...","year":"...","why":"..."}]';
+  var answer = await callLiro(prompt) || '';
+  if(btn){ btn.textContent = 'Affiner avec l\u2019IA'; btn.disabled = false; }
+  if(!answer){ var resDiv2=document.getElementById('ai-results'); if(resDiv2)resDiv2.innerHTML='<div style="font-size:13px;color:var(--txt3);padding:12px 0">Configurez votre clé API pour accéder aux suggestions personnalisées.</div>'; return; }
+  try{
+    var clean = answer.replace(/```json|```/g,'').trim();
+    var start = clean.indexOf('['); var end2 = clean.lastIndexOf(']')+1;
+    if(start >= 0) clean = clean.slice(start, end2);
+    var suggestions = JSON.parse(clean);
+    resDiv.innerHTML = '<div style="background:'+bg+';border:0.5px solid '+brd+';border-radius:var(--r);padding:12px 16px;margin-bottom:12px"><div style="font-family:var(--serif);font-size:16px;color:'+color+';margin-bottom:3px">Suggestions personnalis\u00e9es</div><div style="font-size:12px;color:var(--txt2)">Bas\u00e9es sur votre profil et votre humeur du moment</div></div>';
+    suggestions.slice(0,3).forEach(function(s,i){
+      var card = document.createElement('div');
+      card.style.cssText = 'background:var(--card);border:'+(i===0?'1px solid '+color:'0.5px solid var(--border)')+';border-radius:var(--r-sm);padding:14px;margin-bottom:10px';
+      card.innerHTML = '<div style="font-family:var(--serif);font-size:16px;color:var(--txt);margin-bottom:2px">'+s.title+'</div>'
+        +'<div style="font-size:12px;color:var(--txt3);margin-bottom:8px">'+(s.author||'')+' \u00b7 '+(s.year||'')+'</div>'
+        +'<div style="font-size:13px;color:var(--txt2);line-height:1.6;background:'+bg+';border-radius:6px;padding:8px 10px">'+(s.why||'')+'</div>';
+      resDiv.appendChild(card);
+    });
+    var rb = document.createElement('button');
+    rb.textContent = 'Autres suggestions';
+    rb.style.cssText = 'font-size:12px;color:var(--txt3);background:none;border:none;cursor:pointer;font-family:var(--sans);text-decoration:underline;display:block;text-align:center;margin:8px auto 24px';
+    rb.onclick = function(){ resDiv.innerHTML=''; getAISuggestions(); };
+    resDiv.appendChild(rb);
+  }catch(e){
+    resDiv.innerHTML = '<div style="font-size:13px;color:var(--txt2);padding:12px 0;line-height:1.6">'+answer.replace(/<[^>]+>/g,'')+'</div>';
+  }
+}
+
+
+function goHome(){
+  goSc('s-home');
+  setTimeout(updateLandingForReturn, 100);
+}
+function updateLandingForReturn(){
+  if(!curUser) return;
+  var cards = document.getElementById('profile-cards');
+  var hint = document.getElementById('profile-return-hint');
+  if(!cards) return;
+  if(curProfil){
+    cards.style.display = 'none';
+    if(hint){
+      hint.style.display = 'block';
+      var labels = {attn:'Attention \u26a1',memoire:'M\u00e9moire',plaisir:'Plaisir \u2728'};
+      var label = labels[curProfil] || curProfil;
+      hint.innerHTML = 'Profil actif\u00a0: <strong style="color:var(--txt2)">'+label+'</strong> \u00a0\u00b7\u00a0 <span onclick="showProfileChoice()" style="color:var(--ru);cursor:pointer;text-decoration:underline">Changer de profil</span>';
     }
-    setTimeout(enrichBookCards, 500);
-  });
+  }
+}
+function showProfileChoice(){
+  var cards = document.getElementById('profile-cards');
+  var hint = document.getElementById('profile-return-hint');
+  if(cards) cards.style.display = '';
+  if(hint) hint.style.display = 'none';
 }
 
 document.addEventListener('DOMContentLoaded', function(){
