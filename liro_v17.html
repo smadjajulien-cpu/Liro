@@ -731,18 +731,29 @@ function toast2(msg){
 }
 
 // ── LOGIN DEV ─────────────────────────────────────────────
-var DEV_CODE = 'liro2024';
+// Code dev obfusqué — fragments + rate limiting
+var _dc = ['L','ir','o20','26','!'];
+var _dcAttempts = 0; var _dcLock = 0;
+function _checkDC(v){ return v === _dc.join(''); }
 function checkDevCode(){
   var input = document.getElementById('dev-code');
   var error = document.getElementById('dev-error');
   var val = input ? input.value.trim() : '';
-  if(val === DEV_CODE){
-    localStorage.setItem(LS_AUTH, '1');
-    goSc('s-apikey');
-    checkApiKey();
+  var now = Date.now();
+  if(_dcLock > now){
+    if(error){ error.textContent='Trop d\u2019essais. Attendez '+Math.ceil((_dcLock-now)/1000)+'s.'; error.style.display='block'; }
+    return;
+  }
+  if(_checkDC(val)){
+    _dcAttempts=0;
+    localStorage.setItem(LS_AUTH, String(now + 86400000));
+    goSc('s-apikey'); checkApiKey();
   } else {
-    if(error) error.style.display = 'block';
-    if(input){ input.value = ''; input.focus(); }
+    _dcAttempts++;
+    if(_dcAttempts>=3){ _dcLock=now+30000; _dcAttempts=0; }
+    var rem = Math.max(0, 3-_dcAttempts);
+    if(error){ error.textContent=rem>0?'Code incorrect \u2014 '+rem+' essai(s) restant(s).':'Trop d\u2019essais. Attendez 30s.'; error.style.display='block'; }
+    if(input){ input.value=''; if(input.focus) input.focus(); }
   }
 }
 
@@ -999,49 +1010,42 @@ async function fetchBookSuggestions(q){
 // ── API LIRO ──────────────────────────────────────────────
 async function callLiro(prompt, cb){
   var key = localStorage.getItem(LS_API) || LIRO_API_KEY || '';
-  if(!key){ goSc('s-apikey'); return ''; }
+  if(!key){ goSc('s-apikey'); if(cb) cb(''); return ''; }
   LIRO_API_KEY = key;
-
-  var sysPrompt = 'Tu es Liro, compagnon de lecture bienveillant. Ton r\u00f4le est d\u2019aider \u00e0 REPRENDRE la lecture \u2014 jamais \u00e0 la remplacer.'
-    + '\n\nR\u00c8GLE ABSOLUE ANTI-SPOILER : Ne JAMAIS divulguer ce qui se passe apr\u00e8s la page indiqu\u00e9e. Z\u00e9ro exception.'
-    + '\n\nR\u00c8GLE ANTI-FICHE : Si la page est 0 ou < 3% du total, encourage \u00e0 commencer plut\u00f4t que r\u00e9sumer.'
-    + '\n\nR\u00c8GLE CONFIANCE : Si tu connais peu ce livre, dis-le honn\u00eatement. Ne fabrique jamais de d\u00e9tails.'
-    + '\n\nR\u00c8GLE TON : Bienveillant, jamais condescendant. Jamais de "Bien s\u00fbr !" ou "Absolument !". Pas de jugement sur les oublis.'
-    + '\n\nR\u00c8GLE MOTIVATION : Termine par une phrase qui donne envie de reprendre, ancr\u00e9e dans ce livre sp\u00e9cifique.'
+  var sysPrompt = 'Tu es Liro, compagnon de lecture bienveillant. Aide \u00e0 REPRENDRE la lecture \u2014 jamais \u00e0 la remplacer.'
+    + '\n\nR\u00c8GLE ANTI-SPOILER : Ne JAMAIS divulguer ce qui se passe apr\u00e8s la page indiqu\u00e9e.'
+    + '\n\nR\u00c8GLE HONNÊTET\u00c9 : Si tu connais peu ce livre, dis-le. Ne fabrique jamais de d\u00e9tails.'
+    + '\n\nR\u00c8GLE TON : Bienveillant. Jamais \"Bien s\u00fbr !\" ou \"Absolument !\". Pas de jugement sur les oublis.'
+    + '\n\nR\u00c8GLE FINALE : Termine par une phrase qui donne envie de reprendre ce livre sp\u00e9cifique.'
     + '\n\nR\u00e9ponds en fran\u00e7ais, en HTML simple (p, strong, em). Maximum 250 mots.';
-
   var controller = new AbortController();
   var tid = setTimeout(function(){ controller.abort(); }, 25000);
-
   try{
     var resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': LIRO_API_KEY,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 400,
-        system: sysPrompt,
-        messages: [{ role: 'user', content: prompt }]
-      }),
-      signal: controller.signal
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':LIRO_API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:400,system:sysPrompt,messages:[{role:'user',content:prompt}]}),
+      signal:controller.signal
     });
     clearTimeout(tid);
-    if(resp.status === 401){ goSc('s-apikey'); return ''; }
-    if(resp.status === 429) var e1='<p>Liro est très sollicité. Réessayez dans quelques secondes.</p>'; if(cb)cb(e1); return e1;
-    if(!resp.ok) var e2='<p>Une erreur est survenue ('+resp.status+'). Réessayez.</p>'; if(cb)cb(e2); return e2;
-    var data = await resp.json();
-    var txt = (data.content && data.content[0] && data.content[0].text) ? data.content[0].text : '<p>Réponse incomplète. Réessayez.</p>';
-    if(cb) cb(txt); return txt;
+    var txt;
+    if(resp.status === 401){ goSc('s-apikey'); txt=''; }
+    else if(resp.status === 429){ txt='<p>Liro est tr\u00e8s sollicit\u00e9. R\u00e9essayez dans quelques secondes.</p>'; }
+    else if(!resp.ok){ txt='<p>Erreur '+resp.status+'. R\u00e9essayez.</p>'; }
+    else {
+      var data = await resp.json();
+      txt = (data.content && data.content[0] && data.content[0].text) ? data.content[0].text : '<p>R\u00e9ponse incompl\u00e8te.</p>';
+    }
+    if(cb) cb(txt);
+    return txt;
   }catch(e){
     clearTimeout(tid);
-    var e3=e.name==='AbortError'?'<p>Liro met trop de temps.</p>':'<p>Erreur de connexion.</p>'; if(cb)cb(e3); return e3;
+    var err = e.name==='AbortError' ? '<p>Liro met trop de temps. V\u00e9rifiez votre connexion.</p>' : '<p>Erreur de connexion.</p>';
+    if(cb) cb(err);
+    return err;
   }
 }
+
 
 // ── RÉSUMÉ ────────────────────────────────────────────────
 async function doRead(profil, type){
@@ -1114,14 +1118,14 @@ function showResume(profil, content){
     + '<span style="font-size:13px;color:' + color + ';font-weight:500;flex:1">J\u2019en suis \u00e0 la page...</span>'
     + '<span style="color:' + color + ';font-size:16px">+</span>'
     + '</div>'
-    // Chat libre
-    + '<div style="background:var(--card);border:0.5px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:8px">'
-    + '<div style="font-size:12px;color:var(--txt3);margin-bottom:8px">Poser une question \u00e0 Liro</div>'
-    + '<div style="display:flex;gap:8px;align-items:center">'
-    + '<input id="chat-input-' + profil + '" placeholder="Qui est ce personnage ?" style="flex:1;border:0.5px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;font-family:var(--sans);background:var(--bg);color:var(--txt)">'
-    + '<button id="chat-btn-' + profil + '" style="background:' + color + ';color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:13px;cursor:pointer;font-family:var(--sans);flex-shrink:0">&#8594;</button>'
+    // Chat fil de bulles
+    + '<div style="border:0.5px solid var(--border);border-radius:var(--r-sm);overflow:hidden;margin-bottom:8px">'
+    + '<div style="font-size:11px;font-weight:500;color:var(--txt3);padding:8px 12px;background:var(--card);border-bottom:0.5px solid var(--border)">Discuter avec Liro</div>'
+    + '<div id="chat-msgs-' + profil + '" style="min-height:40px;max-height:240px;overflow-y:auto;padding:8px 10px;background:var(--bg);display:flex;flex-direction:column;gap:4px"></div>'
+    + '<div style="display:flex;border-top:0.5px solid var(--border)">'
+    + '<input id="chat-inp-' + profil + '" placeholder="Une question sur votre lecture..." style="flex:1;border:none;padding:10px 12px;font-size:13px;font-family:var(--sans);background:var(--card);color:var(--txt);outline:none" onkeydown="if(event.key===\'Enter\')sendChat(\''+profil+'\')" >'
+    + '<button onclick="sendChat(\''+profil+'\')" style="background:' + color + ';color:#fff;border:none;padding:10px 16px;font-size:14px;cursor:pointer;flex-shrink:0">&#8594;</button>'
     + '</div>'
-    + '<div id="chat-resp-' + profil + '" style="display:none;margin-top:8px;font-size:13px;color:var(--txt2);line-height:1.7"></div>'
     + '</div>'
     // Notes
     + '<div style="background:var(--card);border:0.5px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:8px">'
@@ -1463,7 +1467,9 @@ function initScrollAnimations(){
 // ── INIT GÉNÉRAL ──────────────────────────────────────────
 function init(){
   // Vérifier auth dev
-  if(localStorage.getItem(LS_AUTH) !== '1'){
+  var _authVal = parseInt(localStorage.getItem(LS_AUTH)||'0');
+  if(!_authVal || Date.now() > _authVal){
+    localStorage.removeItem(LS_AUTH);
     goSc('s-devlogin');
     return;
   }
@@ -1533,7 +1539,15 @@ async function getAISuggestions(){
     + ' R\u00e9ponds UNIQUEMENT en JSON valide : [{"title":"...","author":"...","year":"...","why":"..."}]';
   var answer = await callLiro(prompt) || '';
   if(btn){ btn.textContent = 'Affiner avec l\u2019IA'; btn.disabled = false; }
-  if(!answer){ var resDiv2=document.getElementById('ai-results'); if(resDiv2)resDiv2.innerHTML='<div style="font-size:13px;color:var(--txt3);padding:12px 0">Configurez votre clé API pour accéder aux suggestions personnalisées.</div>'; return; }
+  if(!answer){
+    var resDiv2=document.getElementById('ai-results');
+    if(resDiv2) resDiv2.innerHTML='<div style="background:var(--card);border:0.5px solid var(--border);border-radius:var(--r-sm);padding:14px;text-align:center">'
+      +'<div style="font-size:14px;color:var(--txt);margin-bottom:8px">\u2728 Suggestions personnalis\u00e9es</div>'
+      +'<div style="font-size:13px;color:var(--txt2);line-height:1.6;margin-bottom:12px">Pour que Liro choisisse pour vous, une cl\u00e9 API Anthropic est n\u00e9cessaire.</div>'
+      +'<button onclick="goSc(\'s-apikey\')" style="background:var(--ru);color:#fff;border:none;border-radius:var(--r-sm);padding:10px 20px;font-size:13px;font-weight:500;font-family:var(--sans);cursor:pointer">Configurer ma cl\u00e9 \u2192</button>'
+      +'</div>';
+    return;
+  }
   try{
     var clean = answer.replace(/```json|```/g,'').trim();
     var start = clean.indexOf('['); var end2 = clean.lastIndexOf(']')+1;
