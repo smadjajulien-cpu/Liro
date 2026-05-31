@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Liro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:#1a1a1a}
+body{font-family:'DM Sans',sans-serif;display:flex;justify-content:center;align-items:center}
+.phone{position:relative;width:100%;max-width:430px;height:100%;max-height:932px;background:#f5f0eb;overflow:hidden}
+@media(min-width:500px){.phone{border-radius:32px;box-shadow:0 24px 64px rgba(0,0,0,.4)}}
+
+:root{
+  --ru:#8b3a1a;--ru2:#d4a088;--ru3:#fdf0e8;
+  --bl:#1a5276;--bl2:#aed6f1;--bl3:#eaf2fb;
+  --vt:#4a7c59;--vt2:#a8d5b5;--vt3:#eef6f1;
+  --txt:#1a1a1a;--txt2:#555;--txt3:#999;
+  --card:#fff;--bg:#f5f0eb;--border:#e8e0d8;
+  --grn:#2d6a2d;--gb:#e8f3ec;--gbd:#a8d5b5;
+  --serif:'Playfair Display',Georgia,serif;
+  --sans:'DM Sans',sans-serif;
+  --r:14px;--r-sm:10px;
+}
+
+/* Écrans */
+.sc{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;background:var(--bg);display:none;-webkit-overflow-scrolling:touch}
+.sc.on{display:block}
+
+/* Layout commun */
+.w{padding:0 16px}
+.hdr{padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between;background:var(--bg);position:sticky;top:0;z-index:10}
+.btn-back{background:none;border:none;font-size:13px;color:var(--txt3);cursor:pointer;font-family:var(--sans);padding:14px 16px 0;display:block}
+.page-title{font-family:var(--serif);font-size:20px;color:var(--txt);padding:8px 16px 14px}
+
+/* Cards */
+.card{background:var(--card);border-radius:var(--r);border:0.5px solid var(--border);padding:16px;margin-bottom:10px}
+.card-label{font-size:11px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+
+/* Inputs */
+.inp{width:100%;border:0.5px solid var(--border);border-radius:var(--r-sm);padding:11px 13px;font-size:15px;background:var(--card);color:var(--txt);font-family:var(--sans)}
+.inp:focus{outline:none;border-color:var(--ru)}
+.lbl{font-size:11px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;display:block}
+
+/* Boutons */
+.btn{width:100%;border:none;border-radius:var(--r);padding:14px;font-size:15px;font-weight:500;cursor:pointer;font-family:var(--sans)}
+.btn-ru{background:var(--ru);color:#fff}
+.btn-ru2{background:var(--ru3);color:var(--ru);border:0.5px solid var(--ru2)}
+.btn-vt{background:var(--vt);color:#fff}
+.btn-bl{background:var(--bl);color:#fff}
+
+/* Tabs */
+.tabs{display:flex;gap:5px;padding:0 14px 12px;position:sticky;top:56px;background:var(--bg);z-index:9}
+.tab{flex:1;background:var(--card);border:0.5px solid var(--border);border-radius:10px;padding:8px 4px;font-size:11px;font-weight:500;font-family:var(--sans);color:var(--txt3);cursor:pointer;text-align:center;line-height:1.3;transition:all .15s}
+.tab.on-ru{background:var(--ru3);border-color:var(--ru2);color:var(--ru)}
+.tab.on-bl{background:var(--bl3);border-color:var(--bl2);color:var(--bl)}
+.tab.on-vt{background:var(--vt3);border-color:var(--vt2);color:var(--vt)}
+
+/* Résumé */
+.resume-card{background:var(--card);border-radius:var(--r);border:0.5px solid var(--border);padding:16px;margin-bottom:10px}
+.resume-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:0.5px solid var(--border)}
+.resume-body{font-size:15px;line-height:1.85;color:var(--txt)}
+.no-sp{font-size:11px;background:var(--ru3);border:0.5px solid var(--ru2);border-radius:20px;padding:3px 10px;color:var(--ru);font-weight:500}
+.tts-btn{background:none;border:0.5px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;color:var(--txt3);cursor:pointer;font-family:var(--sans)}
+
+/* Loading */
+.loading-dots{display:flex;gap:5px;justify-content:center;padding:16px 0}
+.loading-dots span{width:8px;height:8px;border-radius:50%;background:var(--ru);animation:ld .9s infinite}
+.loading-dots span:nth-child(2){animation-delay:.2s}
+.loading-dots span:nth-child(3){animation-delay:.4s}
+@keyframes ld{0%,100%{opacity:.2}50%{opacity:1}}
+
+/* Toast */
+.toast{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.82);color:#fff;padding:.5rem 1.2rem;border-radius:50px;font-size:.85rem;z-index:900;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .3s;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+
+/* Overlay/Drawer */
+.overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.45)}
+.drawer{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--card);border-radius:20px 20px 0 0;padding:1.2rem 1rem 2.5rem;max-height:85vh;overflow-y:auto}
+.handle{width:36px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 16px}
+
+/* Profil cards */
+.profil-card{background:var(--card);border-radius:var(--r);border:0.5px solid var(--border);padding:16px;margin:0 16px 10px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:all .15s}
+.profil-card:active{transform:scale(.98)}
+.p-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+
+/* Livre card */
+.book-card{background:var(--card);border-radius:var(--r);border:0.5px solid var(--border);padding:16px;margin-bottom:12px}
+.prog-bar{height:4px;background:#ede8e2;border-radius:2px;overflow:hidden;margin-bottom:5px}
+.prog-fill{height:4px;border-radius:2px}
+
+/* Chips / situations */
+.chips-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.chip{background:var(--card);border:0.5px solid var(--border);border-radius:50px;padding:9px 16px;font-size:13px;font-weight:500;font-family:var(--sans);color:var(--txt);cursor:pointer}
+.sit-list{display:flex;flex-direction:column;gap:7px;margin-bottom:12px}
+.sit-item{background:var(--card);border:0.5px solid var(--border);border-radius:var(--r-sm);padding:11px 14px;cursor:pointer;display:flex;align-items:center;gap:10px}
+.sit-item:active{background:var(--ru3)}
+
+/* Biblio items */
+.lib-item{background:var(--card);border:0.5px solid var(--border);border-radius:var(--r);padding:14px;cursor:pointer;display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.lib-item:active{opacity:.85}
+
+/* Conseil */
+.bk-item{background:var(--card);border:0.5px solid var(--border);border-radius:var(--r);padding:13px;cursor:pointer;display:flex;gap:11px;align-items:center;margin-bottom:8px}
+.bk-item:active{background:var(--ru3)}
+.bk-cover{width:40px;height:55px;border-radius:6px;flex-shrink:0}
+
+/* FAQ */
+.faq-item{background:var(--card);border-top:0.5px solid var(--border);padding:14px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.faq-item:first-child{border-top:none}
+.faq-a{display:none;padding:0 16px 14px;font-size:13px;color:var(--txt2);line-height:1.75;background:var(--card)}
+.faq-group{margin:0 16px 10px;border-radius:var(--r);overflow:hidden;border:0.5px solid var(--border)}
+
+/* Footer */
+.footer-links{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;padding:16px 16px 24px;border-top:0.5px solid var(--border);margin-top:8px}
+.footer-links span{font-size:12px;color:var(--txt3);text-decoration:underline;cursor:pointer}
+
+/* Menu contextuel app */
+.app-menu{display:none;position:absolute;top:56px;right:16px;background:var(--card);border:0.5px solid var(--border);border-radius:var(--r-sm);box-shadow:0 4px 20px rgba(0,0,0,.12);z-index:200;min-width:180px;overflow:hidden}
+.app-menu-item{padding:12px 16px;font-size:14px;color:var(--txt);cursor:pointer;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:10px}
+.app-menu-item:last-child{border-bottom:none}
+.app-menu-item:active{background:var(--ru3)}
+
+/* Menu bouton */
+.menu-btn{width:32px;height:32px;border-radius:50%;background:var(--card);border:0.5px solid var(--border);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--txt2)}
+
+/* Animations */
+.fade-in{opacity:0;transform:translateY(10px);transition:opacity .35s ease,transform .35s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+
+/* Welcome box profil retour */
+.welcome-box{border-radius:var(--r);padding:14px 16px;margin-bottom:12px;border:0.5px solid}
+
+/* Note bas de page lecture */
+.read-note{text-align:center;font-size:12px;color:var(--txt3);padding:4px 0 20px}
+
+/* Sections conseil */
+.section-lbl{font-size:11px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin:8px 0}
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+<div class="toast" id="toast"></div>
+
+<!-- ═══ LOGIN DEV ═══ -->
+<div id="s-devlogin" class="sc on">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 24px;text-align:center">
+    <div style="margin-bottom:6px"><div style="display:flex;align-items:center;gap:7px">
+  <div style="width:32px;height:32px;border-radius:7px;background:#fdf0e8;border:0.5px solid #d4a088;display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 46 46">
+<path d="M 2 4 L 2 42 Q 2 44 4 44 L 23 44 L 23 4 Q 18 2 4 2 Q 2 2 2 4 Z" fill="#fff" stroke="#8b3a1a" stroke-width="1.5"/>
+<path d="M 44 4 L 44 42 Q 44 44 42 44 L 23 44 L 23 4 Q 28 2 42 2 Q 44 2 44 4 Z" fill="#fff" stroke="#8b3a1a" stroke-width="1.5"/>
+<line x1="23" y1="3" x2="23" y2="44" stroke="#d4a088" stroke-width="1.5"/>
+<line x1="6" y1="14" x2="20" y2="14" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="6" y1="20" x2="20" y2="20" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="26" y1="14" x2="40" y2="14" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="26" y1="20" x2="40" y2="20" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M 8 0 L 14 0 L 14 16 L 11 12 L 8 16 Z" fill="#c4724a"/>
+</svg></div>
+  <span style="font-family:'Playfair Display',Georgia,serif;font-weight:500;color:#8b3a1a;letter-spacing:-.02em;font-size:28px">L<em style="font-style:italic;font-weight:400;color:#c4724a">i</em>ro</span>
+</div></div>
+    <div style="font-size:11px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.15em;margin-bottom:32px">Version de d&eacute;veloppement</div>
+    <div style="width:100%;background:var(--card);border-radius:var(--r);border:0.5px solid var(--border);padding:20px">
+      <div style="font-size:13px;color:var(--txt2);margin-bottom:14px;line-height:1.6">Version r&eacute;serv&eacute;e aux testeurs autoris&eacute;s.<br>Entrez le code d&apos;acc&egrave;s.</div>
+      <input type="password" id="dev-code" placeholder="Code d&apos;acc&egrave;s" class="inp" style="margin-bottom:10px;text-align:center;letter-spacing:.2em;font-size:16px" onkeydown="if(event.key==='Enter')checkDevCode()">
+      <div id="dev-error" style="display:none;font-size:12px;color:var(--ru);margin-bottom:8px">Code incorrect. R&eacute;essayez.</div>
+      <button onclick="checkDevCode()" class="btn btn-ru">Acc&eacute;der &agrave; Liro &rarr;</button>
+    </div>
+    <div style="font-size:11px;color:var(--txt3);margin-top:20px;line-height:1.6">Vous &ecirc;tes testeur ?<br><a href="mailto:contact@liro.app" style="color:var(--ru)">contact@liro.app</a></div>
+  </div>
+</div>
+
+<!-- ═══ CLÉ API ═══ -->
+<div id="s-apikey" class="sc">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 24px;text-align:center">
+    <div style="margin-bottom:6px"><div style="display:flex;align-items:center;gap:7px">
+  <div style="width:30px;height:30px;border-radius:7px;background:#fdf0e8;border:0.5px solid #d4a088;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 46 46">
+<path d="M 2 4 L 2 42 Q 2 44 4 44 L 23 44 L 23 4 Q 18 2 4 2 Q 2 2 2 4 Z" fill="#fff" stroke="#8b3a1a" stroke-width="1.5"/>
+<path d="M 44 4 L 44 42 Q 44 44 42 44 L 23 44 L 23 4 Q 28 2 42 2 Q 44 2 44 4 Z" fill="#fff" stroke="#8b3a1a" stroke-width="1.5"/>
+<line x1="23" y1="3" x2="23" y2="44" stroke="#d4a088" stroke-width="1.5"/>
+<line x1="6" y1="14" x2="20" y2="14" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="6" y1="20" x2="20" y2="20" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="26" y1="14" x2="40" y2="14" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="26" y1="20" x2="40" y2="20" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M 8 0 L 14 0 L 14 16 L 11 12 L 8 16 Z" fill="#c4724a"/>
+</svg></div>
+  <span style="font-family:'Playfair Display',Georgia,serif;font-weight:500;color:#8b3a1a;letter-spacing:-.02em;font-size:26px">L<em style="font-style:italic;font-weight:400;color:#c4724a">i</em>ro</span>
+</div></div>
+    <div style="font-size:11px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:24px">Compagnon de lecture</div>
+    <div style="width:100%;background:var(--card);border-radius:var(--r);border:0.5px solid var(--border);padding:20px;margin-bottom:12px">
+      <div style="font-size:14px;font-weight:500;color:var(--txt);margin-bottom:6px">Activez Liro</div>
+      <div style="font-size:13px;color:var(--txt2);margin-bottom:14px;line-height:1.6">Entrez votre cl&eacute; API Anthropic pour activer Liro. Elle est stock&eacute;e uniquement sur votre appareil.</div>
+      <input type="password" id="api-key-input" placeholder="sk-ant-..." class="inp" style="margin-bottom:10px;font-size:13px" autocomplete="off">
+      <button onclick="saveApiKey()" class="btn btn-ru">Activer Liro &rarr;</button>
+    </div>
+    <div style="font-size:12px;color:var(--txt3);line-height:1.6">Obtenez votre cl&eacute; sur<br><a href="https://console.anthropic.com" target="_blank" style="color:var(--ru)">console.anthropic.com</a></div>
+  </div>
+</div>
+
+<!-- ═══ ONBOARDING ═══ -->
+<div id="s-ob" class="sc">
+  <div style="padding:32px 20px 20px">
+    <div style="margin-bottom:6px"><div style="display:flex;align-items:center;gap:7px">
+  <div style="width:30px;height:30px;border-radius:7px;background:#fdf0e8;border:0.5px solid #d4a088;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 46 46">
+<path d="M 2 4 L 2 42 Q 2 44 4 44 L 23 44 L 23 4 Q 18 2 4 2 Q 2 2 2 4 Z" fill="#fff" stroke="#8b3a1a" stroke-width="1.5"/>
+<path d="M 44 4 L 44 42 Q 44 44 42 44 L 23 44 L 23 4 Q 28 2 42 2 Q 44 2 44 4 Z" fill="#fff" stroke="#8b3a1a" stroke-width="1.5"/>
+<line x1="23" y1="3" x2="23" y2="44" stroke="#d4a088" stroke-width="1.5"/>
+<line x1="6" y1="14" x2="20" y2="14" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="6" y1="20" x2="20" y2="20" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="26" y1="14" x2="40" y2="14" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="26" y1="20" x2="40" y2="20" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M 8 0 L 14 0 L 14 16 L 11 12 L 8 16 Z" fill="#c4724a"/>
+</svg></div>
+  <span style="font-family:'Playfair Display',Georgia,serif;font-weight:500;color:#8b3a1a;letter-spacing:-.02em;font-size:26px">L<em style="font-style:italic;font-weight:400;color:#c4724a">i</em>ro</span>
+</div></div>
+    <div style="font-family:var(--serif);font-size:22px;color:var(--txt);margin:16px 0 6px">Cr&eacute;er votre profil</div>
+    <div style="font-size:13px;color:var(--txt2);line-height:1.6;margin-bottom:20px">Liro s&apos;adapte &agrave; votre fa&ccedil;on de lire.</div>
+  </div>
+
+  <div class="profil-card" id="ob-attn" onclick="obSelect('attn')">
+    <div class="p-icon" style="background:var(--bl3)">&#9889;</div>
+    <div style="flex:1">
+      <div style="font-weight:500;font-size:14px;color:var(--txt);margin-bottom:2px">Mon attention est difficile &agrave; canaliser</div>
+      <div style="font-size:12px;color:var(--txt3)">Je commence des livres, je d&eacute;croche, je perds le fil</div>
+    </div>
+    <div id="ck-attn" style="display:none;color:var(--bl);font-size:18px;font-weight:600">&#10003;</div>
+  </div>
+
+  <div class="profil-card" id="ob-memoire" onclick="obSelect('memoire')">
+    <div class="p-icon" style="background:var(--ru3)">&#129504;</div>
+    <div style="flex:1">
+      <div style="font-weight:500;font-size:14px;color:var(--txt);margin-bottom:2px">J&apos;oublie ce que j&apos;ai lu</div>
+      <div style="font-size:12px;color:var(--txt3)">Entre deux sessions, les d&eacute;tails s&apos;effacent</div>
+    </div>
+    <div id="ck-memoire" style="display:none;color:var(--ru);font-size:18px;font-weight:600">&#10003;</div>
+  </div>
+
+  <div class="profil-card" id="ob-plaisir" onclick="obSelect('plaisir')">
+    <div class="p-icon" style="background:var(--vt3)">&#127807;</div>
+    <div style="flex:1">
+      <div style="font-weight:500;font-size:14px;color:var(--txt);margin-bottom:2px">J&apos;ai perdu le go&ucirc;t de lire</div>
+      <div style="font-size:12px;color:var(--txt3)">La lecture s&apos;est &eacute;loign&eacute;e, je veux y revenir</div>
+    </div>
+    <div id="ck-plaisir" style="display:none;color:var(--vt);font-size:18px;font-weight:600">&#10003;</div>
+  </div>
+
+  <div style="padding:16px 20px 0">
+    <div style="font-size:13px;color:var(--txt2);margin-bottom:8px">Votre pr&eacute;nom</div>
+    <input type="text" id="ob-name" placeholder="Marie, Thomas..." class="inp" style="margin-bottom:16px">
+    <button id="ob-btn" onclick="createProfile()" class="btn btn-ru" style="opacity:.5;pointer-events:none">Commencer &agrave; lire &rarr;</button>
+    <button onclick="goSc('s-home')" style="width:100%;background:none;border:none;font-size:13px;color:var(--txt3);cursor:pointer;font-family:var(--sans);padding:12px 0">&#8592; Retour</button>
+  </div>
+</div>
+
+<!-- ═══ HOME / LANDING ═══ -->
+<div id="s-home" class="sc">
+  <!-- Hero -->
+  <div style="padding:36px 22px 24px;text-align:center">
+    <div style="display:flex;justify-content:center;margin-bottom:20px"><div style="display:flex;align-items:center;gap:7px">
+  <div style="width:34px;height:34px;border-radius:7px;background:#fdf0e8;border:0.5px solid #d4a088;display:flex;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 46 46">
+<path d="M 2 4 L 2 42 Q 2 44 4 44 L 23 44 L 23 4 Q 18 2 4 2 Q 2 2 2 4 Z" fill="#fff" stroke="#8b3a1a" stroke-width="1.5"/>
+<path d="M 44 4 L 44 42 Q 44 44 42 44 L 23 44 L 23 4 Q 28 2 42 2 Q 44 2 44 4 Z" fill="#fff" stroke="#8b3a1a" stroke-width="1.5"/>
+<line x1="23" y1="3" x2="23" y2="44" stroke="#d4a088" stroke-width="1.5"/>
+<line x1="6" y1="14" x2="20" y2="14" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="6" y1="20" x2="20" y2="20" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="26" y1="14" x2="40" y2="14" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="26" y1="20" x2="40" y2="20" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M 8 0 L 14 0 L 14 16 L 11 12 L 8 16 Z" fill="#c4724a"/>
+</svg></div>
+  <span style="font-family:'Playfair Display',Georgia,serif;font-weight:500;color:#8b3a1a;letter-spacing:-.02em;font-size:30px">L<em style="font-style:italic;font-weight:400;color:#c4724a">i</em>ro</span>
+</div></div>
+    <div style="font-size:11px;font-weight:500;color:var(--ru);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px">Compagnon de lecture</div>
+    <div style="font-family:var(--serif);font-size:28px;color:var(--txt);line-height:1.25;margin-bottom:14px">Retrouvez le fil<br>de <em style="color:var(--ru)">votre</em> livre.</div>
+    <div style="font-size:14px;color:var(--txt2);line-height:1.85;text-align:left">
+      Lire, c&apos;est simple en th&eacute;orie. Pas tout le temps, pas pour tout le monde.<br><br>
+      Vous d&eacute;crochez, vous oubliez entre chaque session, vous posez un livre et vous ne le reprenez plus. La vie prend toute la place, et la lecture s&apos;&eacute;loigne.<br><br>
+      Liro vous rappelle o&ugrave; vous en &ecirc;tes &mdash; sans jamais d&eacute;voiler la suite. Pour que vous puissiez reprendre, &agrave; votre rythme.
+    </div>
+  </div>
+
+  <div style="height:1px;background:var(--border);margin:0 20px 20px"></div>
+
+  <!-- Profils -->
+  <div style="height:1px;background:var(--border);margin:4px 20px 0"></div>
+  <div style="padding:24px 20px 8px"><div style="font-family:var(--serif);font-size:22px;color:var(--txt);margin-bottom:8px">Comment lisez-vous&nbsp;?</div><div style="font-size:14px;color:var(--txt2);line-height:1.7;margin-bottom:4px">Choisissez le profil qui vous ressemble. Liro s&apos;y adapte.</div></div>
+
+  <div class="profil-card fade-in" onclick="goSc('s-ob');obSelect('attn')">
+    <div class="p-icon" style="background:var(--bl3)">&#9889;</div>
+    <div style="flex:1">
+      <div style="font-weight:500;font-size:14px;color:var(--txt);margin-bottom:3px">Mon attention est difficile &agrave; canaliser</div>
+      <div style="font-size:12px;color:var(--txt3);line-height:1.4">Je commence des livres, je d&eacute;croche, je perds le fil</div>
+    </div>
+    <div style="color:var(--txt3);font-size:18px">&#8594;</div>
+  </div>
+
+  <div class="profil-card fade-in" onclick="goSc('s-ob');obSelect('memoire')">
+    <div class="p-icon" style="background:var(--ru3)">&#129504;</div>
+    <div style="flex:1">
+      <div style="font-weight:500;font-size:14px;color:var(--txt);margin-bottom:3px">J&apos;oublie ce que j&apos;ai lu</div>
+      <div style="font-size:12px;color:var(--txt3);line-height:1.4">Entre deux sessions, les d&eacute;tails s&apos;effacent</div>
+    </div>
+    <div style="color:var(--txt3);font-size:18px">&#8594;</div>
+  </div>
+
+  <div class="profil-card fade-in" onclick="goSc('s-ob');obSelect('plaisir')">
+    <div class="p-icon" style="background:var(--vt3)">&#127807;</div>
+    <div style="flex:1">
+      <div style="font-weight:500;font-size:14px;color:var(--txt);margin-bottom:3px">J&apos;ai perdu le go&ucirc;t de lire</div>
+      <div style="font-size:12px;color:var(--txt3);line-height:1.4">La lecture s&apos;&eacute;loign&eacute;e, je veux y revenir doucement</div>
+    </div>
+    <div style="color:var(--txt3);font-size:18px">&#8594;</div>
+  </div>
+
+  <div style="height:1px;background:var(--border);margin:16px 20px"></div>
+
+  <!-- Témoignages -->
+  <div style="padding:0 20px 20px">
+    <div style="background:var(--card);border-radius:var(--r);border:0.5px solid var(--border);padding:18px">
+      <div style="display:flex"><div style="width:3px;border-radius:2px;flex-shrink:0;align-self:stretch" id="temo-bar" style="background:var(--ru)"></div>
+      <div style="margin-left:12px">
+        <div id="temo-text" style="font-family:var(--serif);font-size:14px;font-style:italic;color:var(--txt);line-height:1.75;margin-bottom:8px"></div>
+        <div id="temo-author" style="font-size:12px;color:var(--txt3)"></div>
+      </div></div>
+      <div style="display:flex;justify-content:center;gap:6px;margin-top:14px" id="temo-dots"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer-links">
+    <span onclick="goSc('s-faq')">FAQ</span>
+    <span onclick="goSc('s-about')">&Agrave; propos</span>
+    <span onclick="goSc('s-impact')">Impact</span>
+    <span onclick="goSc('s-rgpd')">Confidentialit&eacute;</span>
+    <a href="mailto:contact@liro.app" style="font-size:12px;color:var(--txt3)">Contact</a>
+  </div>
+  <div style="text-align:center;font-size:11px;color:var(--txt3);padding-bottom:24px">Disponible en fran&ccedil;ais &middot; English coming soon</div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div id="s-app" class="sc">
+
+  <!-- Header sticky -->
+  <div class="hdr">
+    <div style="display:flex;align-items:center;gap:7px">
+  <div style="width:24px;height:24px;border-radius:5px;background:#fdf0e8;border:0.5px solid #d4a088;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 46 46">
+<path d="M 2 4 L 2 42 Q 2 44 4 44 L 23 44 L 23 4 Q 18 2 4 2 Q 2 2 2 4 Z" fill="#fff" stroke="#8b3a1a" stroke-width="1.5"/>
+<path d="M 44 4 L 44 42 Q 44 44 42 44 L 23 44 L 23 4 Q 28 2 42 2 Q 44 2 44 4 Z" fill="#fff" stroke="#8b3a1a" stroke-width="1.5"/>
+<line x1="23" y1="3" x2="23" y2="44" stroke="#d4a088" stroke-width="1.5"/>
+<line x1="6" y1="14" x2="20" y2="14" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="6" y1="20" x2="20" y2="20" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="26" y1="14" x2="40" y2="14" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="26" y1="20" x2="40" y2="20" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M 8 0 L 14 0 L 14 16 L 11 12 L 8 16 Z" fill="#c4724a"/>
+</svg></div>
+  <span style="font-family:'Playfair Display',Georgia,serif;font-weight:500;color:#8b3a1a;letter-spacing:-.02em;font-size:20px">L<em style="font-style:italic;font-weight:400;color:#c4724a">i</em>ro</span>
+</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div id="app-user-name" style="font-size:13px;color:var(--txt2);font-weight:500"></div>
+      <button class="menu-btn" onclick="toggleAppMenu()">&#8943;</button>
+    </div>
+  </div>
+
+  <!-- Menu contextuel -->
+  <div class="app-menu" id="app-menu">
+    <div class="app-menu-item" onclick="closeAppMenu();goSc('s-home')">&#128100; Changer de profil</div>
+    <div class="app-menu-item" onclick="closeAppMenu();goSc('s-faq')">&#63; FAQ</div>
+    <div class="app-menu-item" onclick="closeAppMenu();goSc('s-about')">&#9432; &Agrave; propos</div>
+    <div class="app-menu-item" onclick="closeAppMenu();goSc('s-impact')">&#10084; Impact</div>
+    <div class="app-menu-item" onclick="closeAppMenu();goSc('s-rgpd')">&#128274; Confidentialit&eacute;</div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab" id="tab0" onclick="appTab(0)">Mon livre</div>
+    <div class="tab" id="tab1" onclick="appTab(1)">Biblioth&egrave;que</div>
+    <div class="tab" id="tab2" onclick="appTab(2)">Conseil</div>
+  </div>
+
+  <!-- TAB 0 : MON LIVRE (contenu dynamique selon profil) -->
+  <div id="app-t0" style="padding:0 16px 24px">
+
+    <!-- Profil MÉMOIRE -->
+    <div id="view-memoire" style="display:none">
+      <div class="book-card" id="mem-book-card">
+        <div style="font-size:10px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px">Vous lisez</div>
+        <div id="mem-title" style="font-family:var(--serif);font-size:20px;color:var(--ru);font-weight:500;margin-bottom:2px">--</div>
+        <div id="mem-author" style="font-size:13px;color:var(--txt2);margin-bottom:10px">--</div>
+        <div class="prog-bar"><div class="prog-fill" id="mem-prog" style="background:var(--ru);width:0%"></div></div>
+        <div style="font-size:12px;color:var(--txt3);display:flex;justify-content:space-between"><span id="mem-page-txt">--</span><span id="mem-pct">--</span></div>
+      </div>
+      <button class="btn btn-ru" style="margin-bottom:10px" onclick="doRead('memoire','main')">Me rappeler o&ugrave; j&apos;en &eacute;tais</button>
+      <div class="chips-row">
+        <button class="chip" onclick="doRead('memoire','perso')">Les personnages</button>
+        <button class="chip" onclick="doRead('memoire','lieu')">O&ugrave; sommes-nous ?</button>
+      </div>
+      <div id="resume-wrap-memoire"></div>
+      <div class="read-note">Liro ne d&eacute;voile jamais la suite &middot; <span style="color:var(--ru);cursor:pointer" onclick="appTab(1)">Changer de livre</span></div>
+    </div>
+
+    <!-- Profil ATTENTION -->
+    <div id="view-attn" style="display:none">
+      <div class="book-card">
+        <div style="font-size:10px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px">En cours</div>
+        <div id="attn-title" style="font-family:var(--serif);font-size:19px;color:var(--bl);font-weight:500;margin-bottom:2px">--</div>
+        <div id="attn-author" style="font-size:13px;color:var(--txt2);margin-bottom:10px">--</div>
+        <div class="prog-bar"><div class="prog-fill" id="attn-prog" style="background:var(--bl);width:0%"></div></div>
+        <div style="font-size:12px;color:var(--txt3);display:flex;justify-content:space-between"><span id="attn-page-txt">--</span><span id="attn-pct">--</span></div>
+      </div>
+      <button class="btn btn-bl" style="margin-bottom:8px;display:flex;align-items:center;gap:10px" onclick="doRead('attn','boost')">
+        <span style="font-size:1.2rem">&#9889;</span>
+        <span style="flex:1;text-align:left">Replonger en 30 secondes</span>
+        <span style="font-size:11px;opacity:.75">Mode Boost</span>
+      </button>
+      <div class="sit-list">
+        <div class="sit-item" onclick="doRead('attn','reprendre')">
+          <span style="font-size:1.1rem;width:24px;text-align:center;flex-shrink:0">&#128260;</span>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--txt)">Reprendre l&agrave; o&ugrave; j&apos;en &eacute;tais</div><div style="font-size:11px;color:var(--txt3);margin-top:1px">Contexte + ce qui s&apos;est pass&eacute;</div></div>
+          <span style="color:var(--txt3);font-size:14px">&#8594;</span>
+        </div>
+        <div class="sit-item" onclick="doRead('attn','perso')">
+          <span style="font-size:1.1rem;width:24px;text-align:center;flex-shrink:0">&#128100;</span>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--txt)">Qui est qui ?</div><div style="font-size:11px;color:var(--txt3);margin-top:1px">Les personnages cl&eacute;s</div></div>
+          <span style="color:var(--txt3);font-size:14px">&#8594;</span>
+        </div>
+        <div class="sit-item" onclick="doRead('attn','finir')">
+          <span style="font-size:1.1rem;width:24px;text-align:center;flex-shrink:0">&#127919;</span>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--txt)">Je veux finir ce livre</div><div style="font-size:11px;color:var(--txt3);margin-top:1px">Motivation + enjeu final</div></div>
+          <span style="color:var(--txt3);font-size:14px">&#8594;</span>
+        </div>
+      </div>
+      <div id="resume-wrap-attn"></div>
+      <div class="read-note">Liro ne d&eacute;voile jamais la suite &middot; <span style="color:var(--bl);cursor:pointer" onclick="appTab(1)">Changer de livre</span></div>
+    </div>
+
+    <!-- Profil PLAISIR/RETOUR -->
+    <div id="view-plaisir" style="display:none">
+      <div class="welcome-box" style="background:var(--vt3);border-color:var(--vt2)">
+        <div style="font-family:var(--serif);font-size:16px;color:var(--vt);margin-bottom:4px">Bon retour, <span id="plaisir-name"></span>.</div>
+        <div style="font-size:13px;color:var(--txt2);line-height:1.6">Pas de pression. M&ecirc;me 5 pages, c&apos;est bien.</div>
+      </div>
+      <div class="book-card">
+        <div style="font-size:10px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px">Vous lisez</div>
+        <div id="plaisir-title" style="font-family:var(--serif);font-size:19px;color:var(--vt);font-weight:500;margin-bottom:2px">--</div>
+        <div id="plaisir-author" style="font-size:13px;color:var(--txt2);margin-bottom:10px">--</div>
+        <div class="prog-bar"><div class="prog-fill" id="plaisir-prog" style="background:var(--vt);width:0%"></div></div>
+        <div style="font-size:12px;color:var(--txt3);display:flex;justify-content:space-between"><span id="plaisir-page-txt">--</span><span id="plaisir-pct">--</span></div>
+      </div>
+      <button class="btn btn-vt" style="margin-bottom:10px;text-align:left" onclick="doRead('plaisir','reprendre')">
+        Reprendre doucement<br><span style="font-size:11px;opacity:.75;font-weight:400">O&ugrave; j&apos;en &eacute;tais &mdash; sans pression</span>
+      </button>
+      <div class="sit-list">
+        <div class="sit-item" onclick="doRead('plaisir','lieu')">
+          <span style="font-size:1.1rem;width:24px;text-align:center;flex-shrink:0">&#127807;</span>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--txt)">L&apos;ambiance du livre</div><div style="font-size:11px;color:var(--txt3);margin-top:1px">Les lieux, les sensations</div></div>
+          <span style="color:var(--txt3);font-size:14px">&#8594;</span>
+        </div>
+        <div class="sit-item" onclick="doRead('plaisir','perso')">
+          <span style="font-size:1.1rem;width:24px;text-align:center;flex-shrink:0">&#128100;</span>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--txt)">Qui sont les personnages ?</div><div style="font-size:11px;color:var(--txt3);margin-top:1px">Un rappel doux, sans spoiler</div></div>
+          <span style="color:var(--txt3);font-size:14px">&#8594;</span>
+        </div>
+      </div>
+      <div id="resume-wrap-plaisir"></div>
+      <div class="read-note">Liro ne d&eacute;voile jamais la suite &middot; <span style="color:var(--vt);cursor:pointer" onclick="appTab(1)">Changer de livre</span></div>
+    </div>
+  </div>
+
+  <!-- TAB 1 : BIBLIOTHÈQUE -->
+  <div id="app-t1" style="display:none;padding:0 16px 24px">
+    <div style="font-family:var(--serif);font-size:18px;color:var(--txt);margin-bottom:12px">Mes livres</div>
+
+    <!-- Formulaire ajout livre -->
+    <div id="add-form" style="display:none;background:var(--card);border-radius:var(--r);border:0.5px solid var(--border);padding:16px;margin-bottom:12px">
+      <div style="font-family:var(--serif);font-size:16px;color:var(--txt);margin-bottom:12px">Ajouter un livre</div>
+
+      <!-- Champ recherche unique -->
+      <div class="lbl">Rechercher par titre ou auteur</div>
+      <input type="text" id="add-search-input" placeholder="ex : Victor Hugo, Madame Bovary..." class="inp" style="margin-bottom:6px" oninput="onAddInput(this.value)" autocomplete="off">
+      <div id="add-suggestions" style="margin-bottom:10px"></div>
+
+      <!-- Champs manuels -->
+      <div class="lbl">Titre *</div>
+      <input type="text" id="add-title-field" placeholder="ex : Les Misérables" class="inp" style="margin-bottom:8px" autocomplete="off">
+      <div class="lbl">Auteur</div>
+      <input type="text" id="add-author-field" placeholder="ex : Victor Hugo" class="inp" style="margin-bottom:8px" autocomplete="off">
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <div style="flex:1">
+          <div class="lbl">Page actuelle</div>
+          <input type="number" id="add-page-field" placeholder="0" class="inp" min="0" value="0">
+        </div>
+        <div style="flex:1">
+          <div class="lbl">Pages totales *</div>
+          <input type="number" id="add-total-field" placeholder="ex : 320" class="inp" min="1">
+        </div>
+      </div>
+
+      <div style="font-size:11px;color:var(--txt3);margin-bottom:12px">
+        Recherchez pour remplir automatiquement, ou saisissez directement ci-dessus.
+      </div>
+
+      <div style="display:flex;gap:8px">
+        <button onclick="submitAddBook()" class="btn btn-ru" style="flex:1">Ajouter ce livre &#8594;</button>
+        <button onclick="toggleAddForm()" style="background:none;border:0.5px solid var(--border);border-radius:var(--r-sm);padding:10px 16px;font-size:13px;cursor:pointer;font-family:var(--sans);color:var(--txt3)">Annuler</button>
+      </div>
+    </div>
+
+    <div id="lib-list"></div>
+    <div id="lib-bottom-btns" style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+      <button id="add-btn" onclick="toggleAddForm()" style="width:100%;background:var(--ru);color:#fff;border:none;border-radius:var(--r);padding:14px;font-size:14px;font-weight:500;font-family:var(--sans);cursor:pointer">+ Ajouter un livre</button>
+      <button onclick="appTab(2)" style="width:100%;background:var(--card);border:0.5px solid var(--border);border-radius:var(--r);padding:13px;font-size:14px;font-family:var(--sans);cursor:pointer;color:var(--txt2)">Je ne sais pas quoi lire...</button>
+    </div>
+  </div>
+
+  <!-- TAB 2 : CONSEIL DE LECTURE -->
+  <div id="app-t2" style="display:none;padding:0 16px 24px">
+    <div id="conseil-intro" style="margin-bottom:14px"></div>
+    <div id="conseil-items"></div>
+  </div>
+
+</div>
+
+<!-- ═══ QUESTIONS FR&EACUTE;QUENTES ═══ -->
+<div id="s-faq" class="sc">
+  <button class="btn-back" onclick="goSc('s-home')">&#8592; Retour</button>
+  <div class="page-title">Questions fr&eacute;quentes</div>
+  
+<div class="w">
+  <div class="faq-group">
+    <div class="faq-item" onclick="toggleFaq(this)"><span style="font-size:14px;font-weight:500;color:var(--txt);flex:1">Comment Liro &eacute;vite les spoilers ?</span><span style="color:var(--txt3);transition:transform .2s">&#8595;</span></div>
+    <div class="faq-a">Vous lui donnez votre page actuelle et le nombre total de pages. Liro ne r&eacute;sume que ce qui s&apos;est pass&eacute; jusqu&apos;&agrave; cette page &mdash; jamais au-del&agrave;. C&apos;est sa r&egrave;gle absolue.</div>
+    <div class="faq-item" onclick="toggleFaq(this)"><span style="font-size:14px;font-weight:500;color:var(--txt);flex:1">Puis-je poser des questions libres &agrave; Liro ?</span><span style="color:var(--txt3);transition:transform .2s">&#8595;</span></div>
+    <div class="faq-a">Oui. Apr&egrave;s chaque r&eacute;sum&eacute;, un chat s&apos;ouvre pour poser n&apos;importe quelle question. Liro reste toujours dans ce que vous avez lu.</div>
+    <div class="faq-item" onclick="toggleFaq(this)"><span style="font-size:14px;font-weight:500;color:var(--txt);flex:1">Mes donn&eacute;es sont-elles partag&eacute;es ?</span><span style="color:var(--txt3);transition:transform .2s">&#8595;</span></div>
+    <div class="faq-a">Votre profil, vos livres et vos notes sont stock&eacute;s uniquement sur votre appareil. Seuls le titre et votre page sont envoy&eacute;s &agrave; l&apos;IA pour g&eacute;n&eacute;rer les r&eacute;sum&eacute;s.</div>
+    <div class="faq-item" onclick="toggleFaq(this)"><span style="font-size:14px;font-weight:500;color:var(--txt);flex:1">Comment ajouter un livre ?</span><span style="color:var(--txt3);transition:transform .2s">&#8595;</span></div>
+    <div class="faq-a">Par titre ou par auteur &mdash; Liro interroge une base de millions de livres (Open Library). Vous pouvez aussi saisir l&apos;ISBN (code sous le code-barres) pour l&apos;&eacute;dition exacte.</div>
+    <div class="faq-item" onclick="toggleFaq(this)"><span style="font-size:14px;font-weight:500;color:var(--txt);flex:1">Qu&apos;est-ce que le domaine public ?</span><span style="color:var(--txt3);transition:transform .2s">&#8595;</span></div>
+    <div class="faq-a">Un livre devient libre 70 ans apr&egrave;s la mort de son auteur. Hugo, Flaubert, Zola, Verne, Daudet... Des milliers d&apos;&oelig;uvres gratuites sur Project Gutenberg. Pour ces livres, Liro s&apos;appuie sur le texte exact.</div>
+    <div class="faq-item" onclick="toggleFaq(this)"><span style="font-size:14px;font-weight:500;color:var(--txt);flex:1">Liro peut-il se tromper ?</span><span style="color:var(--txt3);transition:transform .2s">&#8595;</span></div>
+    <div class="faq-a">Oui, pour les livres peu connus ou r&eacute;cents. Dans ce cas, Liro le signale honn&ecirc;tement et propose de vous aider depuis ce que vous vous rappelez. Il ne fabrique jamais de d&eacute;tails.</div>
+  </div>
+  <div style="text-align:center;padding:12px;font-size:12px;color:var(--txt3)">Une question ? <a href="mailto:contact@liro.app" style="color:var(--ru)">contact@liro.app</a></div>
+</div>
+
+  <div class="footer-links">
+    <span onclick="goSc('s-faq')">FAQ</span>
+    <span onclick="goSc('s-about')">&Agrave; propos</span>
+    <span onclick="goSc('s-impact')">Impact</span>
+    <span onclick="goSc('s-rgpd')">Confidentialit&eacute;</span>
+  </div>
+</div>
+
+<!-- ═══ &AGRAVE; PROPOS DE LIRO ═══ -->
+<div id="s-about" class="sc">
+  <button class="btn-back" onclick="goSc('s-home')">&#8592; Retour</button>
+  <div class="page-title">&Agrave; propos de Liro</div>
+  
+<div class="w">
+  <div class="card"><div class="card-label">Pourquoi Liro existe</div><div style="font-size:13px;color:var(--txt2);line-height:1.8">Lire est l&apos;une des activit&eacute;s les plus riches qui soit &mdash; mais c&apos;est aussi l&apos;une des premi&egrave;res &agrave; dispara&icirc;tre quand la vie s&apos;acc&eacute;l&egrave;re, quand l&apos;attention se disperse, ou quand on traverse une p&eacute;riode difficile.<br><br>Liro est n&eacute; d&apos;une conviction simple : si on pouvait retrouver le fil d&apos;un livre en quelques secondes, sans peur d&apos;avoir oubli&eacute;, on lirait davantage &mdash; et mieux.</div></div>
+  <div class="card"><div class="card-label">Ce que Liro fait</div><div style="font-size:13px;color:var(--txt2);line-height:1.8">Liro est un compagnon de lecture propuls&eacute; par l&apos;IA. Il r&eacute;sume l&apos;histoire jusqu&apos;&agrave; votre page &mdash; sans d&eacute;voiler la suite. Il s&apos;adapte &agrave; trois profils et propose des &oelig;uvres du domaine public que Liro conna&icirc;t mot pour mot.</div></div>
+  <div class="card" style="border-left:3px solid var(--ru2);background:var(--ru3)"><div class="card-label" style="color:var(--ru)">Ce que Liro n&apos;est pas</div><div style="font-size:13px;color:var(--txt2);line-height:1.8">Liro est un outil de bien-&ecirc;tre et d&apos;accompagnement &agrave; la lecture. Il n&apos;est pas un dispositif m&eacute;dical, diagnostique ou th&eacute;rapeutique, et ne remplace pas un professionnel de sant&eacute;.</div></div>
+  <div class="card"><div class="card-label">Comment &ccedil;a marche</div><div style="font-size:13px;color:var(--txt2);line-height:1.8">Liro utilise Claude (Anthropic) pour g&eacute;n&eacute;rer les r&eacute;sum&eacute;s. Vos donn&eacute;es sont stock&eacute;es sur votre appareil. Seuls le titre et votre page sont transmis &agrave; l&apos;IA.</div></div>
+  <div class="card"><div class="card-label">Contact</div><div style="font-size:13px;color:var(--txt2);line-height:1.8">Liro est un projet ind&eacute;pendant.<br><br><a href="mailto:contact@liro.app" style="color:var(--ru)">contact@liro.app</a></div></div>
+</div>
+
+  <div class="footer-links">
+    <span onclick="goSc('s-faq')">FAQ</span>
+    <span onclick="goSc('s-about')">&Agrave; propos</span>
+    <span onclick="goSc('s-impact')">Impact</span>
+    <span onclick="goSc('s-rgpd')">Confidentialit&eacute;</span>
+  </div>
+</div>
+
+<!-- ═══ LIRO &AMP; L&APOS;IMPACT ═══ -->
+<div id="s-impact" class="sc">
+  <button class="btn-back" onclick="goSc('s-home')">&#8592; Retour</button>
+  <div class="page-title">Liro &amp; l&apos;impact</div>
+  
+<div style="font-size:13px;color:var(--txt2);line-height:1.7;padding:0 16px 16px">Liro croit que la lecture change des vies. Voici les associations que nous soutenons.</div>
+<div class="w">
+  <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+    <button onclick="filterImpact('all',this)" class="chip" style="font-size:11px;padding:5px 10px;background:var(--ru3);border-color:var(--ru2);color:var(--ru)">Toutes</button>
+    <button onclick="filterImpact('mental',this)" class="chip" style="font-size:11px;padding:5px 10px">Sant&eacute; mentale</button>
+    <button onclick="filterImpact('neuro',this)" class="chip" style="font-size:11px;padding:5px 10px">Neurod&eacute;g&eacute;n&eacute;ratif</button>
+    <button onclick="filterImpact('livres',this)" class="chip" style="font-size:11px;padding:5px 10px">Acc&egrave;s aux livres</button>
+  </div>
+  <div id="impact-panel" style="display:none;background:var(--ru3);border:0.5px solid var(--ru2);border-radius:var(--r-sm);padding:14px;margin-bottom:10px">
+    <div id="impact-name" style="font-weight:500;font-size:15px;font-family:var(--serif);color:var(--ru);margin-bottom:3px"></div>
+    <div id="impact-desc" style="font-size:12px;color:var(--txt2);margin-bottom:10px;line-height:1.5"></div>
+    <a id="impact-don-btn" href="#" target="_blank" style="display:block;background:var(--ru);color:#fff;border-radius:var(--r-sm);padding:11px;text-align:center;font-size:14px;font-weight:500;font-family:var(--sans);text-decoration:none">Faire un don &#8594;</a>
+  </div>
+  <div id="impact-list"></div>
+  <div style="background:var(--card);border-radius:var(--r);border:0.5px solid var(--border);padding:14px;margin-top:4px">
+    <div style="font-size:13px;color:var(--txt2);line-height:1.7;font-style:italic">&laquo;&nbsp;Liro ne reverse pas encore de pourcentage &mdash; mais c&apos;est une direction dans laquelle on veut aller.&nbsp;&raquo;</div>
+    <a href="mailto:contact@liro.app" style="display:inline-block;margin-top:8px;font-size:12px;color:var(--ru);font-weight:500">contact@liro.app &#8594;</a>
+  </div>
+  <div style="height:24px"></div>
+</div>
+
+  <div class="footer-links">
+    <span onclick="goSc('s-faq')">FAQ</span>
+    <span onclick="goSc('s-about')">&Agrave; propos</span>
+    <span onclick="goSc('s-impact')">Impact</span>
+    <span onclick="goSc('s-rgpd')">Confidentialit&eacute;</span>
+  </div>
+</div>
+
+<!-- ═══ CONFIDENTIALIT&EACUTE; ═══ -->
+<div id="s-rgpd" class="sc">
+  <button class="btn-back" onclick="goSc('s-home')">&#8592; Retour</button>
+  <div class="page-title">Confidentialit&eacute;</div>
+  
+<div style="font-size:13px;color:var(--txt2);line-height:1.7;padding:0 16px 16px">Ce qui reste sur votre appareil. Ce qui est envoy&eacute; &agrave; l&apos;IA. Rien d&apos;autre.</div>
+<div class="w">
+  <div class="card">
+    <div class="card-label">Reste sur votre appareil</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:var(--grn);flex-shrink:0;margin-top:4px"></div><div style="font-size:13px;color:var(--txt2)"><strong style="color:var(--txt)">Profil, livres, notes</strong> &mdash; jamais envoy&eacute;s &agrave; nos serveurs</div></div>
+      <div style="display:flex;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:var(--grn);flex-shrink:0;margin-top:4px"></div><div style="font-size:13px;color:var(--txt2)"><strong style="color:var(--txt)">Votre cl&eacute; API</strong> &mdash; stock&eacute;e localement, jamais transmise</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-label">Envoy&eacute; &agrave; l&apos;IA</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:var(--ru);flex-shrink:0;margin-top:4px"></div><div style="font-size:13px;color:var(--txt2)"><strong style="color:var(--txt)">Titre du livre + votre page</strong> &mdash; pour g&eacute;n&eacute;rer le r&eacute;sum&eacute;</div></div>
+      <div style="display:flex;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:var(--ru);flex-shrink:0;margin-top:4px"></div><div style="font-size:13px;color:var(--txt2)"><strong style="color:var(--txt)">Vos questions</strong> &mdash; quand vous utilisez le chat libre</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-label">Jamais collect&eacute;</div>
+    <div style="font-size:13px;color:var(--txt2);line-height:1.8">Email &middot; Localisation &middot; Identit&eacute; &middot; Comportement de navigation</div>
+  </div>
+  <div class="card">
+    <div class="card-label">Supprimer vos donn&eacute;es</div>
+    <div style="font-size:13px;color:var(--txt2);line-height:1.8">Videz les donn&eacute;es du site dans les r&eacute;glages de votre navigateur. Liro ne conserve rien.<br><br><a href="mailto:contact@liro.app" style="color:var(--ru)">contact@liro.app</a></div>
+  </div>
+  <div style="height:24px"></div>
+</div>
+
+  <div class="footer-links">
+    <span onclick="goSc('s-faq')">FAQ</span>
+    <span onclick="goSc('s-about')">&Agrave; propos</span>
+    <span onclick="goSc('s-impact')">Impact</span>
+    <span onclick="goSc('s-rgpd')">Confidentialit&eacute;</span>
+  </div>
+</div>
+
+<!-- ═══ DRAWER LIVRE ═══ -->
+<div class="overlay" id="overlay" onclick="closeDrawer()">
+  <div class="drawer" onclick="event.stopPropagation()">
+    <div class="handle"></div>
+    <div id="drawer-content"></div>
+  </div>
+</div>
+</div><!-- fin .phone -->
+<script>
+// ════════════════════════════════════════════════════════
+// LIRO v17 — JavaScript complet
+// ══════
+// ════════════════════════════════════════════════════════
+// LIRO v17 — JavaScript complet
+// ════════════════════════════════════════════════════════
+
+// ── ÉTAT GLOBAL ──────────────────────────────────────────
+var LIRO_API_KEY = '';
+var curUser = null;
+var curBook = null;
+var curProfil = 'memoire';
+var obProfil = null;
+var addMode = 'titre';
+var addDebounce = null;
+var temoTimer = null;
+var curTemo = 0;
+
+var PROF_COLOR = { attn:'#1a5276', memoire:'var(--ru)', plaisir:'#4a7c59' };
+var PROF_TAB_CLS = { attn:'on-bl', memoire:'on-ru', plaisir:'on-vt' };
+
+// ── LOCALSTORAGE HELPERS ─────────────────────────────────
+var LS_USERS = 'liro_users';
+var LS_BOOKS = 'liro_books_';
+var LS_NOTES = 'liro_note_';
+var LS_AUTH  = 'liro_dev_auth';
+var LS_API   = 'liro_api_key';
+var LS_PROF  = 'liro_last_profil';
+
+function lsGet(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }
+function lsSet(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
+function getUsers(){ return lsGet(LS_USERS) || []; }
+function setUsers(u){ lsSet(LS_USERS, u); }
+function getBooks(uid){ return lsGet(LS_BOOKS + uid) || []; }
+function setBooks(uid, b){ lsSet(LS_BOOKS + uid, b); }
+
+// ── NAVIGATION ────────────────────────────────────────────
+function goSc(id){
+  document.querySelectorAll('.sc').forEach(function(s){ s.classList.remove('on'); });
+  var t = document.getElementById(id);
+  if(t) t.classList.add('on');
+  closeAppMenu();
+}
+
+function toast2(msg){
+  var t = document.getElementById('toast');
+  if(!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2800);
+}
+
+// ── LOGIN DEV ─────────────────────────────────────────────
+var DEV_CODE = 'liro2024';
+function checkDevCode(){
+  var input = document.getElementById('dev-code');
+  var error = document.getElementById('dev-error');
+  var val = input ? input.value.trim() : '';
+  if(val === DEV_CODE){
+    localStorage.setItem(LS_AUTH, '1');
+    goSc('s-apikey');
+    checkApiKey();
+  } else {
+    if(error) error.style.display = 'block';
+    if(input){ input.value = ''; input.focus(); }
+  }
+}
+
+// ── CLÉ API ───────────────────────────────────────────────
+function saveApiKey(){
+  var input = document.getElementById('api-key-input');
+  var val = input ? input.value.trim() : '';
+  if(!val || !val.startsWith('sk-ant-')){
+    toast2('Cl\u00e9 invalide. Elle doit commencer par sk-ant-');
+    return;
+  }
+  localStorage.setItem(LS_API, val);
+  LIRO_API_KEY = val;
+  // Aller vers profils existants ou onboarding
+  var users = getUsers();
+  if(users.length > 0){
+    loginAs(users[0]);
+  } else {
+    goSc('s-home');
+  }
+}
+
+function checkApiKey(){
+  var key = localStorage.getItem(LS_API) || '';
+  if(key){ LIRO_API_KEY = key; }
+  var users = getUsers();
+  if(key && users.length > 0){
+    loginAs(users[0]);
+  } else if(key){
+    goSc('s-home');
+  }
+}
+
+// ── ONBOARDING ────────────────────────────────────────────
+function obSelect(p){
+  obProfil = p;
+  ['attn','memoire','plaisir'].forEach(function(k){
+    var card = document.getElementById('ob-' + k);
+    var ck = document.getElementById('ck-' + k);
+    if(card && ck){
+      var sel = k === p;
+      var bg = k==='attn'?'var(--bl3)':k==='memoire'?'var(--ru3)':'var(--vt3)';
+      var brd = k==='attn'?'var(--bl2)':k==='memoire'?'var(--ru2)':'var(--vt2)';
+      card.style.background = sel ? bg : 'var(--card)';
+      card.style.borderColor = sel ? brd : 'var(--border)';
+      ck.style.display = sel ? 'block' : 'none';
+    }
+  });
+  var btn = document.getElementById('ob-btn');
+  if(btn){ btn.style.opacity='1'; btn.style.pointerEvents='auto'; }
+}
+
+function createProfile(){
+  var name = (document.getElementById('ob-name').value || '').trim() || 'Lecteur';
+  var profil = obProfil || 'memoire';
+  var user = { id: 'u' + Date.now(), name: name, type: profil };
+  var users = getUsers();
+  users.unshift(user);
+  setUsers(users);
+  loginAs(user);
+}
+
+function loginAs(user){
+  curUser = user;
+  curProfil = user.type || 'memoire';
+  curBook = null;
+  var books = getBooks(user.id);
+  curBook = books.find(function(b){ return !b.done && b.page > 0; }) || books[0] || null;
+  goSc('s-app');
+  initApp();
+}
+
+// ── APP PRINCIPALE ────────────────────────────────────────
+function initApp(){
+  if(!curUser) return;
+  curProfil = curUser.type || 'memoire';
+  // Header
+  var un = document.getElementById('app-user-name');
+  var capName = curUser.name ? curUser.name.charAt(0).toUpperCase() + curUser.name.slice(1) : '';
+  if(un) un.textContent = capName;
+  // Profil nom dans plaisir
+  var pn = document.getElementById('plaisir-name');
+  if(pn) pn.textContent = curUser.name;
+  // Tabs couleur
+  var tabCls = PROF_TAB_CLS[curProfil];
+  ['tab0','tab1','tab2'].forEach(function(id, i){
+    var t = document.getElementById(id);
+    if(t) t.className = 'tab';
+  });
+  // Bouton ajouter couleur
+  var addBtn = document.getElementById('add-btn');
+  if(addBtn){ addBtn.style.background = PROF_COLOR[curProfil]; addBtn.style.color='#fff'; }
+  appTab(0);
+  renderConseil();
+}
+
+function appTab(i){
+  ['app-t0','app-t1','app-t2'].forEach(function(id, j){
+    var el = document.getElementById(id);
+    if(el) el.style.display = j===i ? 'block' : 'none';
+  });
+  ['tab0','tab1','tab2'].forEach(function(id, j){
+    var t = document.getElementById(id);
+    if(t) t.className = 'tab' + (j===i ? ' ' + PROF_TAB_CLS[curProfil] : '');
+  });
+  if(i===0) renderBookView();
+  if(i===1) renderLib();
+  if(i===2) renderConseil();
+  closeAppMenu();
+}
+
+// ── VUE LIVRE PAR PROFIL ─────────────────────────────────
+function renderBookView(){
+  ['view-attn','view-memoire','view-plaisir'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.style.display = 'none';
+  });
+  var view = document.getElementById('view-' + curProfil);
+  if(view) view.style.display = 'block';
+  updateBookDisplay();
+}
+
+function updateBookDisplay(){
+  if(!curBook) return;
+  var pct = curBook.total ? Math.round(curBook.page / curBook.total * 100) : 0;
+  var pageTxt = 'Page ' + curBook.page + ' sur ' + (curBook.total || '?');
+
+  var prefixes = ['mem','attn','plaisir'];
+  prefixes.forEach(function(p){
+    var el = function(id){ return document.getElementById(p + '-' + id); };
+    if(el('title')) el('title').textContent = curBook.title || '';
+    if(el('author')) el('author').textContent = curBook.author || '';
+    if(el('prog')) el('prog').style.width = pct + '%';
+    if(el('page-txt')) el('page-txt').textContent = pageTxt;
+    if(el('pct')) el('pct').textContent = pct + '%';
+  });
+}
+
+// ── BIBLIOTHÈQUE ──────────────────────────────────────────
+function renderLib(){
+  if(!curUser) return;
+  var list = document.getElementById('lib-list');
+  if(!list) return;
+  var books = getBooks(curUser.id);
+  list.innerHTML = '';
+  var libBtns = document.getElementById('lib-bottom-btns');
+  if(!books.length){
+    var colE = PROF_COLOR[curProfil];
+    if(libBtns) libBtns.style.display = 'none';
+    list.innerHTML = '<div style="text-align:center;padding:40px 0 24px">'
+      + '<div style="font-size:40px;margin-bottom:14px">&#128215;</div>'
+      + '<div style="font-family:var(--serif);font-size:20px;color:var(--txt);margin-bottom:8px">Aucun livre en cours</div>'
+      + '<div style="font-size:13px;color:var(--txt2);line-height:1.7;margin-bottom:24px">Ajoutez votre premier livre<br>pour que Liro puisse vous aider.</div>'
+      + '<button onclick="toggleAddForm()" style="display:block;width:100%;background:' + colE + ';color:#fff;border:none;border-radius:var(--r);padding:14px;font-size:15px;font-weight:500;font-family:var(--sans);cursor:pointer;margin-bottom:10px">+ Ajouter mon premier livre</button>'
+      + '<button onclick="appTab(2)" style="display:block;width:100%;background:var(--card);border:0.5px solid var(--border);border-radius:var(--r);padding:12px;font-size:14px;font-family:var(--sans);cursor:pointer;color:var(--txt2)">Je ne sais pas quoi lire...</button>'
+      + '</div>';
+    return;
+  }
+  if(libBtns) libBtns.style.display = 'flex';
+  books.forEach(function(b){
+    var pct = b.total ? Math.round(b.page / b.total * 100) : 0;
+    var color = PROF_COLOR[curProfil];
+    var item = document.createElement('div');
+    item.className = 'lib-item';
+    item.innerHTML = '<div style="flex:1">'
+      + '<div style="font-family:var(--serif);font-size:15px;color:' + color + ';margin-bottom:2px">' + b.title + '</div>'
+      + '<div style="font-size:12px;color:var(--txt3);margin-bottom:6px">' + (b.author||'') + ' \u00b7 page ' + b.page + ' / ' + (b.total||'?') + '</div>'
+      + '<div style="height:3px;background:#ede8e2;border-radius:2px"><div style="height:3px;background:' + color + ';border-radius:2px;width:' + pct + '%"></div></div></div>'
+      + '<div style="color:' + color + ';font-size:18px">&#8594;</div>';
+    (function(book){ item.onclick = function(){ curBook = book; appTab(0); }; })(b);
+    list.appendChild(item);
+  });
+}
+
+// ── AJOUT LIVRE ───────────────────────────────────────────
+function toggleAddForm(){
+  var f = document.getElementById('add-form');
+  if(f) f.style.display = f.style.display === 'none' ? 'block' : 'none';
+}
+
+function setAddMode(m){
+  addMode = m;
+  var ti = document.getElementById('add-title-input');
+  var mi = document.getElementById('mode-' + m);
+  var mo = document.getElementById('mode-' + (m==='titre'?'auteur':'titre'));
+  if(mi){ mi.style.background='var(--ru3)';mi.style.color='var(--ru)';mi.style.borderColor='var(--ru2)'; }
+  if(mo){ mo.style.background='var(--card)';mo.style.color='var(--txt3)';mo.style.borderColor='var(--border)'; }
+  if(ti) ti.placeholder = m==='titre' ? 'ex : Madame Bovary...' : 'ex : Flaubert...';
+  if(ti) ti.value = '';
+  var sug = document.getElementById('add-suggestions');
+  if(sug) sug.innerHTML = '';
+}
+
+function onAddInput(val){
+  clearTimeout(addDebounce);
+  var sug = document.getElementById('add-suggestions');
+  if(val.length < 2){ if(sug) sug.innerHTML=''; return; }
+  addDebounce = setTimeout(function(){ fetchSmartSuggestions(val); }, 500);
+}
+
+async function fetchSmartSuggestions(q){
+  var sug = document.getElementById('add-suggestions');
+  if(!sug) return;
+  sug.innerHTML = '<div style="font-size:12px;color:var(--txt3);padding:4px 0">Recherche...</div>';
+  try{
+    // Recherche simultanée titre + auteur
+    var [respTitle, respAuthor] = await Promise.all([
+      fetch('https://openlibrary.org/search.json?title=' + encodeURIComponent(q) + '&limit=4&fields=title,author_name,number_of_pages_median'),
+      fetch('https://openlibrary.org/search/authors.json?q=' + encodeURIComponent(q) + '&limit=3')
+    ]);
+    var [dataTitle, dataAuthor] = await Promise.all([respTitle.json(), respAuthor.json()]);
+
+    sug.innerHTML = '';
+    var hasResults = false;
+
+    // Résultats auteurs en premier si trouvés
+    var authors = (dataAuthor.docs || []).slice(0,3);
+    if(authors.length > 0){
+      var authorLabel = document.createElement('div');
+      authorLabel.style.cssText = 'font-size:10px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px';
+      authorLabel.textContent = 'Auteurs';
+      sug.appendChild(authorLabel);
+      authors.forEach(function(a){
+        var item = document.createElement('div');
+        item.style.cssText = 'background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;cursor:pointer;margin-bottom:5px;display:flex;align-items:center;justify-content:space-between';
+        item.innerHTML = '<div><div style="font-family:var(--serif);font-size:13px;color:var(--txt);font-weight:500">' + a.name + '</div>'
+          + '<div style="font-size:11px;color:var(--txt3)">' + (a.work_count||0) + ' \u0153uvres \u2014 cliquez pour voir</div></div>'
+          + '<span style="font-size:16px;color:var(--txt3)">&#8594;</span>';
+        (function(author){ item.onclick = function(){ loadAuthorWorks(author.key, author.name); }; })(a);
+        sug.appendChild(item);
+        hasResults = true;
+      });
+    }
+
+    // Résultats titres
+    var books = (dataTitle.docs || []).slice(0,4);
+    if(books.length > 0){
+      if(authors.length > 0){
+        var bookLabel = document.createElement('div');
+        bookLabel.style.cssText = 'font-size:10px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin:8px 0 5px';
+        bookLabel.textContent = 'Livres';
+        sug.appendChild(bookLabel);
+      }
+      books.forEach(function(d){
+        var author = d.author_name ? d.author_name[0] : '';
+        var pages = d.number_of_pages_median || '';
+        var item = document.createElement('div');
+        item.style.cssText = 'background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;cursor:pointer;margin-bottom:5px';
+        item.innerHTML = '<div style="font-family:var(--serif);font-size:13px;color:var(--txt)">' + d.title + '</div>'
+          + '<div style="font-size:11px;color:var(--txt3)">' + author + (pages?' \u00b7 ' + pages + ' p.':'') + '</div>';
+        (function(title, auth, pg){ item.onclick = function(){
+          sug.innerHTML = '';
+          var si = document.getElementById('add-search-input');
+          var tf = document.getElementById('add-title-field');
+          var af = document.getElementById('add-author-field');
+          var pf = document.getElementById('add-total-field');
+          if(si) si.value = title;
+          if(tf) tf.value = title;
+          if(af) af.value = auth;
+          if(pf && pg) pf.value = pg;
+        }; })(d.title, author, pages);
+        sug.appendChild(item);
+        hasResults = true;
+      });
+    }
+
+    if(!hasResults){
+      sug.innerHTML = '<div style="font-size:12px;color:var(--txt3);padding:4px 0">Aucun r\u00e9sultat. Remplissez les champs manuellement.</div>';
+    }
+  }catch(e){
+    sug.innerHTML = '<div style="font-size:12px;color:var(--txt3);padding:4px 0">Recherche indisponible. Remplissez manuellement.</div>';
+  }
+}
+
+async function fetchBookSuggestions(q){ return fetchSmartSuggestions(q); }
+
+async function loadAuthorWorks(authorKey, authorName){
+  var sug = document.getElementById('add-suggestions');
+  if(!sug) return;
+  sug.innerHTML = '<div style="font-size:12px;color:var(--txt3);padding:4px 0">\u0152uvres de ' + authorName + '...</div>';
+  try{
+    // Chercher les œuvres les plus connues via recherche par auteur
+    var resp = await fetch('https://openlibrary.org/search.json?author=' + encodeURIComponent(authorName) + '&sort=editions&limit=8&fields=title,number_of_pages_median,edition_count');
+    var data = await resp.json();
+    var works = (data.docs || []).filter(function(w){ return w.title && w.edition_count > 1; }).slice(0,5);
+
+    sug.innerHTML = '';
+    var backBtn = document.createElement('div');
+    backBtn.style.cssText = 'font-size:12px;color:var(--txt3);cursor:pointer;margin-bottom:8px;display:flex;align-items:center;gap:5px';
+    backBtn.innerHTML = '&#8592; Retour \u00e0 la recherche';
+    backBtn.onclick = function(){ sug.innerHTML = ''; };
+    sug.appendChild(backBtn);
+
+    var label = document.createElement('div');
+    label.style.cssText = 'font-size:11px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px';
+    label.textContent = 'Oeuvres de ' + authorName;
+    sug.appendChild(label);
+
+    if(!works.length){
+      sug.innerHTML += '<div style="font-size:12px;color:var(--txt3)">Aucune \u0153uvre trouv\u00e9e. Tapez le titre directement.</div>';
+      return;
+    }
+    works.forEach(function(w){
+      var item = document.createElement('div');
+      item.style.cssText = 'background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;cursor:pointer;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center';
+      var pages = w.number_of_pages_median ? ' \u00b7 ' + w.number_of_pages_median + ' p.' : '';
+      item.innerHTML = '<div><div style="font-family:var(--serif);font-size:13px;color:var(--txt)">' + w.title + '</div>'
+        + '<div style="font-size:11px;color:var(--txt3)">' + authorName + pages + '</div></div>'
+        + '<span style="font-size:12px;color:var(--ru);font-weight:500">S\u00e9lectionner</span>';
+      (function(title, auth, pg){ item.onclick = function(){
+        sug.innerHTML = '';
+        var si = document.getElementById('add-search-input');
+        var tf = document.getElementById('add-title-field');
+        var af = document.getElementById('add-author-field');
+        var pf = document.getElementById('add-total-field');
+        if(si) si.value = title;
+        if(tf) tf.value = title;
+        if(af) af.value = auth;
+        if(pf && pg) pf.value = pg;
+        toast2('\u201c' + title + '\u201d s\u00e9lectionn\u00e9 \u2014 ajoutez votre page');
+      }; })(w.title, authorName, w.number_of_pages_median||'');
+      sug.appendChild(item);
+    });
+  }catch(e){
+    sug.innerHTML = '<div style="font-size:12px;color:var(--txt3)">Erreur. Tapez le titre directement.</div>';
+  }
+}
+// ════════════════════════════════════════════════════════
+// LIRO v17 — JavaScript complet
+// ════════════════════════════════════════════════════════
+
+// ── ÉTAT GLOBAL ──────────────────────────────────────────
+var LIRO_API_KEY = '';
+var curUser = null;
+var curBook = null;
+var curProfil = 'memoire';
+var obProfil = null;
+var addMode = 'titre';
+var addDebounce = null;
+var temoTimer = null;
+var curTemo = 0;
+
+var PROF_COLOR = { attn:'#1a5276', memoire:'var(--ru)', plaisir:'#4a7c59' };
+var PROF_TAB_CLS = { attn:'on-bl', memoire:'on-ru', plaisir:'on-vt' };
+
+// ── LOCALSTORAGE HELPERS ─────────────────────────────────
+var LS_USERS = 'liro_users';
+var LS_BOOKS = 'liro_books_';
+var LS_NOTES = 'liro_note_';
+var LS_AUTH  = 'liro_dev_auth';
+var LS_API   = 'liro_api_key';
+var LS_PROF  = 'liro_last_profil';
+
+function lsGet(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }
+function lsSet(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
+function getUsers(){ return lsGet(LS_USERS) || []; }
+function setUsers(u){ lsSet(LS_USERS, u); }
+function getBooks(uid){ return lsGet(LS_BOOKS + uid) || []; }
+function setBooks(uid, b){ lsSet(LS_BOOKS + uid, b); }
+
+// ── NAVIGATION ────────────────────────────────────────────
+function goSc(id){
+  document.querySelectorAll('.sc').forEach(function(s){ s.classList.remove('on'); });
+  var t = document.getElementById(id);
+  if(t) t.classList.add('on');
+  closeAppMenu();
+}
+
+function toast2(msg){
+  var t = document.getElementById('toast');
+  if(!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2800);
+}
+
+// ── LOGIN DEV ─────────────────────────────────────────────
+var DEV_CODE = 'liro2024';
+function checkDevCode(){
+  var input = document.getElementById('dev-code');
+  var error = document.getElementById('dev-error');
+  var val = input ? input.value.trim() : '';
+  if(val === DEV_CODE){
+    localStorage.setItem(LS_AUTH, '1');
+    goSc('s-apikey');
+    checkApiKey();
+  } else {
+    if(error) error.style.display = 'block';
+    if(input){ input.value = ''; input.focus(); }
+  }
+}
+
+// ── CLÉ API ───────────────────────────────────────────────
+function saveApiKey(){
+  var input = document.getElementById('api-key-input');
+  var val = input ? input.value.trim() : '';
+  if(!val || !val.startsWith('sk-ant-')){
+    toast2('Cl\u00e9 invalide. Elle doit commencer par sk-ant-');
+    return;
+  }
+  localStorage.setItem(LS_API, val);
+  LIRO_API_KEY = val;
+  // Aller vers profils existants ou onboarding
+  var users = getUsers();
+  if(users.length > 0){
+    loginAs(users[0]);
+  } else {
+    goSc('s-home');
+  }
+}
+
+function checkApiKey(){
+  var key = localStorage.getItem(LS_API) || '';
+  if(key){ LIRO_API_KEY = key; }
+  var users = getUsers();
+  if(key && users.length > 0){
+    loginAs(users[0]);
+  } else if(key){
+    goSc('s-home');
+  }
+}
+
+// ── ONBOARDING ────────────────────────────────────────────
+function obSelect(p){
+  obProfil = p;
+  ['attn','memoire','plaisir'].forEach(function(k){
+    var card = document.getElementById('ob-' + k);
+    var ck = document.getElementById('ck-' + k);
+    if(card && ck){
+      var sel = k === p;
+      var bg = k==='attn'?'var(--bl3)':k==='memoire'?'var(--ru3)':'var(--vt3)';
+      var brd = k==='attn'?'var(--bl2)':k==='memoire'?'var(--ru2)':'var(--vt2)';
+      card.style.background = sel ? bg : 'var(--card)';
+      card.style.borderColor = sel ? brd : 'var(--border)';
+      ck.style.display = sel ? 'block' : 'none';
+    }
+  });
+  var btn = document.getElementById('ob-btn');
+  if(btn){ btn.style.opacity='1'; btn.style.pointerEvents='auto'; }
+}
+
+function createProfile(){
+  var name = (document.getElementById('ob-name').value || '').trim() || 'Lecteur';
+  var profil = obProfil || 'memoire';
+  var user = { id: 'u' + Date.now(), name: name, type: profil };
+  var users = getUsers();
+  users.unshift(user);
+  setUsers(users);
+  loginAs(user);
+}
+
+function loginAs(user){
+  curUser = user;
+  curProfil = user.type || 'memoire';
+  curBook = null;
+  var books = getBooks(user.id);
+  curBook = books.find(function(b){ return !b.done && b.page > 0; }) || books[0] || null;
+  goSc('s-app');
+  initApp();
+}
+
+// ── APP PRINCIPALE ────────────────────────────────────────
+function initApp(){
+  if(!curUser) return;
+  curProfil = curUser.type || 'memoire';
+  // Header
+  var un = document.getElementById('app-user-name');
+  var capName = curUser.name ? curUser.name.charAt(0).toUpperCase() + curUser.name.slice(1) : '';
+  if(un) un.textContent = capName;
+  // Profil nom dans plaisir
+  var pn = document.getElementById('plaisir-name');
+  if(pn) pn.textContent = curUser.name;
+  // Tabs couleur
+  var tabCls = PROF_TAB_CLS[curProfil];
+  ['tab0','tab1','tab2'].forEach(function(id, i){
+    var t = document.getElementById(id);
+    if(t) t.className = 'tab';
+  });
+  // Bouton ajouter couleur
+  var addBtn = document.getElementById('add-btn');
+  if(addBtn){ addBtn.style.background = PROF_COLOR[curProfil]; addBtn.style.color='#fff'; }
+  appTab(0);
+  renderConseil();
+}
+
+function appTab(i){
+  ['app-t0','app-t1','app-t2'].forEach(function(id, j){
+    var el = document.getElementById(id);
+    if(el) el.style.display = j===i ? 'block' : 'none';
+  });
+  ['tab0','tab1','tab2'].forEach(function(id, j){
+    var t = document.getElementById(id);
+    if(t) t.className = 'tab' + (j===i ? ' ' + PROF_TAB_CLS[curProfil] : '');
+  });
+  if(i===0) renderBookView();
+  if(i===1) renderLib();
+  if(i===2) renderConseil();
+  closeAppMenu();
+}
+
+// ── VUE LIVRE PAR PROFIL ─────────────────────────────────
+function renderBookView(){
+  ['view-attn','view-memoire','view-plaisir'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.style.display = 'none';
+  });
+  var view = document.getElementById('view-' + curProfil);
+  if(view) view.style.display = 'block';
+  updateBookDisplay();
+}
+
+function updateBookDisplay(){
+  if(!curBook) return;
+  var pct = curBook.total ? Math.round(curBook.page / curBook.total * 100) : 0;
+  var pageTxt = 'Page ' + curBook.page + ' sur ' + (curBook.total || '?');
+
+  var prefixes = ['mem','attn','plaisir'];
+  prefixes.forEach(function(p){
+    var el = function(id){ return document.getElementById(p + '-' + id); };
+    if(el('title')) el('title').textContent = curBook.title || '';
+    if(el('author')) el('author').textContent = curBook.author || '';
+    if(el('prog')) el('prog').style.width = pct + '%';
+    if(el('page-txt')) el('page-txt').textContent = pageTxt;
+    if(el('pct')) el('pct').textContent = pct + '%';
+  });
+}
+
+// ── BIBLIOTHÈQUE ──────────────────────────────────────────
+function renderLib(){
+  if(!curUser) return;
+  var list = document.getElementById('lib-list');
+  if(!list) return;
+  var books = getBooks(curUser.id);
+  list.innerHTML = '';
+  var libBtns = document.getElementById('lib-bottom-btns');
+  if(!books.length){
+    var colE = PROF_COLOR[curProfil];
+    if(libBtns) libBtns.style.display = 'none';
+    list.innerHTML = '<div style="text-align:center;padding:40px 0 24px">'
+      + '<div style="font-size:40px;margin-bottom:14px">&#128215;</div>'
+      + '<div style="font-family:var(--serif);font-size:20px;color:var(--txt);margin-bottom:8px">Aucun livre en cours</div>'
+      + '<div style="font-size:13px;color:var(--txt2);line-height:1.7;margin-bottom:24px">Ajoutez votre premier livre<br>pour que Liro puisse vous aider.</div>'
+      + '<button onclick="toggleAddForm()" style="display:block;width:100%;background:' + colE + ';color:#fff;border:none;border-radius:var(--r);padding:14px;font-size:15px;font-weight:500;font-family:var(--sans);cursor:pointer;margin-bottom:10px">+ Ajouter mon premier livre</button>'
+      + '<button onclick="appTab(2)" style="display:block;width:100%;background:var(--card);border:0.5px solid var(--border);border-radius:var(--r);padding:12px;font-size:14px;font-family:var(--sans);cursor:pointer;color:var(--txt2)">Je ne sais pas quoi lire...</button>'
+      + '</div>';
+    return;
+  }
+  if(libBtns) libBtns.style.display = 'flex';
+  books.forEach(function(b){
+    var pct = b.total ? Math.round(b.page / b.total * 100) : 0;
+    var color = PROF_COLOR[curProfil];
+    var item = document.createElement('div');
+    item.className = 'lib-item';
+    item.innerHTML = '<div style="flex:1">'
+      + '<div style="font-family:var(--serif);font-size:15px;color:' + color + ';margin-bottom:2px">' + b.title + '</div>'
+      + '<div style="font-size:12px;color:var(--txt3);margin-bottom:6px">' + (b.author||'') + ' \u00b7 page ' + b.page + ' / ' + (b.total||'?') + '</div>'
+      + '<div style="height:3px;background:#ede8e2;border-radius:2px"><div style="height:3px;background:' + color + ';border-radius:2px;width:' + pct + '%"></div></div></div>'
+      + '<div style="color:' + color + ';font-size:18px">&#8594;</div>';
+    (function(book){ item.onclick = function(){ curBook = book; appTab(0); }; })(b);
+    list.appendChild(item);
+  });
+}
+
+// ── AJOUT LIVRE ───────────────────────────────────────────
+function toggleAddForm(){
+  var f = document.getElementById('add-form');
+  if(f) f.style.display = f.style.display === 'none' ? 'block' : 'none';
+}
+
+function setAddMode(m){
+  addMode = m;
+  var ti = document.getElementById('add-title-input');
+  var mi = document.getElementById('mode-' + m);
+  var mo = document.getElementById('mode-' + (m==='titre'?'auteur':'titre'));
+  if(mi){ mi.style.background='var(--ru3)';mi.style.color='var(--ru)';mi.style.borderColor='var(--ru2)'; }
+  if(mo){ mo.style.background='var(--card)';mo.style.color='var(--txt3)';mo.style.borderColor='var(--border)'; }
+  if(ti) ti.placeholder = m==='titre' ? 'ex : Madame Bovary...' : 'ex : Flaubert...';
+  if(ti) ti.value = '';
+  var sug = document.getElementById('add-suggestions');
+  if(sug) sug.innerHTML = '';
+}
+
+function onAddInput(val){
+  clearTimeout(addDebounce);
+  var sug = document.getElementById('add-suggestions');
+  if(val.length < 2){ if(sug) sug.innerHTML=''; return; }
+  addDebounce = setTimeout(function(){ fetchSmartSuggestions(val); }, 500);
+}
+
+async function fetchSmartSuggestions(q){
+  var sug = document.getElementById('add-suggestions');
+  if(!sug) return;
+  sug.innerHTML = '<div style="font-size:12px;color:var(--txt3);padding:4px 0">Recherche...</div>';
+  try{
+    // Recherche simultanée titre + auteur
+    var [respTitle, respAuthor] = await Promise.all([
+      fetch('https://openlibrary.org/search.json?title=' + encodeURIComponent(q) + '&limit=4&fields=title,author_name,number_of_pages_median'),
+      fetch('https://openlibrary.org/search/authors.json?q=' + encodeURIComponent(q) + '&limit=3')
+    ]);
+    var [dataTitle, dataAuthor] = await Promise.all([respTitle.json(), respAuthor.json()]);
+
+    sug.innerHTML = '';
+    var hasResults = false;
+
+    // Résultats auteurs en premier si trouvés
+    var authors = (dataAuthor.docs || []).slice(0,3);
+    if(authors.length > 0){
+      var authorLabel = document.createElement('div');
+      authorLabel.style.cssText = 'font-size:10px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px';
+      authorLabel.textContent = 'Auteurs';
+      sug.appendChild(authorLabel);
+      authors.forEach(function(a){
+        var item = document.createElement('div');
+        item.style.cssText = 'background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;cursor:pointer;margin-bottom:5px;display:flex;align-items:center;justify-content:space-between';
+        item.innerHTML = '<div><div style="font-family:var(--serif);font-size:13px;color:var(--txt);font-weight:500">' + a.name + '</div>'
+          + '<div style="font-size:11px;color:var(--txt3)">' + (a.work_count||0) + ' \u0153uvres \u2014 cliquez pour voir</div></div>'
+          + '<span style="font-size:16px;color:var(--txt3)">&#8594;</span>';
+        (function(author){ item.onclick = function(){ loadAuthorWorks(author.key, author.name); }; })(a);
+        sug.appendChild(item);
+        hasResults = true;
+      });
+    }
+
+    // Résultats titres
+    var books = (dataTitle.docs || []).slice(0,4);
+    if(books.length > 0){
+      if(authors.length > 0){
+        var bookLabel = document.createElement('div');
+        bookLabel.style.cssText = 'font-size:10px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin:8px 0 5px';
+        bookLabel.textContent = 'Livres';
+        sug.appendChild(bookLabel);
+      }
+      books.forEach(function(d){
+        var author = d.author_name ? d.author_name[0] : '';
+        var pages = d.number_of_pages_median || '';
+        var item = document.createElement('div');
+        item.style.cssText = 'background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;cursor:pointer;margin-bottom:5px';
+        item.innerHTML = '<div style="font-family:var(--serif);font-size:13px;color:var(--txt)">' + d.title + '</div>'
+          + '<div style="font-size:11px;color:var(--txt3)">' + author + (pages?' \u00b7 ' + pages + ' p.':'') + '</div>';
+        (function(title, auth, pg){ item.onclick = function(){
+          sug.innerHTML = '';
+          var si = document.getElementById('add-search-input');
+          var tf = document.getElementById('add-title-field');
+          var af = document.getElementById('add-author-field');
+          var pf = document.getElementById('add-total-field');
+          if(si) si.value = title;
+          if(tf) tf.value = title;
+          if(af) af.value = auth;
+          if(pf && pg) pf.value = pg;
+        }; })(d.title, author, pages);
+        sug.appendChild(item);
+        hasResults = true;
+      });
+    }
+
+    if(!hasResults){
+      sug.innerHTML = '<div style="font-size:12px;color:var(--txt3);padding:4px 0">Aucun r\u00e9sultat. Remplissez les champs manuellement.</div>';
+    }
+  }catch(e){
+    sug.innerHTML = '<div style="font-size:12px;color:var(--txt3);padding:4px 0">Recherche indisponible. Remplissez manuellement.</div>';
+  }
+}
+
+async function fetchBookSuggestions(q){ return fetchSmartSuggestions(q); }
+
+function renderConseil(){
+  var c = CONSEILS[curProfil]; if(!c) return;
+  var color = PROF_COLOR[curProfil];
+  var bg = curProfil==='attn'?'var(--bl3)':curProfil==='memoire'?'var(--ru3)':'var(--vt3)';
+  var brd = curProfil==='attn'?'var(--bl2)':curProfil==='memoire'?'var(--ru2)':'var(--vt2)';
+
+  var intro = document.getElementById('conseil-intro');
+  if(intro) intro.innerHTML = '<div style="font-family:var(--serif);font-size:20px;color:var(--txt);margin-bottom:6px">' + c.intro + '</div>'
+    + '<div style="font-size:13px;color:var(--txt2);line-height:1.7;margin-bottom:12px">' + c.sub + '</div>'
+    + '<button id="affiner-btn" onclick="toggleQuestionnaire()" style="width:100%;background:var(--card);border:0.5px solid var(--border);border-radius:var(--r);padding:12px 16px;font-size:13px;font-weight:500;font-family:var(--sans);color:' + color + ';cursor:pointer;display:flex;align-items:center;gap:10px;margin-bottom:4px">'
+    + '<span>&#9749;</span><span style="flex:1;text-align:left">En ce moment, j\u2019ai envie de...</span><span id="affiner-arr" style="transition:transform .25s">&#8595;</span></button>';
+
+  var list = document.getElementById('conseil-items'); if(!list) return;
+  list.innerHTML = '';
+
+  var qDiv = document.createElement('div');
+  qDiv.id = 'q-wrap';
+  qDiv.style.cssText = 'display:none;background:var(--card);border-radius:var(--r);border:0.5px solid var(--border);padding:16px;margin-bottom:14px';
+  qDiv.innerHTML = buildQuestionnaire(color, bg, brd);
+  list.appendChild(qDiv);
+
+  var resDiv = document.createElement('div');
+  resDiv.id = 'q-results'; resDiv.style.display = 'none';
+  list.appendChild(resDiv);
+
+  var defDiv = document.createElement('div');
+  defDiv.id = 'q-default';
+  list.appendChild(defDiv);
+
+  var allKeys = [];
+  if(curBook && curBook.title && SIMILAR[curBook.title]) SIMILAR[curBook.title].forEach(function(k){ allKeys.push(k); });
+  (c.domaine||[]).forEach(function(k){ allKeys.push(k); });
+  (c.classiques||[]).forEach(function(k){ allKeys.push(k); });
+  var seen = {}, top3 = [];
+  allKeys.forEach(function(k){ if(!seen[k] && BOOKS_DETAIL[k] && top3.length < 3){ seen[k]=true; top3.push(k); } });
+  top3.forEach(function(k, i){
+    var b = BOOKS_DETAIL[k]; if(!b) return;
+    var item = makeBookItem(b, k, color);
+    if(i===0) item.style.borderColor = color;
+    defDiv.appendChild(item);
+  });
+  var note = document.createElement('div');
+  note.style.cssText = 'font-size:11px;color:var(--txt3);text-align:center;margin-top:10px;padding-bottom:24px';
+  note.textContent = 'Les \u0153uvres du domaine public sont gratuites et libres de droits.';
+  defDiv.appendChild(note);
+}
+
+function buildQuestionnaire(color, bg, brd){
+  function mkBtn(step, val, ico, txt){
+    return '<button onclick="qPick('+step+',\''+val+'\',this)" id="qc-'+step+'-'+val+'" '
+      +'style="background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r-sm);padding:11px 14px;cursor:pointer;font-size:13px;color:var(--txt);font-family:var(--sans);text-align:left;display:flex;align-items:center;gap:10px;width:100%;margin-bottom:6px">'
+      +'<span style="font-size:1.1rem;flex-shrink:0;width:22px;text-align:center">'+ico+'</span><span>'+txt+'</span></button>';
+  }
+  function mkNext(step, next, label){
+    return '<div style="display:flex;align-items:center;margin-top:10px">'
+      +(step>0?'<button onclick="goQStep('+(step-1)+')" style="background:none;border:none;font-size:13px;color:var(--txt3);cursor:pointer;font-family:var(--sans)">&#8592; Retour</button>':'<button onclick="toggleQuestionnaire()" style="background:none;border:none;font-size:13px;color:var(--txt3);cursor:pointer;font-family:var(--sans)">Annuler</button>')
+      +'<button id="qn'+step+'" disabled onclick="'+next+'" style="background:'+color+';color:#fff;border:none;border-radius:var(--r-sm);padding:10px 20px;font-size:13px;font-weight:500;font-family:var(--sans);cursor:pointer;margin-left:auto;opacity:.35">'+label+'</button></div>';
+  }
+  return '<div style="display:flex;gap:5px;margin-bottom:14px">'
+    +'<div style="height:3px;flex:1;border-radius:2px;background:'+color+'" id="qp0"></div>'
+    +'<div style="height:3px;flex:1;border-radius:2px;background:var(--border)" id="qp1"></div>'
+    +'<div style="height:3px;flex:1;border-radius:2px;background:var(--border)" id="qp2"></div></div>'
+    +'<div id="qs0">'
+    +'<div style="font-size:10px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">En ce moment, j\u2019ai envie de...</div>'
+    +mkBtn(0,'leger','&#9728;','Quelque chose de l\u00e9ger \u2014 sans lourdeur')
+    +mkBtn(0,'captive','&#9889;','Quelque chose d\u2019absorbant \u2014 impossible \u00e0 poser')
+    +mkBtn(0,'emotion','&#127807;','De l\u2019\u00e9motion et de la beaut\u00e9')
+    +mkBtn(0,'decouvrir','&#127758;','Quelque chose que je ne connais pas encore')
+    +mkNext(0,'goQStep(1)','Suivant &#8594;')+'</div>'
+    +'<div id="qs1" style="display:none">'
+    +'<div style="font-size:10px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Mon \u00e9nergie en ce moment</div>'
+    +mkBtn(1,'forme','&#128170;','En forme \u2014 je peux me concentrer')
+    +mkBtn(1,'moderee','&#128338;','Mod\u00e9r\u00e9e \u2014 je veux avancer sans effort')
+    +mkBtn(1,'fatigue','&#127807;','Fatigu\u00e9(e) \u2014 quelque chose de doux et court')
+    +mkNext(1,'goQStep(2)','Suivant &#8594;')+'</div>'
+    +'<div id="qs2" style="display:none">'
+    +'<div style="font-size:10px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Nouveau ou familier ?</div>'
+    +mkBtn(2,'nouveau','&#127758;','Explorer \u2014 un auteur ou un style nouveau')
+    +mkBtn(2,'familier','&#127968;','Familier \u2014 un auteur que j\u2019aime d\u00e9j\u00e0')
+    +mkBtn(2,'surprise','&#127775;','Surprenez-moi \u2014 je fais confiance \u00e0 Liro')
+    +mkNext(2,'showQResults()','Voir mes suggestions &#8594;')+'</div>';
+}
+
+
+
+var Q_ANSWERS = [null, null, null];
+function toggleQuestionnaire(){
+  var qw=document.getElementById('q-wrap'), arr=document.getElementById('affiner-arr');
+  if(!qw) return;
+  var open=qw.style.display!=='none';
+  qw.style.display=open?'none':'block';
+  if(arr) arr.style.transform=open?'':'rotate(180deg)';
+  if(!open) goQStep(0);
+}
+function goQStep(s){
+  [0,1,2].forEach(function(i){
+    var el=document.getElementById('qs'+i); if(el) el.style.display=i===s?'block':'none';
+    var pd=document.getElementById('qp'+i);
+    if(pd) pd.style.background=i<s?PROF_COLOR[curProfil]:i===s?'var(--ru2)':'var(--border)';
+  });
+}
+function qPick(step,val,btn){
+  Q_ANSWERS[step]=val;
+  var color=PROF_COLOR[curProfil];
+  var bg=curProfil==='attn'?'var(--bl3)':curProfil==='memoire'?'var(--ru3)':'var(--vt3)';
+  var brd=curProfil==='attn'?'var(--bl2)':curProfil==='memoire'?'var(--ru2)':'var(--vt2)';
+  var qs=document.getElementById('qs'+step);
+  if(qs) qs.querySelectorAll('button[id^="qc-"]').forEach(function(b){ b.style.background='var(--bg)';b.style.borderColor='var(--border)';b.style.color='var(--txt)'; });
+  btn.style.background=bg; btn.style.borderColor=brd; btn.style.color=color;
+  var n=document.getElementById('qn'+step); if(n){n.disabled=false;n.style.opacity='1';}
+}
+function showQResults(){
+  var a0=Q_ANSWERS[0],a1=Q_ANSWERS[1],a2=Q_ANSWERS[2];
+  var color=PROF_COLOR[curProfil];
+  var bg=curProfil==='attn'?'var(--bl3)':curProfil==='memoire'?'var(--ru3)':'var(--vt3)';
+  var brd=curProfil==='attn'?'var(--bl2)':curProfil==='memoire'?'var(--ru2)':'var(--vt2)';
+  var qw=document.getElementById('q-wrap'); if(qw) qw.style.display='none';
+  var arr=document.getElementById('affiner-arr'); if(arr) arr.style.transform='';
+  var SCORES={
+    leger:{lettres:3,candide:3,petit_prince:2,pennac:2,andersen:2,echenoz:2,horla:2},
+    captive:{horla:3,etranger:3,chagrin:3,verne:2,holmes:2,echenoz:2,candide:2},
+    emotion:{chagrin:3,petit_prince:3,andersen:3,etranger:2,lettres:2,moderato:2},
+    decouvrir:{echenoz:3,pennac:3,horla:2,moderato:2,etranger:2},
+    forme:{etranger:3,chagrin:3,bovary:2,verne:2,holmes:2},
+    moderee:{candide:2,lettres:2,echenoz:2,etranger:2,pennac:2,verne:2},
+    fatigue:{horla:3,petit_prince:3,candide:3,lettres:2,andersen:2},
+    nouveau:{echenoz:3,pennac:3,moderato:3,horla:2,etranger:2},
+    familier:{lettres:3,candide:3,bovary:2,verne:2,andersen:2},
+    surprise:{horla:2,petit_prince:2,echenoz:2,moderato:2,andersen:2,pennac:2},
+  };
+  var scored=Object.keys(BOOKS_DETAIL).map(function(k){
+    var s=0;
+    if(a0&&SCORES[a0]&&SCORES[a0][k]) s+=SCORES[a0][k];
+    if(a1&&SCORES[a1]&&SCORES[a1][k]) s+=SCORES[a1][k];
+    if(a2&&SCORES[a2]&&SCORES[a2][k]) s+=SCORES[a2][k];
+    return{k:k,score:s};
+  });
+  scored.sort(function(a,b){return b.score-a.score;});
+  var top3=scored.slice(0,3).filter(function(x){return BOOKS_DETAIL[x.k];});
+  var titles={leger:'En ce moment, quelque chose de l\u00e9ger',captive:'Pour ne plus pouvoir s\u2019arr\u00eater',emotion:'Pour ressentir quelque chose de beau',decouvrir:'Pour explorer quelque chose de nouveau'};
+  var subs={fatigue:'Des livres accessibles, m\u00eame quand l\u2019\u00e9nergie est basse.',forme:'Vous \u00eates en forme \u2014 voici des livres \u00e0 la hauteur.',moderee:'S\u00e9lection pour avancer sans effort.'};
+  var resDiv=document.getElementById('q-results'), defDiv=document.getElementById('q-default');
+  if(defDiv) defDiv.style.display='none';
+  if(!resDiv) return;
+  resDiv.style.display='block';
+  resDiv.innerHTML='<div style="background:'+bg+';border:0.5px solid '+brd+';border-radius:var(--r);padding:14px 16px;margin-bottom:14px">'
+    +'<div style="font-family:var(--serif);font-size:17px;color:'+color+';margin-bottom:4px">'+(titles[a0]||'Pour vous, en ce moment')+'</div>'
+    +'<div style="font-size:12px;color:var(--txt2);line-height:1.5">'+(subs[a1]||'S\u00e9lection personnalis\u00e9e.')+'</div></div>';
+  top3.forEach(function(item,i){
+    var b=BOOKS_DETAIL[item.k]; if(!b) return;
+    var el=makeBookItem(b,item.k,color);
+    if(i===0) el.style.borderColor=color;
+    resDiv.appendChild(el);
+  });
+  var rb=document.createElement('button');
+  rb.textContent='Changer mes r\u00e9ponses';
+  rb.style.cssText='font-size:12px;color:var(--txt3);background:none;border:none;cursor:pointer;font-family:var(--sans);text-decoration:underline;display:block;text-align:center;margin:12px auto 24px';
+  rb.onclick=function(){ Q_ANSWERS=[null,null,null]; resDiv.style.display='none'; resDiv.innerHTML=''; if(defDiv) defDiv.style.display='block'; };
+  resDiv.appendChild(rb);
+}
+function toggleNotes(profil){
+  var zone=document.getElementById('notes-zone-'+profil);
+  var arr=document.getElementById('notes-arr-'+profil);
+  if(!zone) return;
+  var open=zone.style.display!=='none';
+  zone.style.display=open?'none':'block';
+  if(arr) arr.textContent=open?'\u2193':'\u2191';
+  if(!open) loadNote();
+}
+
+</script>
+</body>
+</html>
