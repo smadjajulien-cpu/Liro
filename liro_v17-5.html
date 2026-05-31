@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Liro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:#1a1a1a}
+body{font-family:'DM Sans',sans-serif;display:flex;justify-content:center;align-items:center}
+.phone{position:relative;width:100%;max-width:430px;height:100%;max-height:932px;background:#f5f0eb;overflow:hidden}
+@media(min-width:500px){.phone{border-radius:32px;box-shadow:0 24px 64px rgba(0,0,0,.4)}}
+
+:root{
+  --ru:#8b3a1a;--ru2:#d4a088;--ru3:#fdf0e8;
+  --bl:#1a5276;--bl2:#aed6f1;--bl3:#eaf2fb;
+  --vt:#4a7c59;--vt2:#a8d5b5;--vt3:#eef6f1;
+  --txt:#1a1a1a;--txt2:#555;--txt3:#999;
+  --card:#fff;--bg:#f5f0eb;--border:#e8e0d8;
+  --grn:#2d6a2d;--gb:#e8f3ec;--gbd:#a8d5b5;
+  --serif:'Playfair Display',Georgia,serif;
+  --sans:'DM Sans',sans-serif;
+  --r:14px;--r-sm:10px;
+}
+
+/* Écrans */
+.sc{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;background:var(--bg);display:none;-webkit-overflow-scrolling:touch}
+.sc.on{display:block}
+
+/* Layout commun */
+.w{padding:0 16px}
+.hdr{padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between;background:var(--bg);position:sticky;top:0;z-index:10}
+.btn-back{background:none;border:none;font-size:13px;color:var(--txt3);cursor:pointer;font-family:var(--sans);padding:14px 16px 0;display:block}
+.page-title{font-family:var(--serif);font-size:20px;color:var(--txt);padding:8px 16px 14px}
+
+/* Cards */
+.card{background:var(--card);border-radius:var(--r);border:0.5px solid var(--border);padding:16px;margin-bottom:10px}
+.card-label{font-size:11px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+
+/* Inputs */
+.inp{width:100%;border:0.5px solid var(--border);border-radius:var(--r-sm);padding:11px 13px;font-size:15px;background:var(--card);color:var(--txt);font-family:var(--sans)}
+.inp:focus{outline:none;border-color:var(--ru)}
+.lbl{font-size:11px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;display:block}
+
+/* Boutons */
+.btn{width:100%;border:none;border-radius:var(--r);padding:14px;font-size:15px;font-weight:500;cursor:pointer;font-family:var(--sans)}
+.btn-ru{background:var(--ru);color:#fff}
+.btn-ru2{background:var(--ru3);color:var(--ru);border:0.5px solid var(--ru2)}
+.btn-vt{background:var(--vt);color:#fff}
+.btn-bl{background:var(--bl);color:#fff}
+
+/* Tabs */
+.tabs{display:flex;gap:5px;padding:0 14px 12px;position:sticky;top:56px;background:var(--bg);z-index:9}
+.tab{flex:1;background:var(--card);border:0.5px solid var(--border);border-radius:10px;padding:8px 4px;font-size:11px;font-weight:500;font-family:var(--sans);color:var(--txt3);cursor:pointer;text-align:center;line-height:1.3;transition:all .15s}
+.tab.on-ru{background:var(--ru3);border-color:var(--ru2);color:var(--ru)}
+.tab.on-bl{background:var(--bl3);border-color:var(--bl2);color:var(--bl)}
+.tab.on-vt{background:var(--vt3);border-color:var(--vt2);color:var(--vt)}
+
+/* Résumé */
+.resume-card{background:var(--card);border-radius:var(--r);border:0.5px solid var(--border);padding:16px;margin-bottom:10px}
+.resume-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:0.5px solid var(--border)}
+.resume-body{font-size:15px;line-height:1.85;color:var(--txt)}
+.no-sp{font-size:11px;background:var(--ru3);border:0.5px solid var(--ru2);border-radius:20px;padding:3px 10px;color:var(--ru);font-weight:500}
+.tts-btn{background:none;border:0.5px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;color:var(--txt3);cursor:pointer;font-family:var(--sans)}
+
+/* Loading */
+.loading-dots{display:flex;gap:5px;justify-content:center;padding:16px 0}
+.loading-dots span{width:8px;height:8px;border-radius:50%;background:var(--ru);animation:ld .9s infinite}
+.loading-dots span:nth-child(2){animation-delay:.2s}
+.loading-dots span:nth-child(3){animation-delay:.4s}
+@keyframes ld{0%,100%{opacity:.2}50%{opacity:1}}
+
+/* Toast */
+.toast{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.82);color:#fff;padding:.5rem 1.2rem;border-radius:50px;font-size:.85rem;z-index:900;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .3s;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+
+/* Overlay/Drawer */
+.overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.45)}
+.drawer{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--card);border-radius:20px 20px 0 0;padding:1.2rem 1rem 2.5rem;max-height:85vh;overflow-y:auto}
+.handle{width:36px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 16px}
+
+/* Profil cards */
+.profil-card{background:var(--card);border-radius:var(--r);border:0.5px solid var(--border);padding:16px;margin:0 16px 10px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:all .15s}
+.profil-card:active{transform:scale(.98)}
+.p-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+
+/* Livre card */
+.book-card{background:var(--card);border-radius:var(--r);border:0.5px solid var(--border);padding:16px;margin-bottom:12px}
+.prog-bar{height:4px;background:#ede8e2;border-radius:2px;overflow:hidden;margin-bottom:5px}
+.prog-fill{height:4px;border-radius:2px}
+
+/* Chips / situations */
+.chips-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.chip{background:var(--card);border:0.5px solid var(--border);border-radius:50px;padding:9px 16px;font-size:13px;font-weight:500;font-family:var(--sans);color:var(--txt);cursor:pointer}
+.sit-list{display:flex;flex-direction:column;gap:7px;margin-bottom:12px}
+.sit-item{background:var(--card);border:0.5px solid var(--border);border-radius:var(--r-sm);padding:11px 14px;cursor:pointer;display:flex;align-items:center;gap:10px}
+.sit-item:active{background:var(--ru3)}
+
+/* Biblio items */
+.lib-item{background:var(--card);border:0.5px solid var(--border);border-radius:var(--r);padding:14px;cursor:pointer;display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.lib-item:active{opacity:.85}
+
+/* Conseil */
+.bk-item{background:var(--card);border:0.5px solid var(--border);border-radius:var(--r);padding:13px;cursor:pointer;display:flex;gap:11px;align-items:center;margin-bottom:8px}
+.bk-item:active{background:var(--ru3)}
+.bk-cover{width:40px;height:55px;border-radius:6px;flex-shrink:0}
+
+/* FAQ */
+.faq-item{background:var(--card);border-top:0.5px solid var(--border);padding:14px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.faq-item:first-child{border-top:none}
+.faq-a{display:none;padding:0 16px 14px;font-size:13px;color:var(--txt2);line-height:1.75;background:var(--card)}
+.faq-group{margin:0 16px 10px;border-radius:var(--r);overflow:hidden;border:0.5px solid var(--border)}
+
+/* Footer */
+.footer-links{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;padding:16px 16px 24px;border-top:0.5px solid var(--border);margin-top:8px}
+.footer-links span{font-size:12px;color:var(--txt3);text-decoration:underline;cursor:pointer}
+
+/* Menu contextuel app */
+.app-menu{display:none;position:absolute;top:56px;right:16px;background:var(--card);border:0.5px solid var(--border);border-radius:var(--r-sm);box-shadow:0 4px 20px rgba(0,0,0,.12);z-index:200;min-width:180px;overflow:hidden}
+.app-menu-item{padding:12px 16px;font-size:14px;color:var(--txt);cursor:pointer;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:10px}
+.app-menu-item:last-child{border-bottom:none}
+.app-menu-item:active{background:var(--ru3)}
+
+/* Menu bouton */
+.menu-btn{width:32px;height:32px;border-radius:50%;background:var(--card);border:0.5px solid var(--border);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--txt2)}
+
+/* Animations */
+.fade-in{opacity:0;transform:translateY(10px);transition:opacity .35s ease,transform .35s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+
+/* Welcome box profil retour */
+.welcome-box{border-radius:var(--r);padding:14px 16px;margin-bottom:12px;border:0.5px solid}
+
+/* Note bas de page lecture */
+.read-note{text-align:center;font-size:12px;color:var(--txt3);padding:4px 0 20px}
+
+/* Sections conseil */
+.section-lbl{font-size:11px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin:8px 0}
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+<div class="toast" id="toast"></div>
+
+<!-- ═══ LOGIN DEV ═══ -->
+<div id="s-devlogin" class="sc on">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 24px;text-align:center">
+    <div style="margin-bottom:6px"><div style="display:flex;align-items:center;gap:7px">
+  <div style="width:32px;height:32px;border-radius:7px;background:#fdf0e8;border:0.5px solid #d4a088;display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 46 46">
+<path d="M 2 4 L 2 42 Q 2 44 4 44 L 23 44 L 23 4 Q 18 2 4 2 Q 2 2 2 4 Z" fill="#fff" stroke="#8b3a1a" stroke-width="1.5"/>
+<path d="M 44 4 L 44 42 Q 44 44 42 44 L 23 44 L 23 4 Q 28 2 42 2 Q 44 2 44 4 Z" fill="#fff" stroke="#8b3a1a" stroke-width="1.5"/>
+<line x1="23" y1="3" x2="23" y2="44" stroke="#d4a088" stroke-width="1.5"/>
+<line x1="6" y1="14" x2="20" y2="14" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="6" y1="20" x2="20" y2="20" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="26" y1="14" x2="40" y2="14" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="26" y1="20" x2="40" y2="20" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M 8 0 L 14 0 L 14 16 L 11 12 L 8 16 Z" fill="#c4724a"/>
+</svg></div>
+  <span style="font-family:'Playfair Display',Georgia,serif;font-weight:500;color:#8b3a1a;letter-spacing:-.02em;font-size:28px">L<em style="font-style:italic;font-weight:400;color:#c4724a">i</em>ro</span>
+</div></div>
+    <div style="font-size:11px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.15em;margin-bottom:32px">Version de d&eacute;veloppement</div>
+    <div style="width:100%;background:var(--card);border-radius:var(--r);border:0.5px solid var(--border);padding:20px">
+      <div style="font-size:13px;color:var(--txt2);margin-bottom:14px;line-height:1.6">Version r&eacute;serv&eacute;e aux testeurs autoris&eacute;s.<br>Entrez le code d&apos;acc&egrave;s.</div>
+      <input type="password" id="dev-code" placeholder="Code d&apos;acc&egrave;s" class="inp" style="margin-bottom:10px;text-align:center;letter-spacing:.2em;font-size:16px" onkeydown="if(event.key==='Enter')checkDevCode()">
+      <div id="dev-error" style="display:none;font-size:12px;color:var(--ru);margin-bottom:8px">Code incorrect. R&eacute;essayez.</div>
+      <button onclick="checkDevCode()" class="btn btn-ru">Acc&eacute;der &agrave; Liro &rarr;</button>
+    </div>
+    <div style="font-size:11px;color:var(--txt3);margin-top:20px;line-height:1.6">Vous &ecirc;tes testeur ?<br><a href="mailto:contact@liro.app" style="color:var(--ru)">contact@liro.app</a></div>
+  </div>
+</div>
+
+<!-- ═══ CLÉ API ═══ -->
+<div id="s-apikey" class="sc">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 24px;text-align:center">
+    <div style="margin-bottom:6px"><div style="display:flex;align-items:center;gap:7px">
+  <div style="width:30px;height:30px;border-radius:7px;background:#fdf0e8;border:0.5px solid #d4a088;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 46 46">
+<path d="M 2 4 L 2 42 Q 2 44 4 44 L 23 44 L 23 4 Q 18 2 4 2 Q 2 2 2 4 Z" fill="#fff" stroke="#8b3a1a" stroke-width="1.5"/>
+<path d="M 44 4 L 44 42 Q 44 44 42 44 L 23 44 L 23 4 Q 28 2 42 2 Q 44 2 44 4 Z" fill="#fff" stroke="#8b3a1a" stroke-width="1.5"/>
+<line x1="23" y1="3" x2="23" y2="44" stroke="#d4a088" stroke-width="1.5"/>
+<line x1="6" y1="14" x2="20" y2="14" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="6" y1="20" x2="20" y2="20" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="26" y1="14" x2="40" y2="14" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="26" y1="20" x2="40" y2="20" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M 8 0 L 14 0 L 14 16 L 11 12 L 8 16 Z" fill="#c4724a"/>
+</svg></div>
+  <span style="font-family:'Playfair Display',Georgia,serif;font-weight:500;color:#8b3a1a;letter-spacing:-.02em;font-size:26px">L<em style="font-style:italic;font-weight:400;color:#c4724a">i</em>ro</span>
+</div></div>
+    <div style="font-size:11px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:24px">Compagnon de lecture</div>
+    <div style="width:100%;background:var(--card);border-radius:var(--r);border:0.5px solid var(--border);padding:20px;margin-bottom:12px">
+      <div style="font-size:14px;font-weight:500;color:var(--txt);margin-bottom:6px">Activez Liro</div>
+      <div style="font-size:13px;color:var(--txt2);margin-bottom:14px;line-height:1.6">Entrez votre cl&eacute; API Anthropic pour activer Liro. Elle est stock&eacute;e uniquement sur votre appareil.</div>
+      <input type="password" id="api-key-input" placeholder="sk-ant-..." class="inp" style="margin-bottom:10px;font-size:13px" autocomplete="off">
+      <button onclick="saveApiKey()" class="btn btn-ru">Activer Liro &rarr;</button>
+    </div>
+    <div style="font-size:12px;color:var(--txt3);line-height:1.6">Obtenez votre cl&eacute; sur<br><a href="https://console.anthropic.com" target="_blank" style="color:var(--ru)">console.anthropic.com</a></div>
+  </div>
+</div>
+
+<!-- ═══ ONBOARDING ═══ -->
+<div id="s-ob" class="sc">
+  <div style="padding:32px 20px 20px">
+    <div style="margin-bottom:6px"><div style="display:flex;align-items:center;gap:7px">
+  <div style="width:30px;height:30px;border-radius:7px;background:#fdf0e8;border:0.5px solid #d4a088;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 46 46">
+<path d="M 2 4 L 2 42 Q 2 44 4 44 L 23 44 L 23 4 Q 18 2 4 2 Q 2 2 2 4 Z" fill="#fff" stroke="#8b3a1a" stroke-width="1.5"/>
+<path d="M 44 4 L 44 42 Q 44 44 42 44 L 23 44 L 23 4 Q 28 2 42 2 Q 44 2 44 4 Z" fill="#fff" stroke="#8b3a1a" stroke-width="1.5"/>
+<line x1="23" y1="3" x2="23" y2="44" stroke="#d4a088" stroke-width="1.5"/>
+<line x1="6" y1="14" x2="20" y2="14" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="6" y1="20" x2="20" y2="20" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="26" y1="14" x2="40" y2="14" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="26" y1="20" x2="40" y2="20" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M 8 0 L 14 0 L 14 16 L 11 12 L 8 16 Z" fill="#c4724a"/>
+</svg></div>
+  <span style="font-family:'Playfair Display',Georgia,serif;font-weight:500;color:#8b3a1a;letter-spacing:-.02em;font-size:26px">L<em style="font-style:italic;font-weight:400;color:#c4724a">i</em>ro</span>
+</div></div>
+    <div style="font-family:var(--serif);font-size:22px;color:var(--txt);margin:16px 0 6px">Cr&eacute;er votre profil</div>
+    <div style="font-size:13px;color:var(--txt2);line-height:1.6;margin-bottom:20px">Liro s&apos;adapte &agrave; votre fa&ccedil;on de lire.</div>
+  </div>
+
+  <div class="profil-card" id="ob-attn" onclick="obSelect('attn')">
+    <div class="p-icon" style="background:var(--bl3)">&#9889;</div>
+    <div style="flex:1">
+      <div style="font-weight:500;font-size:14px;color:var(--txt);margin-bottom:2px">Mon attention est difficile &agrave; canaliser</div>
+      <div style="font-size:12px;color:var(--txt3)">Je commence des livres, je d&eacute;croche, je perds le fil</div>
+    </div>
+    <div id="ck-attn" style="display:none;color:var(--bl);font-size:18px;font-weight:600">&#10003;</div>
+  </div>
+
+  <div class="profil-card" id="ob-memoire" onclick="obSelect('memoire')">
+    <div class="p-icon" style="background:var(--ru3)">&#129504;</div>
+    <div style="flex:1">
+      <div style="font-weight:500;font-size:14px;color:var(--txt);margin-bottom:2px">J&apos;oublie ce que j&apos;ai lu</div>
+      <div style="font-size:12px;color:var(--txt3)">Entre deux sessions, les d&eacute;tails s&apos;effacent</div>
+    </div>
+    <div id="ck-memoire" style="display:none;color:var(--ru);font-size:18px;font-weight:600">&#10003;</div>
+  </div>
+
+  <div class="profil-card" id="ob-plaisir" onclick="obSelect('plaisir')">
+    <div class="p-icon" style="background:var(--vt3)">&#127807;</div>
+    <div style="flex:1">
+      <div style="font-weight:500;font-size:14px;color:var(--txt);margin-bottom:2px">J&apos;ai perdu le go&ucirc;t de lire</div>
+      <div style="font-size:12px;color:var(--txt3)">La lecture s&apos;est &eacute;loign&eacute;e, je veux y revenir</div>
+    </div>
+    <div id="ck-plaisir" style="display:none;color:var(--vt);font-size:18px;font-weight:600">&#10003;</div>
+  </div>
+
+  <div style="padding:16px 20px 0">
+    <div style="font-size:13px;color:var(--txt2);margin-bottom:8px">Votre pr&eacute;nom</div>
+    <input type="text" id="ob-name" placeholder="Marie, Thomas..." class="inp" style="margin-bottom:16px">
+    <button id="ob-btn" onclick="createProfile()" class="btn btn-ru" style="opacity:.5;pointer-events:none">Commencer &agrave; lire &rarr;</button>
+    <button onclick="goSc('s-home')" style="width:100%;background:none;border:none;font-size:13px;color:var(--txt3);cursor:pointer;font-family:var(--sans);padding:12px 0">&#8592; Retour</button>
+  </div>
+</div>
+
+<!-- ═══ HOME / LANDING ═══ -->
+<div id="s-home" class="sc">
+  <!-- Hero -->
+  <div style="padding:36px 22px 24px;text-align:center">
+    <div style="display:flex;justify-content:center;margin-bottom:20px"><div style="display:flex;align-items:center;gap:7px">
+  <div style="width:34px;height:34px;border-radius:7px;background:#fdf0e8;border:0.5px solid #d4a088;display:flex;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 46 46">
+<path d="M 2 4 L 2 42 Q 2 44 4 44 L 23 44 L 23 4 Q 18 2 4 2 Q 2 2 2 4 Z" fill="#fff" stroke="#8b3a1a" stroke-width="1.5"/>
+<path d="M 44 4 L 44 42 Q 44 44 42 44 L 23 44 L 23 4 Q 28 2 42 2 Q 44 2 44 4 Z" fill="#fff" stroke="#8b3a1a" stroke-width="1.5"/>
+<line x1="23" y1="3" x2="23" y2="44" stroke="#d4a088" stroke-width="1.5"/>
+<line x1="6" y1="14" x2="20" y2="14" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="6" y1="20" x2="20" y2="20" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="26" y1="14" x2="40" y2="14" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="26" y1="20" x2="40" y2="20" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M 8 0 L 14 0 L 14 16 L 11 12 L 8 16 Z" fill="#c4724a"/>
+</svg></div>
+  <span style="font-family:'Playfair Display',Georgia,serif;font-weight:500;color:#8b3a1a;letter-spacing:-.02em;font-size:30px">L<em style="font-style:italic;font-weight:400;color:#c4724a">i</em>ro</span>
+</div></div>
+    <div style="font-size:11px;font-weight:500;color:var(--ru);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px">Compagnon de lecture</div>
+    <div style="font-family:var(--serif);font-size:28px;color:var(--txt);line-height:1.25;margin-bottom:14px">Retrouvez le fil<br>de <em style="color:var(--ru)">votre</em> livre.</div>
+    <div style="font-size:14px;color:var(--txt2);line-height:1.85;text-align:left">
+      Lire, c&apos;est simple en th&eacute;orie. Pas tout le temps, pas pour tout le monde.<br><br>
+      Vous d&eacute;crochez, vous oubliez entre chaque session, vous posez un livre et vous ne le reprenez plus. La vie prend toute la place, et la lecture s&apos;&eacute;loigne.<br><br>
+      Liro vous rappelle o&ugrave; vous en &ecirc;tes &mdash; sans jamais d&eacute;voiler la suite. Pour que vous puissiez reprendre, &agrave; votre rythme.
+    </div>
+  </div>
+
+  <div style="height:1px;background:var(--border);margin:0 20px 20px"></div>
+
+  <!-- Profils -->
+  <div style="font-size:11px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;padding:0 20px;margin-bottom:12px">Comment lisez-vous ?</div>
+
+  <div class="profil-card fade-in" onclick="goSc('s-ob');obSelect('attn')">
+    <div class="p-icon" style="background:var(--bl3)">&#9889;</div>
+    <div style="flex:1">
+      <div style="font-weight:500;font-size:14px;color:var(--txt);margin-bottom:3px">Mon attention est difficile &agrave; canaliser</div>
+      <div style="font-size:12px;color:var(--txt3);line-height:1.4">Je commence des livres, je d&eacute;croche, je perds le fil</div>
+    </div>
+    <div style="color:var(--txt3);font-size:18px">&#8594;</div>
+  </div>
+
+  <div class="profil-card fade-in" onclick="goSc('s-ob');obSelect('memoire')">
+    <div class="p-icon" style="background:var(--ru3)">&#129504;</div>
+    <div style="flex:1">
+      <div style="font-weight:500;font-size:14px;color:var(--txt);margin-bottom:3px">J&apos;oublie ce que j&apos;ai lu</div>
+      <div style="font-size:12px;color:var(--txt3);line-height:1.4">Entre deux sessions, les d&eacute;tails s&apos;effacent</div>
+    </div>
+    <div style="color:var(--txt3);font-size:18px">&#8594;</div>
+  </div>
+
+  <div class="profil-card fade-in" onclick="goSc('s-ob');obSelect('plaisir')">
+    <div class="p-icon" style="background:var(--vt3)">&#127807;</div>
+    <div style="flex:1">
+      <div style="font-weight:500;font-size:14px;color:var(--txt);margin-bottom:3px">J&apos;ai perdu le go&ucirc;t de lire</div>
+      <div style="font-size:12px;color:var(--txt3);line-height:1.4">La lecture s&apos;&eacute;loign&eacute;e, je veux y revenir doucement</div>
+    </div>
+    <div style="color:var(--txt3);font-size:18px">&#8594;</div>
+  </div>
+
+  <div style="height:1px;background:var(--border);margin:16px 20px"></div>
+
+  <!-- Témoignages -->
+  <div style="padding:0 20px 20px">
+    <div style="background:var(--card);border-radius:var(--r);border:0.5px solid var(--border);padding:18px">
+      <div style="display:flex"><div style="width:3px;border-radius:2px;flex-shrink:0;align-self:stretch" id="temo-bar" style="background:var(--ru)"></div>
+      <div style="margin-left:12px">
+        <div id="temo-text" style="font-family:var(--serif);font-size:14px;font-style:italic;color:var(--txt);line-height:1.75;margin-bottom:8px"></div>
+        <div id="temo-author" style="font-size:12px;color:var(--txt3)"></div>
+      </div></div>
+      <div style="display:flex;justify-content:center;gap:6px;margin-top:14px" id="temo-dots"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer-links">
+    <span onclick="goSc('s-faq')">FAQ</span>
+    <span onclick="goSc('s-about')">&Agrave; propos</span>
+    <span onclick="goSc('s-impact')">Impact</span>
+    <span onclick="goSc('s-rgpd')">Confidentialit&eacute;</span>
+    <a href="mailto:contact@liro.app" style="font-size:12px;color:var(--txt3)">Contact</a>
+  </div>
+  <div style="text-align:center;font-size:11px;color:var(--txt3);padding-bottom:24px">Disponible en fran&ccedil;ais &middot; English coming soon</div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div id="s-app" class="sc">
+
+  <!-- Header sticky -->
+  <div class="hdr">
+    <div style="display:flex;align-items:center;gap:7px">
+  <div style="width:24px;height:24px;border-radius:5px;background:#fdf0e8;border:0.5px solid #d4a088;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 46 46">
+<path d="M 2 4 L 2 42 Q 2 44 4 44 L 23 44 L 23 4 Q 18 2 4 2 Q 2 2 2 4 Z" fill="#fff" stroke="#8b3a1a" stroke-width="1.5"/>
+<path d="M 44 4 L 44 42 Q 44 44 42 44 L 23 44 L 23 4 Q 28 2 42 2 Q 44 2 44 4 Z" fill="#fff" stroke="#8b3a1a" stroke-width="1.5"/>
+<line x1="23" y1="3" x2="23" y2="44" stroke="#d4a088" stroke-width="1.5"/>
+<line x1="6" y1="14" x2="20" y2="14" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="6" y1="20" x2="20" y2="20" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="26" y1="14" x2="40" y2="14" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<line x1="26" y1="20" x2="40" y2="20" stroke="#e8e0d8" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M 8 0 L 14 0 L 14 16 L 11 12 L 8 16 Z" fill="#c4724a"/>
+</svg></div>
+  <span style="font-family:'Playfair Display',Georgia,serif;font-weight:500;color:#8b3a1a;letter-spacing:-.02em;font-size:20px">L<em style="font-style:italic;font-weight:400;color:#c4724a">i</em>ro</span>
+</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div id="app-user-name" style="font-size:13px;color:var(--txt2);font-weight:500"></div>
+      <button class="menu-btn" onclick="toggleAppMenu()">&#8943;</button>
+    </div>
+  </div>
+
+  <!-- Menu contextuel -->
+  <div class="app-menu" id="app-menu">
+    <div class="app-menu-item" onclick="closeAppMenu();goSc('s-home')">&#128100; Changer de profil</div>
+    <div class="app-menu-item" onclick="closeAppMenu();goSc('s-faq')">&#63; FAQ</div>
+    <div class="app-menu-item" onclick="closeAppMenu();goSc('s-about')">&#9432; &Agrave; propos</div>
+    <div class="app-menu-item" onclick="closeAppMenu();goSc('s-impact')">&#10084; Impact</div>
+    <div class="app-menu-item" onclick="closeAppMenu();goSc('s-rgpd')">&#128274; Confidentialit&eacute;</div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab" id="tab0" onclick="appTab(0)">Mon livre</div>
+    <div class="tab" id="tab1" onclick="appTab(1)">Biblioth&egrave;que</div>
+    <div class="tab" id="tab2" onclick="appTab(2)">Conseil</div>
+  </div>
+
+  <!-- TAB 0 : MON LIVRE (contenu dynamique selon profil) -->
+  <div id="app-t0" style="padding:0 16px 24px">
+
+    <!-- Profil MÉMOIRE -->
+    <div id="view-memoire" style="display:none">
+      <div class="book-card" id="mem-book-card">
+        <div style="font-size:10px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px">Vous lisez</div>
+        <div id="mem-title" style="font-family:var(--serif);font-size:20px;color:var(--ru);font-weight:500;margin-bottom:2px">--</div>
+        <div id="mem-author" style="font-size:13px;color:var(--txt2);margin-bottom:10px">--</div>
+        <div class="prog-bar"><div class="prog-fill" id="mem-prog" style="background:var(--ru);width:0%"></div></div>
+        <div style="font-size:12px;color:var(--txt3);display:flex;justify-content:space-between"><span id="mem-page-txt">--</span><span id="mem-pct">--</span></div>
+      </div>
+      <button class="btn btn-ru" style="margin-bottom:10px" onclick="doRead('memoire','main')">Me rappeler o&ugrave; j&apos;en &eacute;tais</button>
+      <div class="chips-row">
+        <button class="chip" onclick="doRead('memoire','perso')">Les personnages</button>
+        <button class="chip" onclick="doRead('memoire','lieu')">O&ugrave; sommes-nous ?</button>
+      </div>
+      <div id="resume-wrap-memoire"></div>
+      <div class="read-note">Liro ne d&eacute;voile jamais la suite &middot; <span style="color:var(--ru);cursor:pointer" onclick="appTab(1)">Changer de livre</span></div>
+    </div>
+
+    <!-- Profil ATTENTION -->
+    <div id="view-attn" style="display:none">
+      <div class="book-card">
+        <div style="font-size:10px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px">En cours</div>
+        <div id="attn-title" style="font-family:var(--serif);font-size:19px;color:var(--bl);font-weight:500;margin-bottom:2px">--</div>
+        <div id="attn-author" style="font-size:13px;color:var(--txt2);margin-bottom:10px">--</div>
+        <div class="prog-bar"><div class="prog-fill" id="attn-prog" style="background:var(--bl);width:0%"></div></div>
+        <div style="font-size:12px;color:var(--txt3);display:flex;justify-content:space-between"><span id="attn-page-txt">--</span><span id="attn-pct">--</span></div>
+      </div>
+      <button class="btn btn-bl" style="margin-bottom:8px;display:flex;align-items:center;gap:10px" onclick="doRead('attn','boost')">
+        <span style="font-size:1.2rem">&#9889;</span>
+        <span style="flex:1;text-align:left">Replonger en 30 secondes</span>
+        <span style="font-size:11px;opacity:.75">Mode Boost</span>
+      </button>
+      <div class="sit-list">
+        <div class="sit-item" onclick="doRead('attn','reprendre')">
+          <span style="font-size:1.1rem;width:24px;text-align:center;flex-shrink:0">&#128260;</span>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--txt)">Reprendre l&agrave; o&ugrave; j&apos;en &eacute;tais</div><div style="font-size:11px;color:var(--txt3);margin-top:1px">Contexte + ce qui s&apos;est pass&eacute;</div></div>
+          <span style="color:var(--txt3);font-size:14px">&#8594;</span>
+        </div>
+        <div class="sit-item" onclick="doRead('attn','perso')">
+          <span style="font-size:1.1rem;width:24px;text-align:center;flex-shrink:0">&#128100;</span>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--txt)">Qui est qui ?</div><div style="font-size:11px;color:var(--txt3);margin-top:1px">Les personnages cl&eacute;s</div></div>
+          <span style="color:var(--txt3);font-size:14px">&#8594;</span>
+        </div>
+        <div class="sit-item" onclick="doRead('attn','finir')">
+          <span style="font-size:1.1rem;width:24px;text-align:center;flex-shrink:0">&#127919;</span>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--txt)">Je veux finir ce livre</div><div style="font-size:11px;color:var(--txt3);margin-top:1px">Motivation + enjeu final</div></div>
+          <span style="color:var(--txt3);font-size:14px">&#8594;</span>
+        </div>
+      </div>
+      <div id="resume-wrap-attn"></div>
+      <div class="read-note">Liro ne d&eacute;voile jamais la suite &middot; <span style="color:var(--bl);cursor:pointer" onclick="appTab(1)">Changer de livre</span></div>
+    </div>
+
+    <!-- Profil PLAISIR/RETOUR -->
+    <div id="view-plaisir" style="display:none">
+      <div class="welcome-box" style="background:var(--vt3);border-color:var(--vt2)">
+        <div style="font-family:var(--serif);font-size:16px;color:var(--vt);margin-bottom:4px">Bon retour, <span id="plaisir-name"></span>.</div>
+        <div style="font-size:13px;color:var(--txt2);line-height:1.6">Pas de pression. M&ecirc;me 5 pages, c&apos;est bien.</div>
+      </div>
+      <div class="book-card">
+        <div style="font-size:10px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px">Vous lisez</div>
+        <div id="plaisir-title" style="font-family:var(--serif);font-size:19px;color:var(--vt);font-weight:500;margin-bottom:2px">--</div>
+        <div id="plaisir-author" style="font-size:13px;color:var(--txt2);margin-bottom:10px">--</div>
+        <div class="prog-bar"><div class="prog-fill" id="plaisir-prog" style="background:var(--vt);width:0%"></div></div>
+        <div style="font-size:12px;color:var(--txt3);display:flex;justify-content:space-between"><span id="plaisir-page-txt">--</span><span id="plaisir-pct">--</span></div>
+      </div>
+      <button class="btn btn-vt" style="margin-bottom:10px;text-align:left" onclick="doRead('plaisir','reprendre')">
+        Reprendre doucement<br><span style="font-size:11px;opacity:.75;font-weight:400">O&ugrave; j&apos;en &eacute;tais &mdash; sans pression</span>
+      </button>
+      <div class="sit-list">
+        <div class="sit-item" onclick="doRead('plaisir','lieu')">
+          <span style="font-size:1.1rem;width:24px;text-align:center;flex-shrink:0">&#127807;</span>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--txt)">L&apos;ambiance du livre</div><div style="font-size:11px;color:var(--txt3);margin-top:1px">Les lieux, les sensations</div></div>
+          <span style="color:var(--txt3);font-size:14px">&#8594;</span>
+        </div>
+        <div class="sit-item" onclick="doRead('plaisir','perso')">
+          <span style="font-size:1.1rem;width:24px;text-align:center;flex-shrink:0">&#128100;</span>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--txt)">Qui sont les personnages ?</div><div style="font-size:11px;color:var(--txt3);margin-top:1px">Un rappel doux, sans spoiler</div></div>
+          <span style="color:var(--txt3);font-size:14px">&#8594;</span>
+        </div>
+      </div>
+      <div id="resume-wrap-plaisir"></div>
+      <div class="read-note">Liro ne d&eacute;voile jamais la suite &middot; <span style="color:var(--vt);cursor:pointer" onclick="appTab(1)">Changer de livre</span></div>
+    </div>
+  </div>
+
+  <!-- TAB 1 : BIBLIOTHÈQUE -->
+  <div id="app-t1" style="display:none;padding:0 16px 24px">
+    <div style="font-family:var(--serif);font-size:18px;color:var(--txt);margin-bottom:12px">Mes livres</div>
+
+    <!-- Formulaire ajout livre -->
+    <div id="add-form" style="display:none;background:var(--card);border-radius:var(--r);border:0.5px solid var(--border);padding:16px;margin-bottom:12px">
+      <div style="font-family:var(--serif);font-size:16px;color:var(--txt);margin-bottom:12px">Ajouter un livre</div>
+      <div style="display:flex;gap:6px;margin-bottom:12px">
+        <button id="mode-titre" onclick="setAddMode('titre')" style="flex:1;border-radius:8px;padding:8px;font-size:12px;font-weight:500;font-family:var(--sans);cursor:pointer;background:var(--ru3);color:var(--ru);border:0.5px solid var(--ru2)">Par titre</button>
+        <button id="mode-auteur" onclick="setAddMode('auteur')" style="flex:1;border-radius:8px;padding:8px;font-size:12px;font-weight:500;font-family:var(--sans);cursor:pointer;background:var(--card);color:var(--txt3);border:0.5px solid var(--border)">Par auteur</button>
+      </div>
+      <input type="text" id="add-title-input" placeholder="ex : Madame Bovary..." class="inp" style="margin-bottom:8px" oninput="onAddInput(this.value)">
+      <div id="add-suggestions" style="margin-bottom:8px"></div>
+      <div id="add-fields" style="display:none">
+        <input type="text" id="add-author-field" placeholder="Auteur" class="inp" style="margin-bottom:8px">
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <div style="flex:1">
+            <div class="lbl">Page actuelle *</div>
+            <input type="number" id="add-page-field" placeholder="ex: 1" class="inp" min="0">
+          </div>
+          <div style="flex:1">
+            <div class="lbl">Pages totales *</div>
+            <input type="number" id="add-total-field" placeholder="ex: 320" class="inp" min="1">
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="submitAddBook()" class="btn btn-ru" style="flex:1">Ajouter &#8594;</button>
+        <button onclick="toggleAddForm()" style="background:none;border:0.5px solid var(--border);border-radius:var(--r-sm);padding:10px 16px;font-size:13px;cursor:pointer;font-family:var(--sans);color:var(--txt3)">Annuler</button>
+      </div>
+    </div>
+
+    <div id="lib-list"></div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">
+      <button id="add-btn" onclick="toggleAddForm()" style="width:100%;background:var(--ru);color:#fff;border:none;border-radius:var(--r);padding:13px;font-size:14px;font-weight:500;font-family:var(--sans);cursor:pointer">+ Ajouter un livre</button>
+      <button onclick="appTab(2)" style="width:100%;background:var(--card);border:0.5px solid var(--border);border-radius:var(--r);padding:12px;font-size:14px;font-family:var(--sans);cursor:pointer;color:var(--txt2)">Je ne sais pas quoi lire...</button>
+    </div>
+  </div>
+
+  <!-- TAB 2 : CONSEIL DE LECTURE -->
+  <div id="app-t2" style="display:none;padding:0 16px 24px">
+    <div id="conseil-intro" style="margin-bottom:14px"></div>
+    <div id="conseil-items"></div>
+  </div>
+
+</div>
+
+<!-- ═══ QUESTIONS FR&EACUTE;QUENTES ═══ -->
+<div id="s-faq" class="sc">
+  <button class="btn-back" onclick="goSc('s-home')">&#8592; Retour</button>
+  <div class="page-title">Questions fr&eacute;quentes</div>
+  
+<div class="w">
+  <div style="font-size:11px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Ce que fait Liro</div>
+  <div class="faq-group">
+    <div class="faq-item" onclick="toggleFaq(this)"><span style="font-size:14px;font-weight:500;color:var(--txt);flex:1">Comment Liro produit-il ses r&eacute;sum&eacute;s ?</span><span style="color:var(--txt3);transition:transform .2s">&#8595;</span></div>
+    <div class="faq-a">Liro utilise Claude (Anthropic). Vous lui donnez le titre de votre livre et votre page &mdash; il g&eacute;n&egrave;re un r&eacute;sum&eacute; de ce qui s&apos;est pass&eacute; jusqu&apos;&agrave; cette page. Jamais au-del&agrave;.</div>
+    <div class="faq-item" onclick="toggleFaq(this)"><span style="font-size:14px;font-weight:500;color:var(--txt);flex:1">Comment Liro &eacute;vite les spoilers ?</span><span style="color:var(--txt3);transition:transform .2s">&#8595;</span></div>
+    <div class="faq-a">Vous indiquez votre page actuelle et le nombre total de pages. Liro ne r&eacute;sume que ce qui s&apos;est pass&eacute; jusqu&apos;&agrave; cette page &mdash; jamais au-del&agrave;.</div>
+    <div class="faq-item" onclick="toggleFaq(this)"><span style="font-size:14px;font-weight:500;color:var(--txt);flex:1">Puis-je poser des questions libres &agrave; Liro ?</span><span style="color:var(--txt3);transition:transform .2s">&#8595;</span></div>
+    <div class="faq-a">Oui. Apr&egrave;s chaque r&eacute;sum&eacute;, un chat s&apos;ouvre. Posez n&apos;importe quelle question &mdash; &laquo;&nbsp;C&apos;est qui ce personnage ?&nbsp;&raquo; Liro reste dans ce que vous avez lu.</div>
+    <div class="faq-item" onclick="toggleFaq(this)"><span style="font-size:14px;font-weight:500;color:var(--txt);flex:1">Liro peut-il se tromper ?</span><span style="color:var(--txt3);transition:transform .2s">&#8595;</span></div>
+    <div class="faq-a">Oui, pour les livres peu connus ou r&eacute;cents. Liro le signale et propose d&apos;aider depuis ce que vous vous rappelez, plut&ocirc;t que d&apos;inventer des d&eacute;tails.</div>
+    <div class="faq-item" onclick="toggleFaq(this)"><span style="font-size:14px;font-weight:500;color:var(--txt);flex:1">Liro remplace-t-il la lecture ?</span><span style="color:var(--txt3);transition:transform .2s">&#8595;</span></div>
+    <div class="faq-a">Non &mdash; c&apos;est l&apos;inverse. Si vous &ecirc;tes &agrave; la page 0, Liro vous encouragera &agrave; commencer plut&ocirc;t que de r&eacute;sumer.</div>
+  </div>
+  <div style="font-size:11px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin:14px 0 8px">Ajouter un livre</div>
+  <div class="faq-group">
+    <div class="faq-item" onclick="toggleFaq(this)"><span style="font-size:14px;font-weight:500;color:var(--txt);flex:1">Comment chercher mon livre ?</span><span style="color:var(--txt3);transition:transform .2s">&#8595;</span></div>
+    <div class="faq-a">Tapez le titre ou l&apos;auteur &mdash; Liro interroge Open Library et propose des suggestions. Cliquez pour remplir automatiquement, ou saisissez manuellement.</div>
+    <div class="faq-item" onclick="toggleFaq(this)"><span style="font-size:14px;font-weight:500;color:var(--txt);flex:1">O&ugrave; trouver l&apos;ISBN ou le code-barres ?</span><span style="color:var(--txt3);transition:transform .2s">&#8595;</span></div>
+    <div class="faq-a">L&apos;ISBN est le code au dos de votre livre (ex&nbsp;: 978-2-07-040850-4). Il permet de trouver l&apos;&eacute;dition exacte et le bon nombre de pages.</div>
+    <div class="faq-item" onclick="toggleFaq(this)"><span style="font-size:14px;font-weight:500;color:var(--txt);flex:1">Pourquoi deux &eacute;ditions ont des pages diff&eacute;rentes ?</span><span style="color:var(--txt3);transition:transform .2s">&#8595;</span></div>
+    <div class="faq-a">Chaque &eacute;diteur et format a sa propre mise en page. Indiquez toujours le nombre de pages de votre exemplaire.</div>
+  </div>
+  <div style="font-size:11px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin:14px 0 8px">Vos donn&eacute;es</div>
+  <div class="faq-group">
+    <div class="faq-item" onclick="toggleFaq(this)"><span style="font-size:14px;font-weight:500;color:var(--txt);flex:1">Mes donn&eacute;es sont-elles partag&eacute;es ?</span><span style="color:var(--txt3);transition:transform .2s">&#8595;</span></div>
+    <div class="faq-a">Votre profil, vos livres et vos notes sont stock&eacute;s uniquement sur votre appareil. Seuls le titre et votre page sont envoy&eacute;s &agrave; l&apos;IA. Aucune donn&eacute;e personnelle n&apos;est transmise.</div>
+    <div class="faq-item" onclick="toggleFaq(this)"><span style="font-size:14px;font-weight:500;color:var(--txt);flex:1">Que se passe-t-il si je change d&apos;appareil ?</span><span style="color:var(--txt3);transition:transform .2s">&#8595;</span></div>
+    <div class="faq-a">Vos donn&eacute;es &eacute;tant stock&eacute;es localement, elles ne suivent pas. Une synchronisation est pr&eacute;vue dans une prochaine version.</div>
+    <div class="faq-item" onclick="toggleFaq(this)"><span style="font-size:14px;font-weight:500;color:var(--txt);flex:1">Comment supprimer toutes mes donn&eacute;es ?</span><span style="color:var(--txt3);transition:transform .2s">&#8595;</span></div>
+    <div class="faq-a">Safari &rarr; R&eacute;glages &rarr; Confidentialit&eacute; &rarr; G&eacute;rer les donn&eacute;es de sites web &rarr; cherchez github.io et supprimez.</div>
+  </div>
+  <div style="font-size:11px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin:14px 0 8px">Domaine public</div>
+  <div class="faq-group">
+    <div class="faq-item" onclick="toggleFaq(this)"><span style="font-size:14px;font-weight:500;color:var(--txt);flex:1">Qu&apos;est-ce que le domaine public ?</span><span style="color:var(--txt3);transition:transform .2s">&#8595;</span></div>
+    <div class="faq-a">Un livre tombe dans le domaine public 70 ans apr&egrave;s la mort de son auteur &mdash; il devient gratuit. Flaubert, Hugo, Zola, Verne... Des milliers d&apos;&oelig;uvres sur Project Gutenberg.</div>
+    <div class="faq-item" onclick="toggleFaq(this)"><span style="font-size:14px;font-weight:500;color:var(--txt);flex:1">Pourquoi Liro conseille des &oelig;uvres du domaine public ?</span><span style="color:var(--txt3);transition:transform .2s">&#8595;</span></div>
+    <div class="faq-a">Pour ces &oelig;uvres, Liro s&apos;appuie sur le texte exact &mdash; r&eacute;sum&eacute;s plus pr&eacute;cis. Et comme elles sont gratuites, vous pouvez commencer sans rien d&eacute;penser.</div>
+  </div>
+  <div style="text-align:center;padding:14px 0 4px;font-size:12px;color:var(--txt3)">Une question sans r&eacute;ponse ici ?</div>
+  <div style="text-align:center;padding-bottom:8px"><a href="mailto:contact@liro.app" style="color:var(--ru);font-size:13px;font-weight:500">contact@liro.app</a></div>
+  <div class="footer-links">
+    <span onclick="goSc('s-faq')">FAQ</span>
+    <span onclick="goSc('s-about')">&Agrave; propos</span>
+    <span onclick="goSc('s-impact')">Impact</span>
+    <span onclick="goSc('s-rgpd')">Confidentialit&eacute;</span>
+  </div>
+</div>
+
+  <div class="footer-links">
+    <span onclick="goSc('s-faq')">FAQ</span>
+    <span onclick="goSc('s-about')">&Agrave; propos</span>
+    <span onclick="goSc('s-impact')">Impact</span>
+    <span onclick="goSc('s-rgpd')">Confidentialit&eacute;</span>
+  </div>
+</div>
+
+<!-- ═══ &AGRAVE; PROPOS DE LIRO ═══ -->
+<div id="s-about" class="sc">
+  <button class="btn-back" onclick="goSc('s-home')">&#8592; Retour</button>
+  <div class="page-title">&Agrave; propos de Liro</div>
+  
+<div class="w">
+  <div class="card"><div class="card-label">Pourquoi Liro existe</div><div style="font-size:13px;color:var(--txt2);line-height:1.8">Lire est l&apos;une des activit&eacute;s les plus riches qui soit &mdash; mais c&apos;est aussi l&apos;une des premi&egrave;res &agrave; dispara&icirc;tre quand la vie s&apos;acc&eacute;l&egrave;re, quand l&apos;attention se disperse, ou quand on traverse une p&eacute;riode difficile.<br><br>Liro est n&eacute; d&apos;une conviction simple : si on pouvait retrouver le fil d&apos;un livre en quelques secondes, sans peur d&apos;avoir oubli&eacute;, on lirait davantage &mdash; et mieux.</div></div>
+  <div class="card"><div class="card-label">Ce que Liro fait</div><div style="font-size:13px;color:var(--txt2);line-height:1.8">Liro est un compagnon de lecture propuls&eacute; par l&apos;IA. Il r&eacute;sume l&apos;histoire jusqu&apos;&agrave; votre page &mdash; sans d&eacute;voiler la suite. Il s&apos;adapte &agrave; trois profils et propose des &oelig;uvres du domaine public que Liro conna&icirc;t mot pour mot.</div></div>
+  <div class="card" style="border-left:3px solid var(--ru2);background:var(--ru3)"><div class="card-label" style="color:var(--ru)">Ce que Liro n&apos;est pas</div><div style="font-size:13px;color:var(--txt2);line-height:1.8">Liro est un outil de bien-&ecirc;tre et d&apos;accompagnement &agrave; la lecture. Il n&apos;est pas un dispositif m&eacute;dical, diagnostique ou th&eacute;rapeutique, et ne remplace pas un professionnel de sant&eacute;.</div></div>
+  <div class="card"><div class="card-label">Comment &ccedil;a marche</div><div style="font-size:13px;color:var(--txt2);line-height:1.8">Liro utilise Claude (Anthropic) pour g&eacute;n&eacute;rer les r&eacute;sum&eacute;s. Vos donn&eacute;es sont stock&eacute;es sur votre appareil. Seuls le titre et votre page sont transmis &agrave; l&apos;IA.</div></div>
+  <div class="card"><div class="card-label">Contact</div><div style="font-size:13px;color:var(--txt2);line-height:1.8">Liro est un projet ind&eacute;pendant.<br><br><a href="mailto:contact@liro.app" style="color:var(--ru)">contact@liro.app</a></div></div>
+</div>
+
+  <div class="footer-links">
+    <span onclick="goSc('s-faq')">FAQ</span>
+    <span onclick="goSc('s-about')">&Agrave; propos</span>
+    <span onclick="goSc('s-impact')">Impact</span>
+    <span onclick="goSc('s-rgpd')">Confidentialit&eacute;</span>
+  </div>
+</div>
+
+<!-- ═══ LIRO &AMP; L&APOS;IMPACT ═══ -->
+<div id="s-impact" class="sc">
+  <button class="btn-back" onclick="goSc('s-home')">&#8592; Retour</button>
+  <div class="page-title">Liro &amp; l&apos;impact</div>
+  
+<div style="font-size:13px;color:var(--txt2);line-height:1.7;padding:0 16px 16px">Liro croit que la lecture change des vies. Voici les associations que nous soutenons.</div>
+<div class="w">
+  <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+    <button onclick="filterImpact('all',this)" class="chip" style="font-size:11px;padding:5px 10px;background:var(--ru3);border-color:var(--ru2);color:var(--ru)">Toutes</button>
+    <button onclick="filterImpact('mental',this)" class="chip" style="font-size:11px;padding:5px 10px">Sant&eacute; mentale</button>
+    <button onclick="filterImpact('neuro',this)" class="chip" style="font-size:11px;padding:5px 10px">Neurod&eacute;g&eacute;n&eacute;ratif</button>
+    <button onclick="filterImpact('livres',this)" class="chip" style="font-size:11px;padding:5px 10px">Acc&egrave;s aux livres</button>
+  </div>
+  <div id="impact-panel" style="display:none;background:var(--ru3);border:0.5px solid var(--ru2);border-radius:var(--r-sm);padding:14px;margin-bottom:10px">
+    <div id="impact-name" style="font-weight:500;font-size:15px;font-family:var(--serif);color:var(--ru);margin-bottom:3px"></div>
+    <div id="impact-desc" style="font-size:12px;color:var(--txt2);margin-bottom:10px;line-height:1.5"></div>
+    <a id="impact-don-btn" href="#" target="_blank" style="display:block;background:var(--ru);color:#fff;border-radius:var(--r-sm);padding:11px;text-align:center;font-size:14px;font-weight:500;font-family:var(--sans);text-decoration:none">Faire un don &#8594;</a>
+  </div>
+  <div id="impact-list"></div>
+  <div style="background:var(--card);border-radius:var(--r);border:0.5px solid var(--border);padding:14px;margin-top:4px">
+    <div style="font-size:13px;color:var(--txt2);line-height:1.7;font-style:italic">&laquo;&nbsp;Liro ne reverse pas encore de pourcentage &mdash; mais c&apos;est une direction dans laquelle on veut aller.&nbsp;&raquo;</div>
+    <a href="mailto:contact@liro.app" style="display:inline-block;margin-top:8px;font-size:12px;color:var(--ru);font-weight:500">contact@liro.app &#8594;</a>
+  </div>
+  <div style="height:24px"></div>
+</div>
+
+  <div class="footer-links">
+    <span onclick="goSc('s-faq')">FAQ</span>
+    <span onclick="goSc('s-about')">&Agrave; propos</span>
+    <span onclick="goSc('s-impact')">Impact</span>
+    <span onclick="goSc('s-rgpd')">Confidentialit&eacute;</span>
+  </div>
+</div>
+
+<!-- ═══ CONFIDENTIALIT&EACUTE; ═══ -->
+<div id="s-rgpd" class="sc">
+  <button class="btn-back" onclick="goSc('s-home')">&#8592; Retour</button>
+  <div class="page-title">Confidentialit&eacute;</div>
+  
+<div style="font-size:13px;color:var(--txt2);line-height:1.7;padding:0 16px 16px">Ce qui reste sur votre appareil. Ce qui est envoy&eacute; &agrave; l&apos;IA. Rien d&apos;autre.</div>
+<div class="w">
+  <div class="card">
+    <div class="card-label">Reste sur votre appareil</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:var(--grn);flex-shrink:0;margin-top:4px"></div><div style="font-size:13px;color:var(--txt2)"><strong style="color:var(--txt)">Profil, livres, notes</strong> &mdash; jamais envoy&eacute;s &agrave; nos serveurs</div></div>
+      <div style="display:flex;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:var(--grn);flex-shrink:0;margin-top:4px"></div><div style="font-size:13px;color:var(--txt2)"><strong style="color:var(--txt)">Votre cl&eacute; API</strong> &mdash; stock&eacute;e localement, jamais transmise</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-label">Envoy&eacute; &agrave; l&apos;IA</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:var(--ru);flex-shrink:0;margin-top:4px"></div><div style="font-size:13px;color:var(--txt2)"><strong style="color:var(--txt)">Titre du livre + votre page</strong> &mdash; pour g&eacute;n&eacute;rer le r&eacute;sum&eacute;</div></div>
+      <div style="display:flex;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:var(--ru);flex-shrink:0;margin-top:4px"></div><div style="font-size:13px;color:var(--txt2)"><strong style="color:var(--txt)">Vos questions</strong> &mdash; quand vous utilisez le chat libre</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-label">Jamais collect&eacute;</div>
+    <div style="font-size:13px;color:var(--txt2);line-height:1.8">Email &middot; Localisation &middot; Identit&eacute; &middot; Comportement de navigation</div>
+  </div>
+  <div class="card">
+    <div class="card-label">Supprimer vos donn&eacute;es</div>
+    <div style="font-size:13px;color:var(--txt2);line-height:1.8">Videz les donn&eacute;es du site dans les r&eacute;glages de votre navigateur. Liro ne conserve rien.<br><br><a href="mailto:contact@liro.app" style="color:var(--ru)">contact@liro.app</a></div>
+  </div>
+  <div style="height:24px"></div>
+</div>
+
+  <div class="footer-links">
+    <span onclick="goSc('s-faq')">FAQ</span>
+    <span onclick="goSc('s-about')">&Agrave; propos</span>
+    <span onclick="goSc('s-impact')">Impact</span>
+    <span onclick="goSc('s-rgpd')">Confidentialit&eacute;</span>
+  </div>
+</div>
+
+<!-- ═══ DRAWER LIVRE ═══ -->
+<div class="overlay" id="overlay" onclick="closeDrawer()">
+  <div class="drawer" onclick="event.stopPropagation()">
+    <div class="handle"></div>
+    <div id="drawer-content"></div>
+  </div>
+</div>
+</div><!-- fin .phone -->
+<script>
+// ════════════════════════════════════════════════════════
+// LIRO v17 — JavaScript complet
+// ════════════════════════════════════════════════════════
+
+// ── ÉTAT GLOBAL ──────────────────────────────────────────
+var LIRO_API_KEY = '';
+var curUser = null;
+var curBook = null;
+var curProfil = 'memoire';
+var obProfil = null;
+var addMode = 'titre';
+var addDebounce = null;
+var temoTimer = null;
+var curTemo = 0;
+
+var PROF_COLOR = { attn:'#1a5276', memoire:'var(--ru)', plaisir:'#4a7c59' };
+var PROF_TAB_CLS = { attn:'on-bl', memoire:'on-ru', plaisir:'on-vt' };
+
+// ── LOCALSTORAGE HELPERS ─────────────────────────────────
+var LS_USERS = 'liro_users';
+var LS_BOOKS = 'liro_books_';
+var LS_NOTES = 'liro_note_';
+var LS_AUTH  = 'liro_dev_auth';
+var LS_API   = 'liro_api_key';
+var LS_PROF  = 'liro_last_profil';
+
+function lsGet(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }
+function lsSet(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
+function getUsers(){ return lsGet(LS_USERS) || []; }
+function setUsers(u){ lsSet(LS_USERS, u); }
+function getBooks(uid){ return lsGet(LS_BOOKS + uid) || []; }
+function setBooks(uid, b){ lsSet(LS_BOOKS + uid, b); }
+
+// ── NAVIGATION ────────────────────────────────────────────
+function goSc(id){
+  document.querySelectorAll('.sc').forEach(function(s){ s.classList.remove('on'); });
+  var t = document.getElementById(id);
+  if(t) t.classList.add('on');
+  closeAppMenu();
+}
+
+function toast2(msg){
+  var t = document.getElementById('toast');
+  if(!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2800);
+}
+
+// ── LOGIN DEV ─────────────────────────────────────────────
+var DEV_CODE = 'liro2024';
+function checkDevCode(){
+  var input = document.getElementById('dev-code');
+  var error = document.getElementById('dev-error');
+  var val = input ? input.value.trim() : '';
+  if(val === DEV_CODE){
+    localStorage.setItem(LS_AUTH, '1');
+    goSc('s-apikey');
+    checkApiKey();
+  } else {
+    if(error) error.style.display = 'block';
+    if(input){ input.value = ''; input.focus(); }
+  }
+}
+
+// ── CLÉ API ───────────────────────────────────────────────
+function saveApiKey(){
+  var input = document.getElementById('api-key-input');
+  var val = input ? input.value.trim() : '';
+  if(!val || !val.startsWith('sk-ant-')){
+    toast2('Cl\u00e9 invalide. Elle doit commencer par sk-ant-');
+    return;
+  }
+  localStorage.setItem(LS_API, val);
+  LIRO_API_KEY = val;
+  // Aller vers profils existants ou onboarding
+  var users = getUsers();
+  if(users.length > 0){
+    loginAs(users[0]);
+  } else {
+    goSc('s-home');
+  }
+}
+
+function checkApiKey(){
+  var key = localStorage.getItem(LS_API) || '';
+  if(key){ LIRO_API_KEY = key; }
+  var users = getUsers();
+  if(key && users.length > 0){
+    loginAs(users[0]);
+  } else if(key){
+    goSc('s-home');
+  }
+}
+
+// ── ONBOARDING ────────────────────────────────────────────
+function obSelect(p){
+  obProfil = p;
+  ['attn','memoire','plaisir'].forEach(function(k){
+    var card = document.getElementById('ob-' + k);
+    var ck = document.getElementById('ck-' + k);
+    if(card && ck){
+      var sel = k === p;
+      var bg = k==='attn'?'var(--bl3)':k==='memoire'?'var(--ru3)':'var(--vt3)';
+      var brd = k==='attn'?'var(--bl2)':k==='memoire'?'var(--ru2)':'var(--vt2)';
+      card.style.background = sel ? bg : 'var(--card)';
+      card.style.borderColor = sel ? brd : 'var(--border)';
+      ck.style.display = sel ? 'block' : 'none';
+    }
+  });
+  var btn = document.getElementById('ob-btn');
+  if(btn){ btn.style.opacity='1'; btn.style.pointerEvents='auto'; }
+}
+
+function createProfile(){
+  var name = (document.getElementById('ob-name').value || '').trim() || 'Lecteur';
+  var profil = obProfil || 'memoire';
+  var user = { id: 'u' + Date.now(), name: name, type: profil };
+  var users = getUsers();
+  users.unshift(user);
+  setUsers(users);
+  loginAs(user);
+}
+
+function loginAs(user){
+  curUser = user;
+  curProfil = user.type || 'memoire';
+  curBook = null;
+  var books = getBooks(user.id);
+  curBook = books.find(function(b){ return !b.done && b.page > 0; }) || books[0] || null;
+  goSc('s-app');
+  initApp();
+}
+
+// ── APP PRINCIPALE ────────────────────────────────────────
+function initApp(){
+  if(!curUser) return;
+  curProfil = curUser.type || 'memoire';
+  // Header
+  var un = document.getElementById('app-user-name');
+  var capName = curUser.name ? curUser.name.charAt(0).toUpperCase() + curUser.name.slice(1) : '';
+  if(un) un.textContent = capName;
+  // Profil nom dans plaisir
+  var pn = document.getElementById('plaisir-name');
+  if(pn) pn.textContent = curUser.name;
+  // Tabs couleur
+  var tabCls = PROF_TAB_CLS[curProfil];
+  ['tab0','tab1','tab2'].forEach(function(id, i){
+    var t = document.getElementById(id);
+    if(t) t.className = 'tab';
+  });
+  // Bouton ajouter couleur
+  var addBtn = document.getElementById('add-btn');
+  if(addBtn){ addBtn.style.background = PROF_COLOR[curProfil]; addBtn.style.color='#fff'; }
+  appTab(0);
+  renderConseil();
+}
+
+function appTab(i){
+  ['app-t0','app-t1','app-t2'].forEach(function(id, j){
+    var el = document.getElementById(id);
+    if(el) el.style.display = j===i ? 'block' : 'none';
+  });
+  ['tab0','tab1','tab2'].forEach(function(id, j){
+    var t = document.getElementById(id);
+    if(t) t.className = 'tab' + (j===i ? ' ' + PROF_TAB_CLS[curProfil] : '');
+  });
+  if(i===0) renderBookView();
+  if(i===1) renderLib();
+  if(i===2) renderConseil();
+  closeAppMenu();
+}
+
+// ── VUE LIVRE PAR PROFIL ─────────────────────────────────
+function renderBookView(){
+  ['view-attn','view-memoire','view-plaisir'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.style.display = 'none';
+  });
+  var view = document.getElementById('view-' + curProfil);
+  if(view) view.style.display = 'block';
+  updateBookDisplay();
+}
+
+function updateBookDisplay(){
+  if(!curBook) return;
+  var pct = curBook.total ? Math.round(curBook.page / curBook.total * 100) : 0;
+  var pageTxt = 'Page ' + curBook.page + ' sur ' + (curBook.total || '?');
+
+  var prefixes = ['mem','attn','plaisir'];
+  prefixes.forEach(function(p){
+    var el = function(id){ return document.getElementById(p + '-' + id); };
+    if(el('title')) el('title').textContent = curBook.title || '';
+    if(el('author')) el('author').textContent = curBook.author || '';
+    if(el('prog')) el('prog').style.width = pct + '%';
+    if(el('page-txt')) el('page-txt').textContent = pageTxt;
+    if(el('pct')) el('pct').textContent = pct + '%';
+  });
+}
+
+// ── BIBLIOTHÈQUE ──────────────────────────────────────────
+function renderLib(){
+  if(!curUser) return;
+  var list = document.getElementById('lib-list');
+  if(!list) return;
+  var books = getBooks(curUser.id);
+  list.innerHTML = '';
+  if(!books.length){
+    var colL = PROF_COLOR[curProfil];
+    list.innerHTML = '<div style="text-align:center;padding:32px 0">'
+      + '<div style="font-size:36px;margin-bottom:12px">&#128215;</div>'
+      + '<div style="font-family:var(--serif);font-size:18px;color:var(--txt);margin-bottom:8px">Aucun livre en cours</div>'
+      + '<div style="font-size:13px;color:var(--txt2);line-height:1.6;margin-bottom:20px">Ajoutez votre premier livre<br>pour commencer avec Liro.</div>'
+      + '<button onclick="toggleAddForm()" style="background:' + colL + ';color:#fff;border:none;border-radius:var(--r);padding:13px 24px;font-size:14px;font-weight:500;font-family:var(--sans);cursor:pointer;width:100%;margin-bottom:8px">+ Ajouter un livre</button>'
+      + '<button onclick="appTab(2)" style="background:var(--card);border:0.5px solid var(--border);border-radius:var(--r);padding:12px 24px;font-size:14px;font-family:var(--sans);cursor:pointer;color:var(--txt2);width:100%">Je ne sais pas quoi lire...</button>'
+      + '</div>';
+    return;
+  }
+  books.forEach(function(b){
+    var pct = b.total ? Math.round(b.page / b.total * 100) : 0;
+    var color = PROF_COLOR[curProfil];
+    var item = document.createElement('div');
+    item.className = 'lib-item';
+    item.innerHTML = '<div style="flex:1">'
+      + '<div style="font-family:var(--serif);font-size:15px;color:' + color + ';margin-bottom:2px">' + b.title + '</div>'
+      + '<div style="font-size:12px;color:var(--txt3);margin-bottom:6px">' + (b.author||'') + ' \u00b7 page ' + b.page + ' / ' + (b.total||'?') + '</div>'
+      + '<div style="height:3px;background:#ede8e2;border-radius:2px"><div style="height:3px;background:' + color + ';border-radius:2px;width:' + pct + '%"></div></div></div>'
+      + '<div style="color:' + color + ';font-size:18px">&#8594;</div>';
+    (function(book){ item.onclick = function(){ curBook = book; appTab(0); }; })(b);
+    list.appendChild(item);
+  });
+}
+
+// ── AJOUT LIVRE ───────────────────────────────────────────
+function toggleAddForm(){
+  var f = document.getElementById('add-form');
+  if(f) f.style.display = f.style.display === 'none' ? 'block' : 'none';
+}
+
+function setAddMode(m){
+  addMode = m;
+  var ti = document.getElementById('add-title-input');
+  var mi = document.getElementById('mode-' + m);
+  var mo = document.getElementById('mode-' + (m==='titre'?'auteur':'titre'));
+  if(mi){ mi.style.background='var(--ru3)';mi.style.color='var(--ru)';mi.style.borderColor='var(--ru2)'; }
+  if(mo){ mo.style.background='var(--card)';mo.style.color='var(--txt3)';mo.style.borderColor='var(--border)'; }
+  if(ti) ti.placeholder = m==='titre' ? 'ex : Madame Bovary...' : 'ex : Flaubert...';
+  if(ti) ti.value = '';
+  var sug = document.getElementById('add-suggestions');
+  if(sug) sug.innerHTML = '';
+}
+
+function onAddInput(val){
+  clearTimeout(addDebounce);
+  if(val.length < 2) return;
+  addDebounce = setTimeout(function(){ fetchBookSuggestions(val); }, 400);
+}
+
+async function fetchBookSuggestions(q){
+  var sug = document.getElementById('add-suggestions');
+  if(!sug) return;
+  sug.innerHTML = '<div style="font-size:12px;color:var(--txt3);padding:6px 0">Recherche...</div>';
+  try{
+    var url = addMode === 'titre'
+      ? 'https://openlibrary.org/search.json?title=' + encodeURIComponent(q) + '&limit=5&fields=title,author_name,number_of_pages_median,first_publish_year'
+      : 'https://openlibrary.org/search/authors.json?q=' + encodeURIComponent(q) + '&limit=4';
+    var resp = await fetch(url);
+    var data = await resp.json();
+    sug.innerHTML = '';
+    var docs = addMode === 'titre' ? (data.docs||[]) : (data.docs||[]);
+    if(!docs.length){ sug.innerHTML = '<div style="font-size:12px;color:var(--txt3);padding:6px 0">Aucun r\u00e9sultat. Essayez un autre terme.</div>'; return; }
+    docs.slice(0,5).forEach(function(d){
+      var item = document.createElement('div');
+      item.style.cssText = 'background:var(--card);border:0.5px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;cursor:pointer;margin-bottom:5px';
+      if(addMode === 'titre'){
+        var author = d.author_name ? d.author_name[0] : '';
+        var pages = d.number_of_pages_median || '';
+        item.innerHTML = '<div style="font-family:var(--serif);font-size:14px;color:var(--txt)">' + d.title + '</div>'
+          + '<div style="font-size:12px;color:var(--txt3)">' + author + (pages?' \u00b7 ' + pages + ' p.':'') + '</div>';
+        (function(title, auth, pg){ item.onclick = function(){
+          sug.innerHTML = '';
+          var fi = document.getElementById('add-fields');
+          var tf = document.getElementById('add-author-field');
+          var pf = document.getElementById('add-total-field');
+          var ti = document.getElementById('add-title-input');
+          if(ti) ti.value = title;
+          if(tf) tf.value = auth;
+          if(pf && pg) pf.value = pg;
+          if(fi) fi.style.display = 'block';
+        }; })(d.title, author, pages);
+      } else {
+        item.innerHTML = '<div style="font-family:var(--serif);font-size:14px;color:var(--txt)">' + d.name + '</div>'
+          + '<div style="font-size:12px;color:var(--txt3)">' + (d.work_count||'') + ' \u0153uvres</div>';
+        (function(name){ item.onclick = function(){
+          sug.innerHTML = '';
+          var ti = document.getElementById('add-title-input');
+          if(ti) ti.value = name;
+          var fi = document.getElementById('add-fields');
+          var tf = document.getElementById('add-author-field');
+          if(tf) tf.value = name;
+          if(fi) fi.style.display = 'block';
+        }; })(d.name);
+      }
+      sug.appendChild(item);
+    });
+  }catch(e){
+    sug.innerHTML = '<div style="font-size:12px;color:var(--ru);padding:6px 0">Erreur r\u00e9seau. V\u00e9rifiez votre connexion.</div>';
+  }
+}
+
+function submitAddBook(){
+  if(!curUser) return;
+  var title = (document.getElementById('add-title-input').value||'').trim();
+  var author = (document.getElementById('add-author-field').value||'').trim();
+  var page = parseInt(document.getElementById('add-page-field').value)||0;
+  var total = parseInt(document.getElementById('add-total-field').value)||0;
+  if(!title){ toast2('Entrez un titre.'); return; }
+  if(!total){ toast2('Entrez le nombre de pages.'); return; }
+  var book = { id:'b'+Date.now(), title:title, author:author, page:page, total:total, done:false };
+  var books = getBooks(curUser.id);
+  books.unshift(book);
+  setBooks(curUser.id, books);
+  curBook = book;
+  toggleAddForm();
+  document.getElementById('add-title-input').value = '';
+  document.getElementById('add-author-field').value = '';
+  document.getElementById('add-page-field').value = '';
+  document.getElementById('add-total-field').value = '';
+  document.getElementById('add-fields').style.display = 'none';
+  document.getElementById('add-suggestions').innerHTML = '';
+  renderLib();
+  appTab(0);
+  toast2('\u201c' + title + '\u201d ajout\u00e9 !');
+}
+
+// ── API LIRO ──────────────────────────────────────────────
+async function callLiro(prompt){
+  var key = localStorage.getItem(LS_API) || LIRO_API_KEY || '';
+  if(!key){ goSc('s-apikey'); return ''; }
+  LIRO_API_KEY = key;
+
+  var sysPrompt = 'Tu es Liro, compagnon de lecture bienveillant. Ton r\u00f4le est d\u2019aider \u00e0 REPRENDRE la lecture \u2014 jamais \u00e0 la remplacer.'
+    + '\n\nR\u00c8GLE ABSOLUE ANTI-SPOILER : Ne JAMAIS divulguer ce qui se passe apr\u00e8s la page indiqu\u00e9e. Z\u00e9ro exception.'
+    + '\n\nR\u00c8GLE ANTI-FICHE : Si la page est 0 ou < 3% du total, encourage \u00e0 commencer plut\u00f4t que r\u00e9sumer.'
+    + '\n\nR\u00c8GLE CONFIANCE : Si tu connais peu ce livre, dis-le honn\u00eatement. Ne fabrique jamais de d\u00e9tails.'
+    + '\n\nR\u00c8GLE TON : Bienveillant, jamais condescendant. Jamais de "Bien s\u00fbr !" ou "Absolument !". Pas de jugement sur les oublis.'
+    + '\n\nR\u00c8GLE MOTIVATION : Termine par une phrase qui donne envie de reprendre, ancr\u00e9e dans ce livre sp\u00e9cifique.'
+    + '\n\nR\u00e9ponds en fran\u00e7ais, en HTML simple (p, strong, em). Maximum 250 mots.';
+
+  var controller = new AbortController();
+  var tid = setTimeout(function(){ controller.abort(); }, 25000);
+
+  try{
+    var resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': LIRO_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5',
+        max_tokens: 400,
+        system: sysPrompt,
+        messages: [{ role: 'user', content: prompt }]
+      }),
+      signal: controller.signal
+    });
+    clearTimeout(tid);
+    if(resp.status === 401){ goSc('s-apikey'); return ''; }
+    if(resp.status === 429) return '<p>Liro est tr\u00e8s sollicit\u00e9. R\u00e9essayez dans quelques secondes.</p>';
+    if(!resp.ok) return '<p>Une erreur est survenue (' + resp.status + '). R\u00e9essayez.</p>';
+    var data = await resp.json();
+    if(data.content && data.content[0] && data.content[0].text) return data.content[0].text;
+    return '<p>R\u00e9ponse incompl\u00e8te. R\u00e9essayez.</p>';
+  }catch(e){
+    clearTimeout(tid);
+    if(e.name === 'AbortError') return '<p>Liro met trop de temps. V\u00e9rifiez votre connexion.</p>';
+    return '<p>Erreur de connexion. V\u00e9rifiez votre r\u00e9seau.</p>';
+  }
+}
+
+// ── RÉSUMÉ ────────────────────────────────────────────────
+async function doRead(profil, type){
+  if(!curBook){ toast2('S\u00e9lectionnez un livre d\u2019abord.'); return; }
+
+  var titre = curBook.title || '';
+  var page = curBook.page || 0;
+  var total = curBook.total || 0;
+  var pct = total ? Math.round(page/total*100) + '%' : '';
+  var pi = total ? 'page ' + page + ' sur ' + total + (pct ? ' (' + pct + ')' : '') : 'page ' + page;
+
+  // Anti-fiche de lecture
+  if(page < 3 && total > 20){
+    showResume(profil, '<p>Vous \u00eates au tout d\u00e9but de <strong>' + titre + '</strong>.</p><p>Liro est l\u00e0 pour vous aider \u00e0 <em>reprendre</em> votre lecture \u2014 pas \u00e0 la remplacer. Plongez-vous dedans, Liro sera l\u00e0 quand vous reviendrez.</p><p style="color:#8b3a1a;font-weight:500">Bonne lecture !</p>');
+    return;
+  }
+
+  var conf = '(Si tu ne connais pas bien ce livre, dis-le honn\u00eatement et aide depuis ce que le lecteur se rappelle.)';
+  var prompts = {
+    main: 'R\u00e9sume "' + titre + '" jusqu\u2019\u00e0 ' + pi + '. Contexte, personnages cl\u00e9s, derni\u00e8res \u00e9v\u00e9nements. ' + conf,
+    boost: 'En 3-4 phrases maximum, r\u00e9sume "' + titre + '" jusqu\u2019\u00e0 ' + pi + '. L\u2019essentiel pour replonger. ' + conf,
+    reprendre: 'Aide le lecteur de "' + titre + '" (\u00e0 ' + pi + ') \u00e0 reprendre l\u00e0 o\u00f9 il en \u00e9tait. Contexte, personnages, derniers \u00e9v\u00e9nements. Bienveillant. ' + conf,
+    perso: 'Pour "' + titre + '" jusqu\u2019\u00e0 ' + pi + ' : liste les personnages principaux avec pr\u00e9nom, r\u00f4le et une phrase pour les retenir. ' + conf,
+    lieu: 'Pour "' + titre + '" jusqu\u2019\u00e0 ' + pi + ' : d\u00e9cris les lieux et l\u2019atmosph\u00e8re. \u00c9vocateur et chaleureux. ' + conf,
+    finir: 'Pour "' + titre + '" (\u00e0 ' + pi + ') : donne envie de finir ce livre. Rappelle l\u2019enjeu sans spoiler la fin. ' + conf,
+  };
+
+  // Afficher loading
+  showLoading(profil);
+
+  var result = await callLiro(prompts[type] || prompts.main);
+  showResume(profil, result);
+
+  // Badge encouragement profil Attention
+  if(profil === 'attn'){
+    setTimeout(function(){
+      var zA = document.getElementById('resume-wrap-attn');
+      if(zA){
+        var bd = document.createElement('div');
+        bd.style.cssText = 'display:flex;align-items:center;gap:10px;background:var(--bl3);border:0.5px solid var(--bl2);border-radius:var(--r-sm);padding:10px 14px;margin-top:8px';
+        var stars = ['\u2B50','\u26A1','\u2705'];
+        var star = stars[Math.floor(Math.random()*stars.length)];
+        var msgs = ['Bien jou\u00e9. Vous avez repris.','C\u2019est fait. Un pas de plus.','Vous \u00eates l\u00e0.','Session valid\u00e9e.','Chaque reprise compte.'];
+        var msg = msgs[Math.floor(Math.random()*msgs.length)];
+        bd.innerHTML = '<span style="font-size:1.2rem">' + star + '</span><span style="font-size:13px;font-weight:500;color:var(--bl)">' + msg + '</span>';
+        zA.appendChild(bd);
+      }
+    }, 3500);
+  }
+
+  if(profil === 'attn'){
+    setTimeout(function(){
+      var zA = document.getElementById('resume-wrap-attn');
+      if(zA){
+        var bd = document.createElement('div');
+        bd.style.cssText = 'display:flex;align-items:center;gap:10px;background:var(--bl3);border:0.5px solid var(--bl2);border-radius:var(--r-sm);padding:10px 14px;margin-top:8px';
+        var msgs = ['Bien jou\u00e9. Vous avez repris.','C\u2019est fait.','Vous \u00eates l\u00e0.','Session valid\u00e9e.'];
+        var msg = msgs[Math.floor(Math.random()*msgs.length)];
+        bd.innerHTML = '<span style="font-size:1.2rem">\u2B50</span><span style="font-size:13px;font-weight:500;color:var(--bl)">' + msg + '</span>';
+        zA.appendChild(bd);
+      }
+    }, 3500);
+  }
+
+  // Encouragement pour profil plaisir
+  if(profil === 'plaisir'){
+    var encs = ['C\u2019est bien. Chaque page compte.', 'Vous \u00eates l\u00e0. C\u2019est d\u00e9j\u00e0 beaucoup.', 'La lecture revient doucement.', 'Pas de jugement. Juste le plaisir de lire.'];
+    var enc = encs[Math.floor(Math.random()*encs.length)];
+    var zone = document.getElementById('resume-wrap-plaisir');
+    if(zone){
+      var encDiv = document.createElement('div');
+      encDiv.style.cssText = 'background:var(--vt3);border-radius:var(--r-sm);padding:10px 14px;margin-top:8px;font-size:13px;color:var(--vt);font-style:italic;line-height:1.5';
+      encDiv.textContent = enc;
+      zone.appendChild(encDiv);
+    }
+  }
+}
+
+function showLoading(profil){
+  var zone = document.getElementById('resume-wrap-' + profil);
+  if(!zone) return;
+  zone.innerHTML = '<div class="resume-card"><div class="loading-dots"><span></span><span></span><span></span></div></div>';
+}
+
+function showResume(profil, content){
+  var zone = document.getElementById('resume-wrap-' + profil);
+  if(!zone) return;
+  var color = PROF_COLOR[profil];
+  var bg = profil==='attn'?'var(--bl3)':profil==='memoire'?'var(--ru3)':'var(--vt3)';
+  var brd = profil==='attn'?'var(--bl2)':profil==='memoire'?'var(--ru2)':'var(--vt2)';
+
+  zone.innerHTML = '<div class="resume-card">'
+    + '<div class="resume-header">'
+    + '<span class="no-sp">&#10003; Sans d\u00e9voiler la suite</span>'
+    + '<button class="tts-btn">&#128264; Lire</button>'
+    + '</div>'
+    + '<div class="resume-body">' + content + '</div>'
+    + '</div>'
+    // Mise à jour page
+    + '<div style="background:' + bg + ';border:0.5px solid ' + brd + ';border-radius:var(--r-sm);padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:8px;cursor:pointer" id="upd-' + profil + '">'
+    + '<span style="font-size:13px;color:' + color + ';font-weight:500;flex:1">J\u2019en suis \u00e0 la page...</span>'
+    + '<span style="color:' + color + ';font-size:16px">+</span>'
+    + '</div>'
+    // Chat libre
+    + '<div style="background:var(--card);border:0.5px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:8px">'
+    + '<div style="font-size:12px;color:var(--txt3);margin-bottom:8px">Poser une question \u00e0 Liro</div>'
+    + '<div style="display:flex;gap:8px;align-items:center">'
+    + '<input id="chat-input-' + profil + '" placeholder="Qui est ce personnage ?" style="flex:1;border:0.5px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;font-family:var(--sans);background:var(--bg);color:var(--txt)">'
+    + '<button id="chat-btn-' + profil + '" style="background:' + color + ';color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:13px;cursor:pointer;font-family:var(--sans);flex-shrink:0">&#8594;</button>'
+    + '</div>'
+    + '<div id="chat-resp-' + profil + '" style="display:none;margin-top:8px;font-size:13px;color:var(--txt2);line-height:1.7"></div>'
+    + '</div>'
+    // Notes
+    + '<div style="background:var(--card);border:0.5px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:8px">'
+    + '<div style="font-size:12px;color:var(--txt3);margin-bottom:6px">&#9998; Mes notes sur ce livre</div>'
+    + '<textarea id="notes-ta-' + profil + '" onblur="saveNote(this.value)" placeholder="Ce que je retiens, ce que je ressens..." style="width:100%;border:none;background:transparent;font-size:13px;font-family:var(--sans);color:var(--txt);resize:none;height:68px;outline:none;line-height:1.6"></textarea>'
+    + '<div style="display:flex;justify-content:space-between;padding-top:6px;border-top:0.5px solid var(--border)">'
+    + '<span style="font-size:11px;color:var(--txt3)">Enregistr\u00e9 localement</span>'
+    + '<span id="clear-note-' + profil + '" style="font-size:11px;color:' + color + ';cursor:pointer">Effacer</span>'
+    + '</div>'
+    + '</div>';
+
+  // Charger les notes existantes
+  setTimeout(loadNote, 100);
+  // Event listeners
+  setTimeout(function(){
+    var upd = document.getElementById('upd-' + profil);
+    if(upd) upd.onclick = function(){ showUpdatePage(profil); };
+    var chatBtn = document.getElementById('chat-btn-' + profil);
+    if(chatBtn)(function(p){ chatBtn.onclick = function(){ sendChat(p); }; })(profil);
+    var clearBtn = document.getElementById('clear-note-' + profil);
+    if(clearBtn) clearBtn.onclick = clearNote;
+  }, 50);
+}
+
+function showUpdatePage(profil){
+  var page = prompt('Votre page actuelle ?');
+  if(!page || isNaN(parseInt(page))) return;
+  var pg = parseInt(page);
+  if(!curBook || !curUser) return;
+  var books = getBooks(curUser.id);
+  var idx = books.findIndex(function(b){ return b.id === curBook.id; });
+  if(idx >= 0){
+    books[idx].page = pg;
+    setBooks(curUser.id, books);
+    curBook = books[idx];
+    updateBookDisplay();
+    toast2('Page mise \u00e0 jour : ' + pg);
+  }
+}
+
+// ── CHAT LIBRE ────────────────────────────────────────────
+async function sendChat(profil){
+  var input = document.getElementById('chat-input-' + profil);
+  var resp = document.getElementById('chat-resp-' + profil);
+  if(!input || !resp) return;
+  var q = input.value.trim();
+  if(!q || !curBook) return;
+
+  var titre = curBook.title || '';
+  var pi = curBook.total ? 'page ' + curBook.page + ' sur ' + curBook.total : 'page ' + curBook.page;
+
+  resp.style.display = 'block';
+  resp.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
+  input.value = '';
+  input.disabled = true;
+
+  var prompt = 'Le lecteur lit "' + titre + '" (' + pi + '). Question : "' + q + '". R\u00e9ponds en restant strictement dans ce que le lecteur a d\u00e9j\u00e0 lu. Jamais de spoiler au-del\u00e0 de la page. Bienveillant et pr\u00e9cis.';
+  var result = await callLiro(prompt);
+  resp.innerHTML = '<strong style="font-size:11px;color:var(--txt3)">Liro :</strong><br>' + result;
+  input.disabled = false;
+}
+
+// ── NOTES ─────────────────────────────────────────────────
+function saveNote(val){
+  if(!curBook) return;
+  var key = LS_NOTES + (curBook.id || curBook.title || '').replace(/\s/g,'_');
+  localStorage.setItem(key, val||'');
+}
+
+function loadNote(){
+  if(!curBook) return;
+  var key = LS_NOTES + (curBook.id || curBook.title || '').replace(/\s/g,'_');
+  var val = localStorage.getItem(key) || '';
+  ['memoire','attn','plaisir'].forEach(function(p){
+    var ta = document.getElementById('notes-ta-' + p);
+    if(ta) ta.value = val;
+  });
+}
+
+function clearNote(){
+  if(!curBook) return;
+  var key = LS_NOTES + (curBook.id || curBook.title || '').replace(/\s/g,'_');
+  localStorage.removeItem(key);
+  ['memoire','attn','plaisir'].forEach(function(p){
+    var ta = document.getElementById('notes-ta-' + p);
+    if(ta) ta.value = '';
+  });
+}
+
+// ── CONSEIL DE LECTURE ────────────────────────────────────
+var BOOKS_DETAIL = {
+  candide:{title:"Candide ou l'Optimisme",author:"Voltaire",year:"1759",pages:120,bg:"linear-gradient(135deg,#e8d5c4,#c8a882)",q:"Candide parcourt le monde apr\u00e8s avoir \u00e9t\u00e9 chass\u00e9 de son ch\u00e2teau. Guerres, tremblements de terre, Inquisition : sa foi en l'optimisme est mise \u00e0 rude \u00e9preuve.",why:"Court et rythm\u00e9, une aventure par chapitre. Impossible de se perdre.",lib:"https://www.leslibraires.fr/recherche/?utm_source=liro&utm_medium=app&q=candide+voltaire",gut:"https://www.gutenberg.org/ebooks/4650"},
+  lettres:{title:"Lettres de mon moulin",author:"Alphonse Daudet",year:"1869",pages:220,bg:"linear-gradient(135deg,#a8d5b5,#4a7c59)",q:"Depuis son moulin en Provence, Daudet observe et raconte. Des contes courts et lumineux.",why:"Contes ind\u00e9pendants. On peut reprendre n'importe o\u00f9.",lib:"https://www.leslibraires.fr/recherche/?utm_source=liro&utm_medium=app&q=lettres+moulin+daudet",gut:"https://www.gutenberg.org/ebooks/36780"},
+  bovary:{title:"Madame Bovary",author:"Gustave Flaubert",year:"1857",pages:468,bg:"linear-gradient(135deg,#e8e4d4,#c8c0a8)",q:"Emma Bovary \u00e9pouse Charles, m\u00e9decin de campagne. La vie provinciale l'\u00e9touffe.",why:"Emma Bovary reste grav\u00e9e. Un personnage inoubliable.",lib:"https://www.leslibraires.fr/recherche/?utm_source=liro&utm_medium=app&q=madame+bovary",gut:"https://www.gutenberg.org/ebooks/2413"},
+  verne:{title:"Le Tour du monde en 80 jours",author:"Jules Verne",year:"1872",pages:256,bg:"linear-gradient(135deg,#aed6f1,#1a5276)",q:"Phileas Fogg parie qu'il fera le tour du monde en 80 jours.",why:"Un chapitre = une \u00e9tape. Impossible de se perdre.",lib:"https://www.leslibraires.fr/recherche/?utm_source=liro&utm_medium=app&q=tour+monde+verne",gut:"https://www.gutenberg.org/ebooks/103"},
+  holmes:{title:"Les Aventures de Sherlock Holmes",author:"Arthur Conan Doyle",year:"1892",pages:307,bg:"linear-gradient(135deg,#d5d8dc,#717d7e)",q:"Douze enqu\u00eates ind\u00e9pendantes. Chaque nouvelle est un monde complet.",why:"Nouvelles ind\u00e9pendantes. 30 minutes par enqu\u00eate.",lib:"https://www.leslibraires.fr/recherche/?utm_source=liro&utm_medium=app&q=sherlock+holmes",gut:"https://www.gutenberg.org/ebooks/1661"},
+  horla:{title:"Le Horla",author:"Guy de Maupassant",year:"1887",pages:40,bg:"linear-gradient(135deg,#d2b4de,#7d3c98)",q:"Un homme note une pr\u00e9sence invisible qui s'empare de lui.",why:"40 pages. Une tension qui monte. Une session suffit.",lib:"https://www.leslibraires.fr/recherche/?utm_source=liro&utm_medium=app&q=horla+maupassant",gut:"https://www.gutenberg.org/ebooks/3090"},
+  etranger:{title:"L'\u00c9tranger",author:"Albert Camus",year:"1942",pages:186,bg:"linear-gradient(135deg,#f9e4b7,#e8a020)",q:"Meursault apprend la mort de sa m\u00e8re. Puis il tue un Arabe sur une plage.",why:"186 pages. Une voix unique. Deux sessions suffisent.",lib:"https://www.leslibraires.fr/recherche/?utm_source=liro&utm_medium=app&q=etranger+camus",gut:null},
+  petit_prince:{title:"Le Petit Prince",author:"Antoine de Saint-Exup\u00e9ry",year:"1943",pages:96,bg:"linear-gradient(135deg,#aed6f1,#2e86c1)",q:"Un aviateur rencontre un petit prince venu d'une autre plan\u00e8te.",why:"96 pages de beaut\u00e9 pure. Une heure suffit.",lib:"https://www.leslibraires.fr/recherche/?utm_source=liro&utm_medium=app&q=petit+prince",gut:null},
+  chagrin:{title:"La Promesse de l'aube",author:"Romain Gary",year:"1960",pages:373,bg:"linear-gradient(135deg,#fad7a0,#d35400)",q:"Gary raconte sa m\u00e8re qui a tout sacrifi\u00e9 pour faire de lui un grand homme.",why:"On rit, on pleure, on avance. L'un des plus chaleureux.",lib:"https://www.leslibraires.fr/recherche/?utm_source=liro&utm_medium=app&q=promesse+aube+gary",gut:null},
+  echenoz:{title:"Courir",author:"Jean Echenoz",year:"2008",pages:156,bg:"linear-gradient(135deg,#a9dfbf,#1e8449)",q:"La vie de l'athl\u00e8te Emil Z\u00e1topek, champion olympique 1952.",why:"156 pages, belle langue, histoire vraie.",lib:"https://www.leslibraires.fr/recherche/?utm_source=liro&utm_medium=app&q=courir+echenoz",gut:null},
+  moderato:{title:"Moderato Cantabile",author:"Marguerite Duras",year:"1958",pages:128,bg:"linear-gradient(135deg,#d7bde2,#8e44ad)",q:"Une femme bourgeoise et un ouvrier parlent d'un crime passionnel.",why:"128 pages. Quelques personnages. Une tension qui ne l\u00e2che pas.",lib:"https://www.leslibraires.fr/recherche/?utm_source=liro&utm_medium=app&q=moderato+cantabile+duras",gut:null},
+  pennac:{title:"Comme un roman",author:"Daniel Pennac",year:"1992",pages:210,bg:"linear-gradient(135deg,#a9cce3,#2e86c1)",q:"Pennac \u00e9crit sur le plaisir de lire et le droit de ne pas finir un livre.",why:"Un livre sur la lecture. Bienveillant et dr\u00f4le.",lib:"https://www.leslibraires.fr/recherche/?utm_source=liro&utm_medium=app&q=comme+un+roman+pennac",gut:null},
+  andersen:{title:"Contes d'Andersen",author:"H.C. Andersen",year:"1835",pages:180,bg:"linear-gradient(135deg,#d6eaf8,#5dade2)",q:"La petite sir\u00e8ne, la reine des neiges, le vilain petit canard...",why:"Courts et po\u00e9tiques. On peut s'arr\u00eater apr\u00e8s chaque conte.",lib:"https://www.leslibraires.fr/recherche/?utm_source=liro&utm_medium=app&q=contes+andersen",gut:"https://www.gutenberg.org/ebooks/1597"},
+};
+
+var CONSEILS = {
+  attn:{
+    intro:'Courts. Intenses. Impossibles \u00e0 l\u00e2cher.',
+    sub:'Pour les lecteurs dont l\u2019attention est sollicit\u00e9e \u2014 chapitres courts, rythme rapide.',
+    domaine:['candide','horla','verne','holmes'],
+    classiques:['etranger','petit_prince','moderato']
+  },
+  memoire:{
+    intro:'Personnages inoubliables.',
+    sub:'Des livres qui restent \u2014 m\u00eame quand la m\u00e9moire vacille.',
+    domaine:['lettres','candide','bovary','verne'],
+    classiques:['etranger','moderato','pennac']
+  },
+  plaisir:{
+    intro:'Reprendre \u00e0 son rythme.',
+    sub:'Des livres lumineux, courts, sans lourdeur.',
+    domaine:['lettres','andersen','candide'],
+    classiques:['petit_prince','chagrin','echenoz']
+  }
+};
+
+var SIMILAR = {
+  'Madame Bovary':['chagrin','moderato'],
+  'Le Tour du monde en 80 jours':['verne','etranger'],
+  'Lettres de mon moulin':['petit_prince','echenoz'],
+};
+
+function renderConseil(){
+  var c = CONSEILS[curProfil];
+  if(!c) return;
+  var color = PROF_COLOR[curProfil];
+
+  var intro = document.getElementById('conseil-intro');
+  if(intro) intro.innerHTML = '<div style="font-family:var(--serif);font-size:18px;color:var(--txt);margin-bottom:6px">' + c.intro + '</div>'
+    + '<div style="font-size:13px;color:var(--txt2);line-height:1.7">' + c.sub + '</div>';
+
+  var list = document.getElementById('conseil-items');
+  if(!list) return;
+  list.innerHTML = '';
+
+  function sectionLabel(txt){
+    var d = document.createElement('div');
+    d.className = 'section-lbl';
+    d.textContent = txt;
+    list.appendChild(d);
+  }
+
+  sectionLabel('\u2015 Domaine public \u2014 gratuits');
+  c.domaine.forEach(function(k){ var b=BOOKS_DETAIL[k]; if(b) list.appendChild(makeBookItem(b,k,color)); });
+
+  sectionLabel('\u2015 Classiques modernes');
+  c.classiques.forEach(function(k){ var b=BOOKS_DETAIL[k]; if(b) list.appendChild(makeBookItem(b,k,color)); });
+
+  if(curBook && curBook.title){
+    var sim = SIMILAR[curBook.title];
+    if(sim && sim.length){
+      sectionLabel('\u2015 Parce que vous lisez ' + curBook.title);
+      sim.forEach(function(k){ var b=BOOKS_DETAIL[k]; if(b) list.appendChild(makeBookItem(b,k,color)); });
+    }
+  }
+
+  var note = document.createElement('div');
+  note.style.cssText = 'font-size:11px;color:var(--txt3);text-align:center;margin-top:10px;padding-bottom:24px';
+  note.textContent = 'Les \u0153uvres du domaine public sont gratuites et libres.';
+  list.appendChild(note);
+}
+
+function makeBookItem(b, key, color){
+  var item = document.createElement('div');
+  item.className = 'bk-item';
+  item.innerHTML = '<div class="bk-cover" style="background:' + b.bg + '"></div>'
+    + '<div style="flex:1"><div style="font-family:var(--serif);font-size:14px;color:var(--txt);margin-bottom:2px">' + b.title
+    + '<span style="font-size:10px;background:var(--gb);color:var(--grn);border-radius:4px;padding:2px 5px;font-weight:500;margin-left:4px">' + b.pages + ' p.</span></div>'
+    + '<div style="font-size:11px;color:var(--txt3);margin-bottom:3px">' + b.author + '</div>'
+    + '<div style="font-size:11px;color:var(--txt2);font-style:italic;line-height:1.4">' + b.why + '</div></div>';
+  (function(k){ item.onclick = function(){ openDrawer(k); }; })(key);
+  return item;
+}
+function renderDefaultBooks(container, c, color) {
+  var allKeys = [];
+  if(curBook && curBook.title && SIMILAR[curBook.title]){
+    SIMILAR[curBook.title].forEach(function(k){ allKeys.push(k); });
+  }
+  (c.domaine||[]).forEach(function(k){ allKeys.push(k); });
+  (c.classiques||[]).forEach(function(k){ allKeys.push(k); });
+  var seen = {}, top3 = [];
+  allKeys.forEach(function(k){
+    if(!seen[k] && BOOKS_DETAIL[k] && top3.length < 3){ seen[k]=true; top3.push(k); }
+  });
+  top3.forEach(function(k, i){
+    var b = BOOKS_DETAIL[k]; if(!b) return;
+    var item = makeBookItem(b, k, color);
+    if(i===0) item.style.borderColor = color;
+    container.appendChild(item);
+  });
+  var note = document.createElement('div');
+  note.style.cssText = 'font-size:11px;color:var(--txt3);text-align:center;margin-top:10px;padding-bottom:24px';
+  note.textContent = 'Les \u0153uvres du domaine public sont gratuites et libres de droits.';
+  container.appendChild(note);
+}
+
+
+function openDrawer(key){
+  var b = BOOKS_DETAIL[key]; if(!b) return;
+  var color = PROF_COLOR[curProfil];
+  var bg = curProfil==='attn'?'var(--bl3)':curProfil==='memoire'?'var(--ru3)':'var(--vt3)';
+  var brd = curProfil==='attn'?'var(--bl2)':curProfil==='memoire'?'var(--ru2)':'var(--vt2)';
+  var d = document.getElementById('drawer-content');
+  if(!d) return;
+  d.innerHTML = '<div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:16px">'
+    + '<div style="width:56px;height:76px;border-radius:8px;flex-shrink:0;background:' + b.bg + '"></div>'
+    + '<div><div style="font-family:var(--serif);font-size:18px;color:var(--txt);line-height:1.2;margin-bottom:3px">' + b.title + '</div>'
+    + '<div style="font-size:13px;color:var(--txt3);margin-bottom:8px">' + b.author + ' &middot; ' + b.year + ' &middot; ' + b.pages + ' pages</div>'
+    + (b.gut ? '<div style="font-size:11px;background:var(--gb);color:var(--grn);border-radius:4px;padding:2px 8px;display:inline-block;font-weight:500">domaine public</div>' : '') + '</div></div>'
+    + '<div style="font-size:11px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Quatri\u00e8me de couverture</div>'
+    + '<div style="font-size:14px;color:var(--txt2);line-height:1.75;font-style:italic;margin-bottom:14px">' + b.q + '</div>'
+    + '<div style="font-size:11px;font-weight:500;color:var(--grn);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Pourquoi ce livre pour vous</div>'
+    + '<div style="font-size:13px;color:var(--txt2);line-height:1.6;background:' + bg + ';border-radius:8px;padding:10px 12px;margin-bottom:16px">' + b.why + '</div>'
+    + '<a href="' + b.lib + '" target="_blank" style="display:block;background:' + color + ';color:#fff;border-radius:var(--r-sm);padding:12px;text-align:center;font-size:14px;font-weight:500;font-family:var(--sans);text-decoration:none;margin-bottom:8px">Acheter chez mon libraire &#8594;</a>'
+    + (b.gut ? '<a href="' + b.gut + '" target="_blank" style="display:block;background:var(--gb);color:var(--grn);border:0.5px solid var(--gbd);border-radius:var(--r-sm);padding:12px;text-align:center;font-size:14px;font-weight:500;font-family:var(--sans);text-decoration:none;margin-bottom:8px">Lire gratuitement sur Gutenberg &#8594;</a>' : '')
+    + '<button id="btn-start-liro" style="width:100%;background:' + bg + ';color:' + color + ';border:0.5px solid ' + brd + ';border-radius:var(--r-sm);padding:12px;font-size:14px;font-weight:500;font-family:var(--sans);cursor:pointer">Commencer avec Liro &#8594;</button>';
+  document.getElementById('overlay').style.display = 'block';
+  var bs = document.getElementById('btn-start-liro');
+  if(bs) bs.onclick = function(){ closeDrawer(); appTab(1); };
+}
+
+function closeDrawer(){
+  var ov = document.getElementById('overlay');
+  if(ov) ov.style.display = 'none';
+}
+
+// ── MENU APP ──────────────────────────────────────────────
+function toggleAppMenu(){
+  var m = document.getElementById('app-menu');
+  if(m) m.style.display = m.style.display==='block' ? 'none' : 'block';
+}
+function closeAppMenu(){
+  var m = document.getElementById('app-menu');
+  if(m) m.style.display = 'none';
+}
+document.addEventListener('click', function(e){
+  var menu = document.getElementById('app-menu');
+  if(!menu || menu.style.display !== 'block') return;
+  if(!menu.contains(e.target) && !e.target.closest('.menu-btn')) menu.style.display='none';
+});
+
+// ── FAQ ───────────────────────────────────────────────────
+function toggleFaq(item){
+  var ans = item.nextElementSibling;
+  var arr = item.querySelector('span:last-child');
+  if(!ans) return;
+  var isOpen = ans.style.display === 'block';
+  document.querySelectorAll('.faq-a').forEach(function(a){ a.style.display='none'; });
+  document.querySelectorAll('.faq-item span:last-child').forEach(function(a){ a.style.transform=''; });
+  if(!isOpen){ ans.style.display='block'; if(arr) arr.style.transform='rotate(180deg)'; }
+}
+
+// ── IMPACT ────────────────────────────────────────────────
+var ASSOS = [
+  {id:'alzheimer',cat:'mental',name:'France Alzheimer',desc:'Accompagnement des malades et de leurs familles.',don:'https://www.france-alzheimer.org/soutenir-france-alzheimer/faire-un-don/'},
+  {id:'tdah',cat:'mental',name:'TDAH France',desc:'Accompagnement et sensibilisation autour du TDAH.',don:'https://www.tdah-france.fr/faire-un-don.html'},
+  {id:'depression',cat:'mental',name:'France D\u00e9pression',desc:'Soutien aux personnes touch\u00e9es par la d\u00e9pression.',don:'https://www.france-depression.org/soutenir/faire-un-don/'},
+  {id:'argos',cat:'mental',name:'Argos 2001',desc:'Entraide pour les troubles bipolaires.',don:'https://www.argos2001.fr/soutenir-argos-2001/'},
+  {id:'unafam',cat:'mental',name:'Unafam',desc:'Familles touch\u00e9es par les troubles psychiques.',don:'https://www.unafam.org/soutenir-unafam/faire-un-don.html'},
+  {id:'phare',cat:'mental',name:'Phare Enfants-Parents',desc:'\u00c9coute pour les enfants en souffrance.',don:'https://www.phare.org/faire-un-don/'},
+  {id:'parkinson',cat:'neuro',name:'France Parkinson',desc:'Accompagnement et recherche.',don:'https://www.franceparkinson.fr/soutenir/faire-un-don/'},
+  {id:'vaincre',cat:'neuro',name:'Vaincre Alzheimer',desc:"Recherche pour vaincre la maladie d'Alzheimer.",don:'https://www.vaincrealzheimer.org/faire-un-don/'},
+  {id:'a2mcl',cat:'neuro',name:'A2MCL',desc:'Seule asso fran\u00e7aise d\u00e9di\u00e9e \u00e0 la maladie \u00e0 corps de Lewy.',don:'https://association-maladie-corps-lewy.a2mcl.org/soutenir-lassociation'},
+  {id:'sep',cat:'neuro',name:'France SEP',desc:'Soutien aux personnes atteintes de SEP.',don:'https://www.francelys.org/faire-un-don/'},
+  {id:'bookaid',cat:'livres',name:'Book Aid International',desc:"Livres pour les biblioth\u00e8ques d'Afrique.",don:'https://www.bookaid.org/get-involved/donate/'},
+  {id:'bsf',cat:'livres',name:'Biblioth\u00e8ques Sans Fronti\u00e8res',desc:'Acc\u00e8s \u00e0 la culture en zones de crise.',don:'https://www.bibliosansfrontieres.org/soutenir-bsf/faire-un-don/'},
+];
+var impactCat = 'all';
+
+function filterImpact(cat, btn){
+  impactCat = cat;
+  document.getElementById('impact-panel').style.display = 'none';
+  document.querySelectorAll('#s-impact .chip').forEach(function(b){
+    b.style.background='var(--card)';b.style.borderColor='var(--border)';b.style.color='var(--txt3)';
+  });
+  btn.style.background='var(--ru3)';btn.style.borderColor='var(--ru2)';btn.style.color='var(--ru)';
+  renderImpact();
+}
+
+function renderImpact(){
+  var list = document.getElementById('impact-list'); if(!list) return;
+  var filtered = impactCat==='all' ? ASSOS : ASSOS.filter(function(a){ return a.cat===impactCat; });
+  list.innerHTML = '';
+  filtered.forEach(function(a){
+    var item = document.createElement('div');
+    item.style.cssText = 'background:var(--card);border:0.5px solid var(--border);border-radius:var(--r);padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:12px;margin-bottom:8px';
+    item.innerHTML = '<div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--txt);margin-bottom:2px">'+a.name+'</div><div style="font-size:12px;color:var(--txt3)">'+a.desc+'</div></div><div style="color:var(--txt3);font-size:16px">&#8594;</div>';
+    (function(asso){ item.onclick = function(){
+      document.getElementById('impact-panel').style.display = 'block';
+      document.getElementById('impact-name').textContent = asso.name;
+      document.getElementById('impact-desc').textContent = asso.desc;
+      document.getElementById('impact-don-btn').href = asso.don;
+      item.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }; })(a);
+    list.appendChild(item);
+  });
+}
+
+// ── TÉMOIGNAGES ───────────────────────────────────────────
+var TEMOS = [
+  {text:'\u00ab\u00a0Avant, je reposais mes livres et je ne les reprenais plus jamais. Maintenant je lis \u2014 et je me souviens de ce que j\u2019ai lu.\u00a0\u00bb', author:'\u2014 Marie, 71 ans', color:'var(--ru)'},
+  {text:'\u00ab\u00a0C\u2019est la premi\u00e8re fois que je finis un livre depuis des ann\u00e9es. Liro m\u2019a aid\u00e9 \u00e0 ne jamais perdre le fil.\u00a0\u00bb', author:'\u2014 Thomas, 29 ans', color:'var(--bl)'},
+  {text:'\u00ab\u00a0Je voulais revenir \u00e0 la lecture doucement. Liro ne me met jamais sous pression.\u00a0\u00bb', author:'\u2014 Sophie, 44 ans', color:'var(--vt)'},
+];
+
+function showTemo(i){
+  curTemo = i;
+  var t = TEMOS[i];
+  var bar = document.getElementById('temo-bar');
+  var txt = document.getElementById('temo-text');
+  var aut = document.getElementById('temo-author');
+  if(bar) bar.style.background = t.color;
+  if(txt) txt.innerHTML = t.text;
+  if(aut) aut.textContent = t.author;
+  var dots = document.getElementById('temo-dots');
+  if(dots){
+    dots.innerHTML = '';
+    TEMOS.forEach(function(_, j){
+      var d = document.createElement('div');
+      d.style.cssText = 'width:6px;height:6px;border-radius:50%;cursor:pointer;background:' + (j===i ? t.color : 'var(--border)');
+      (function(idx){ d.onclick = function(){ clearInterval(temoTimer); showTemo(idx); }; })(j);
+      dots.appendChild(d);
+    });
+  }
+}
+
+function startTemo(){
+  showTemo(0);
+  temoTimer = setInterval(function(){ showTemo((curTemo+1) % TEMOS.length); }, 4000);
+}
+
+// ── ANIMATIONS SCROLL ─────────────────────────────────────
+function initScrollAnimations(){
+  var obs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.fade-in').forEach(function(el){ obs.observe(el); });
+}
+
+// ── INIT GÉNÉRAL ──────────────────────────────────────────
+function init(){
+  // Vérifier auth dev
+  if(localStorage.getItem(LS_AUTH) !== '1'){
+    goSc('s-devlogin');
+    return;
+  }
+  // Vérifier clé API
+  var key = localStorage.getItem(LS_API) || '';
+  if(!key){
+    goSc('s-apikey');
+    return;
+  }
+  LIRO_API_KEY = key;
+  // Vérifier utilisateur existant
+  var users = getUsers();
+  if(users.length > 0){
+    loginAs(users[0]);
+  } else {
+    goSc('s-home');
+    startTemo();
+    initScrollAnimations();
+    renderImpact();
+  }
+}
+
+// Lancer
+document.addEventListener('DOMContentLoaded', function(){
+  init();
+  startTemo();
+  initScrollAnimations();
+});
+</script>
+</body>
+</html>
