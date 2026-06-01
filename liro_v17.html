@@ -699,6 +699,177 @@ var addDebounce = null;
 var temoTimer = null;
 var curTemo = 0;
 
+
+var CATALOGUE = [
+  // \u2500\u2500 NIVEAU 1 : Tr\u00e8s courts (< 80 pages) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+  {id:'horla', niveau:1, titre:'Le Horla', auteur:'Guy de Maupassant', annee:1887, pages:40,
+   desc:'Une pr\u00e9sence invisible qui s\u2019empare d\u2019un homme. 40 pages de tension pure \u2014 une session suffit.',
+   profils:['attn'], gut:'https://www.gutenberg.org/ebooks/3090', bg:'#d2b4de'},
+  {id:'parure', niveau:1, titre:'La Parure', auteur:'Guy de Maupassant', annee:1884, pages:15,
+   desc:'Une femme emprunte un bijou pour un soir. Le destin bascule en 15 pages.',
+   profils:['attn','memoire','plaisir'], gut:'https://www.gutenberg.org/ebooks/3090', bg:'#abebc6'},
+  {id:'boule', niveau:1, titre:'Boule de Suif', auteur:'Guy de Maupassant', annee:1880, pages:50,
+   desc:'Dans une diligence sous l\u2019occupation prussienne, une femme de mauvaise r\u00e9putation r\u00e9v\u00e8le les hypocrisies.',
+   profils:['attn','memoire'], gut:'https://www.gutenberg.org/ebooks/3090', bg:'#f9e4b7'},
+  {id:'mateo', niveau:1, titre:'Mateo Falcone', auteur:'Prosper M\u00e9rim\u00e9e', annee:1829, pages:20,
+   desc:'En Corse, un p\u00e8re doit choisir entre l\u2019honneur et son fils. 20 pages implacables.',
+   profils:['attn'], gut:'https://www.gutenberg.org/ebooks/8467', bg:'#d5d8dc'},
+  {id:'micromegas', niveau:1, titre:'Microm\u00e9gas', auteur:'Voltaire', annee:1752, pages:40,
+   desc:'Un g\u00e9ant venu d\u2019une autre \u00e9toile observe la petitesse et la pr\u00e9tention des hommes.',
+   profils:['attn','plaisir'], gut:'https://www.gutenberg.org/ebooks/30123', bg:'#aed6f1'},
+  {id:'venus', niveau:1, titre:'La V\u00e9nus d\u2019Ille', auteur:'Prosper M\u00e9rim\u00e9e', annee:1837, pages:35,
+   desc:'Une statue de bronze trouv\u00e9e dans un jardin. La nuit des noces tourne au drame.',
+   profils:['attn'], gut:'https://www.gutenberg.org/ebooks/8467', bg:'#d7bde2'},
+  {id:'morte', niveau:1, titre:'La Morte amoureuse', auteur:'Th\u00e9ophile Gautier', annee:1836, pages:35,
+   desc:'Un pr\u00eatre tombe amoureux d\u2019une femme qui n\u2019est peut-\u00eatre pas vivante. F\u00e9\u00e9rique et envo\u00fbtant.',
+   profils:['plaisir'], gut:'https://www.gutenberg.org/ebooks/6882', bg:'#fad7a0'},
+  {id:'coeur', niveau:1, titre:'Un c\u0153ur simple', auteur:'Gustave Flaubert', annee:1877, pages:45,
+   desc:'La vie enti\u00e8re d\u2019une servante normande, simple et touchante. Flaubert au sommet de sa tendresse.',
+   profils:['memoire','plaisir'], gut:'https://www.gutenberg.org/ebooks/6056', bg:'#a8d5b5'},
+  {id:'chevelure', niveau:1, titre:'La Chevelure', auteur:'Guy de Maupassant', annee:1884, pages:10,
+   desc:'Un homme trouve une touffe de cheveux dans un meuble ancien et bascule dans l\u2019obsession.',
+   profils:['attn'], gut:'https://www.gutenberg.org/ebooks/3090', bg:'#d5d8dc'},
+  {id:'jongleur', niveau:1, titre:'L\u2019\u00c9tui de nacre', auteur:'Anatole France', annee:1892, pages:30,
+   desc:'Des contes courts et spirituels \u2014 ironie douce, sagesse l\u00e9g\u00e8re. Id\u00e9al pour reprendre.',
+   profils:['plaisir'], gut:'https://www.gutenberg.org/ebooks/7079', bg:'#f9e4b7'},
+  {id:'candide', niveau:1, titre:'Candide', auteur:'Voltaire', annee:1759, pages:120,
+   desc:'Satire de l\u2019optimisme na\u00efverve. Candide traverse catastrophes et absurdit\u00e9s avec le sourire.',
+   profils:['attn','plaisir'], gut:'https://www.gutenberg.org/ebooks/4650', bg:'#e8d5c4'},
+  {id:'nez', niveau:1, titre:'Le Manteau', auteur:'Nicolas Gogol', annee:1842, pages:40,
+   desc:'Un petit fonctionnaire russ\u00e8 r\u00eave d\u2019un manteau neuf. Gogol invente le r\u00e9alisme magique.',
+   profils:['attn','plaisir'], gut:'https://www.gutenberg.org/ebooks/36238', bg:'#d6eaf8'},
+
+  // \u2500\u2500 NIVEAU 2 : Courts (80-200 pages) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+  {id:'perrault', niveau:2, titre:'Contes de ma m\u00e8re l\u2019Oye', auteur:'Charles Perrault', annee:1697, pages:80,
+   desc:'Cendrillon, le Petit Chaperon rouge, la Belle au bois dormant. Chaque conte se lit en 15 minutes.',
+   profils:['plaisir'], gut:'https://www.gutenberg.org/ebooks/29021', bg:'#fad7a0'},
+  {id:'colomba', niveau:2, titre:'Colomba', auteur:'Prosper M\u00e9rim\u00e9e', annee:1840, pages:180,
+   desc:'En Corse, une jeune femme pousse son fr\u00e8re \u00e0 la vengeance. Un thriller avant l\u2019heure.',
+   profils:['attn','memoire'], gut:'https://www.gutenberg.org/ebooks/8468', bg:'#d5d8dc'},
+  {id:'carmen', niveau:2, titre:'Carmen', auteur:'Prosper M\u00e9rim\u00e9e', annee:1845, pages:120,
+   desc:'La cigari\u00e8re andalouse. Un amour fatal racon\u0442\u00e9 avec une \u00e9l\u00e9gance froide.',
+   profils:['attn','plaisir'], gut:'https://www.gutenberg.org/ebooks/8468', bg:'#fde8d8'},
+  {id:'andersen', niveau:2, titre:'Contes d\u2019Andersen', auteur:'H.C. Andersen', annee:1835, pages:0,
+   desc:'La petite sir\u00e8ne, la reine des neiges, le vilain petit canard. On s\u2019arr\u00eate apr\u00e8s chaque conte.',
+   profils:['plaisir'], gut:'https://www.gutenberg.org/ebooks/1597', bg:'#d6eaf8'},
+  {id:'tour80', niveau:2, titre:'Le Tour du monde en 80 jours', auteur:'Jules Verne', annee:1872, pages:256,
+   desc:'Un chapitre = une \u00e9tape. Phileas Fogg fonce sans jamais s\u2019arr\u00eater. Impossible de se perdre.',
+   profils:['attn'], gut:'https://www.gutenberg.org/ebooks/103', bg:'#aed6f1'},
+  {id:'adolphe', niveau:2, titre:'Adolphe', auteur:'Benjamin Constant', annee:1816, pages:120,
+   desc:'Un homme ne parvient ni \u00e0 aimer ni \u00e0 quitter. Le roman de l\u2019ambivalence, court et universel.',
+   profils:['memoire','plaisir'], gut:'https://www.gutenberg.org/ebooks/14433', bg:'#a9cce3'},
+  {id:'manon', niveau:2, titre:'Manon Lescaut', auteur:'Pr\u00e9vost', annee:1731, pages:160,
+   desc:'Un chevalier ruine sa vie par amour pour une femme l\u00e9g\u00e8re. Passion et chute.',
+   profils:['plaisir','memoire'], gut:'https://www.gutenberg.org/ebooks/10104', bg:'#fad7a0'},
+  {id:'lettres', niveau:2, titre:'Lettres de mon moulin', auteur:'Alphonse Daudet', annee:1869, pages:220,
+   desc:'Contes courts et lumineux depuis un moulin de Provence. On peut reprendre n\u2019importe o\u00f9.',
+   profils:['attn','plaisir','memoire'], gut:'https://www.gutenberg.org/ebooks/36780', bg:'#a8d5b5'},
+  {id:'tartarin', niveau:2, titre:'Tartarin de Tarascon', auteur:'Alphonse Daudet', annee:1872, pages:180,
+   desc:'Un gascon fanfaron part chasser les lions en Afrique. Tr\u00e8s dr\u00f4le, tr\u00e8s vif.',
+   profils:['plaisir'], gut:'https://www.gutenberg.org/ebooks/26514', bg:'#f9e4b7'},
+  {id:'meaulnes', niveau:2, titre:'Le Grand Meaulnes', auteur:'Alain-Fournier', annee:1913, pages:200,
+   desc:'Un adolescent d\u00e9couvre un domaine myst\u00e9rieux et une f\u00eate \u00e9trange. La nostalgie de l\u2019enfance.',
+   profils:['plaisir','memoire'], gut:'https://www.gutenberg.org/ebooks/11698', bg:'#d7bde2'},
+  {id:'symphonie', niveau:2, titre:'La Symphonie pastorale', auteur:'Andr\u00e9 Gide', annee:1919, pages:100,
+   desc:'Un pasteur recueille une jeune aveugle et tombe amoureux. Court, beau, ambigu.',
+   profils:['memoire'], gut:'https://www.gutenberg.org/ebooks/13173', bg:'#a9dfbf'},
+  {id:'mare', niveau:2, titre:'La Mare au diable', auteur:'George Sand', annee:1846, pages:120,
+   desc:'Un paysan veuf rencontre une jeune berg\u00E8re. Simple, lumineux, reposant.',
+   profils:['plaisir'], gut:'https://www.gutenberg.org/ebooks/3842', bg:'#a8d5b5'},
+  {id:'fracasse', niveau:2, titre:'Le Capitaine Fracasse', auteur:'Th\u00e9ophile Gautier', annee:1863, pages:500,
+   desc:'Un noble ru\u0438\u043D\u00e9 rejoint une troupe de com\u00e9diens. Aventure, romance et humour. Chapitres courts.',
+   profils:['plaisir','attn'], gut:'https://www.gutenberg.org/ebooks/6882', bg:'#fde8d8'},
+  {id:'chercheur', niveau:2, titre:'La Recherche de l\u2019absolu', auteur:'Honor\u00e9 de Balzac', annee:1834, pages:200,
+   desc:'Un savant flamand obsess\u00e9 par la pierre philosophale sacrifie tout. Balzac le plus intense.',
+   profils:['memoire'], gut:'https://www.gutenberg.org/ebooks/1940', bg:'#d5d8dc'},
+  {id:'nana_t1', niveau:2, titre:'Nana', auteur:'\u00c9mile Zola', annee:1880, pages:400,
+   desc:'Une actrice monte et d\u00e9truit tout ce qu\u2019elle touche. Zola au sommet de sa force narrative.',
+   profils:['memoire'], gut:'https://www.gutenberg.org/ebooks/5200', bg:'#fad7a0'},
+
+  // \u2500\u2500 NIVEAU 3 : Moyens (200-500 pages) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+  {id:'bovary', niveau:3, titre:'Madame Bovary', auteur:'Gustave Flaubert', annee:1857, pages:468,
+   desc:'Emma r\u00eave d\u2019une vie romanesque. La r\u00e9alit\u00e9 provinciale l\u2019\u00e9touffe. Un personnage inoubliable.',
+   profils:['memoire'], gut:'https://www.gutenberg.org/ebooks/2413', bg:'#e8e4d4'},
+  {id:'bel_ami', niveau:3, titre:'Bel-Ami', auteur:'Guy de Maupassant', annee:1885, pages:374,
+   desc:'Georges Duroy monte dans la soci\u00e9t\u00e9 par les femmes et le journalisme. Cynique et haletant.',
+   profils:['memoire','attn'], gut:'https://www.gutenberg.org/ebooks/4576', bg:'#fad7a0'},
+  {id:'une_vie', niveau:3, titre:'Une vie', auteur:'Guy de Maupassant', annee:1883, pages:280,
+   desc:'Toute une vie de femme, de l\u2019espoir \u00e0 la d\u00e9sillusiontion. Le roman le plus tendre de Maupassant.',
+   profils:['plaisir','memoire'], gut:'https://www.gutenberg.org/ebooks/4765', bg:'#d6eaf8'},
+  {id:'eugenie', niveau:3, titre:'Eug\u00e9nie Grandet', auteur:'Honor\u00e9 de Balzac', annee:1833, pages:250,
+   desc:'La fille d\u2019un avare attend un amour qui ne viendra pas. Balzac le plus accessible.',
+   profils:['attn','memoire'], gut:'https://www.gutenberg.org/ebooks/1319', bg:'#fde8d8'},
+  {id:'goriot', niveau:3, titre:'Le P\u00e8re Goriot', auteur:'Honor\u00e9 de Balzac', annee:1835, pages:350,
+   desc:'Un vieillard sacrifie tout pour ses filles ingrates. Rasti gnac d\u00e9couvre Paris et l\u2019ambition.',
+   profils:['memoire'], gut:'https://www.gutenberg.org/ebooks/1237', bg:'#d5d8dc'},
+  {id:'rouge', niveau:3, titre:'Le Rouge et le Noir', auteur:'Stendhal', annee:1830, pages:576,
+   desc:'Julien Sorel, fils de charpentier, veut conqu\u00e9rir le monde. Passion, ambition, chute.',
+   profils:['memoire'], gut:'https://www.gutenberg.org/ebooks/798', bg:'#fad7a0'},
+  {id:'monte_t1', niveau:3, titre:'Le Comte de Monte-Cristo (t.1)', auteur:'Alexandre Dumas', annee:1844, pages:400,
+   desc:'Edmond Dant\u00e8s sort de prison apr\u00e8s 14 ans. Il pr\u00e9pare sa vengeance. Impossible de s\u2019arr\u00eater.',
+   profils:['attn','plaisir'], gut:'https://www.gutenberg.org/ebooks/1184', bg:'#a9cce3'},
+  {id:'vingt_mille', niveau:3, titre:'Vingt mille lieues sous les mers', auteur:'Jules Verne', annee:1870, pages:400,
+   desc:'Le capitaine N\u00e9mo et le Nautilus. L\u2019aventure sous-marine fondatrice.',
+   profils:['attn','memoire'], gut:'https://www.gutenberg.org/ebooks/5097', bg:'#154360'},
+  {id:'ile_mystere', niveau:3, titre:'L\u2019\u00cele myst\u00e9rieuse', auteur:'Jules Verne', annee:1874, pages:600,
+   desc:'Des naufrag\u00e9s reconstruisent une civilisation sur une \u00eele d\u00e9serte. Un hymne \u00e0 l\u2019ing\u00e9niosit\u00e9 humaine.',
+   profils:['attn','memoire'], gut:'https://www.gutenberg.org/ebooks/1268', bg:'#a9dfbf'},
+  {id:'crime', niveau:3, titre:'Crime et Ch\u00e2timent', auteur:'Fiodor Dosto\u00efevski', annee:1866, pages:550,
+   desc:'Raskol nikov tue une vieille usuri\u00e8re et vit avec la culpabilit\u00e9. Psychologie pure.',
+   profils:['memoire'], gut:'https://www.gutenberg.org/ebooks/2554', bg:'#d5d8dc'},
+  {id:'germinal', niveau:3, titre:'Germinal', auteur:'\u00c9mile Zola', annee:1885, pages:592,
+   desc:'Les mineurs du Nord en gr\u00e8ve. La col\u00e8re des pauvres, la force du collectif.',
+   profils:['memoire'], gut:'https://www.gutenberg.org/ebooks/5711', bg:'#145a32'},
+  {id:'don_t1', niveau:3, titre:'Don Quichotte (t.1)', auteur:'Cervant\u00e8s', annee:1605, pages:450,
+   desc:'Un hidalgo qui se prend pour un chevalier part affronter des moulins \u00e0 vent. Dr\u00f4le et profond.',
+   profils:['plaisir'], gut:'https://www.gutenberg.org/ebooks/2000', bg:'#fad7a0'},
+  {id:'mousquetaires', niveau:3, titre:'Les Trois Mousquetaires', auteur:'Alexandre Dumas', annee:1844, pages:700,
+   desc:'D\u2019Artagnan monte \u00e0 Paris et rencontre Athos, Porthos et Aramis. L\u2019aventure pure.',
+   profils:['attn','plaisir'], gut:'https://www.gutenberg.org/ebooks/1257', bg:'#d5d8dc'},
+
+  // \u2500\u2500 NIVEAU 4 : Longs (450+ pages) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+  {id:'miserables', niveau:4, titre:'Les Mis\u00e9rables', auteur:'Victor Hugo', annee:1862, pages:1900,
+   desc:'Jean Valjean, Fantine, Cosette, Javert. La plus grande fresque humaine de la litt\u00e9rature fran\u00e7aise.',
+   profils:['memoire'], gut:'https://www.gutenberg.org/ebooks/135', bg:'#2c3e50'},
+  {id:'guerre_paix', niveau:4, titre:'Guerre et Paix', auteur:'L\u00e9on Tolsto\u00ef', annee:1869, pages:1440,
+   desc:'La Russie face \u00e0 Napol\u00e9on. Des dizaines de personnages inoubliables. Le plus grand roman.',
+   profils:['memoire'], gut:'https://www.gutenberg.org/ebooks/2600', bg:'#d5d8dc'},
+  {id:'karamazov', niveau:4, titre:'Les Fr\u00e8res Karamazov', auteur:'Dosto\u00efevski', annee:1880, pages:900,
+   desc:'Trois fr\u00e8res, un p\u00e8re mort, la question de Dieu. Le testament de Dosto\u00efevski.',
+   profils:['memoire'], gut:'https://www.gutenberg.org/ebooks/28054', bg:'#717d7e'},
+  {id:'proust', niveau:4, titre:'\u00c0 l\u2019ombre des jeunes filles en fleurs', auteur:'Marcel Proust', annee:1919, pages:500,
+   desc:'La m\u00e9moire, le temps, les jeunes filles \u00e0 Balbec. Proust \u00e0 son plus accessible.',
+   profils:['plaisir','memoire'], gut:'https://www.gutenberg.org/ebooks/7178', bg:'#d7bde2'},
+  {id:'assommoir', niveau:4, titre:'L\u2019Assommoir', auteur:'\u00c9mile Zola', annee:1877, pages:600,
+   desc:'G\u00e9rvaise et l\u2019alcool dans le Paris ouvrier. Zola le plus fort, le plus dur.',
+   profils:['memoire'], gut:'https://www.gutenberg.org/ebooks/7804', bg:'#717d7e'},
+  {id:'monte_complet', niveau:4, titre:'Le Comte de Monte-Cristo (complet)', auteur:'Alexandre Dumas', annee:1844, pages:1200,
+   desc:'La vengeance d\u2019Edmond Dant\u00e8s dans son int\u00e9gralit\u00e9. Le plus grand page-turner de la litt\u00e9rature.',
+   profils:['attn','plaisir'], gut:'https://www.gutenberg.org/ebooks/1184', bg:'#1a5276'},
+  {id:'anna', niveau:4, titre:'Anna Kar\u00e9nine', auteur:'L\u00e9on Tolsto\u00ef', annee:1878, pages:900,
+   desc:'Une femme brise les conventions de la soci\u00e9t\u00e9 russe par amour. Tolsto\u00ef au sommet.',
+   profils:['plaisir','memoire'], gut:'https://www.gutenberg.org/ebooks/1399', bg:'#d5d8dc'},
+  {id:'copperfield', niveau:4, titre:'David Copperfield', auteur:'Charles Dickens', annee:1850, pages:900,
+   desc:'L\u2019enfance difficile de David jusqu\u2019\u00e0 l\u2019\u00e2ge adulte. Le roman le plus chaleureux de Dickens.',
+   profils:['memoire','plaisir'], gut:'https://www.gutenberg.org/ebooks/766', bg:'#a9cce3'},
+  {id:'don_complet', niveau:4, titre:'Don Quichotte (complet)', auteur:'Cervant\u00e8s', annee:1615, pages:900,
+   desc:'Les deux volumes r\u00e9unis. L\u2019\u0153uvre fondatrice du roman moderne. Dr\u00f4le, \u00e9mouvant, profond.',
+   profils:['plaisir'], gut:'https://www.gutenberg.org/ebooks/2000', bg:'#fad7a0'},
+  {id:'notre_dame', niveau:4, titre:'Notre-Dame de Paris', auteur:'Victor Hugo', annee:1831, pages:700,
+   desc:'Quasimodo, Esmeralda, Claude Frollo. Hugo invente le roman historique fran\u00e7ais.',
+   profils:['memoire','plaisir'], gut:'https://www.gutenberg.org/ebooks/2610', bg:'#566573'},
+  {id:'rougon', niveau:4, titre:'La Fortune des Rougon', auteur:'\u00c9mile Zola', annee:1871, pages:500,
+   desc:'Le premier tome des Rougon-Macquart. L\u2019origine d\u2019une famille sous le Second Empire.',
+   profils:['memoire'], gut:'https://www.gutenberg.org/ebooks/5742', bg:'#717d7e'},
+];
+
+var NIVEAUX = [
+  {n:1, label:'Tr\u00e8s courts', desc:'Nouvelles et contes \u00b7 moins de 80 pages \u00b7 id\u00e9al pour reprendre', color:'#2d7a2d'},
+  {n:2, label:'Courts', desc:'Romans courts \u00b7 80\u2013220 pages \u00b7 style accessible', color:'#1a5276'},
+  {n:3, label:'Moyens', desc:'Romans classiques \u00b7 200\u2013600 pages \u00b7 personnages forts', color:'#7d3c98'},
+  {n:4, label:'Longs', desc:'Grandes fresques \u00b7 600+ pages \u00b7 pour lecteurs qui ont repris confiance', color:'#922b21'}
+];
+
 var PROF_COLOR = { attn:'#1a5276', memoire:'var(--ru)', plaisir:'#4a7c59' };
 var PROF_TAB_CLS = { attn:'on-bl', memoire:'on-ru', plaisir:'on-vt' };
 
@@ -1084,8 +1255,17 @@ async function doRead(profil, type){
   var pi = total ? 'page ' + page + ' sur ' + total + (pct ? ' (' + pct + ')' : '') : 'page ' + page;
 
   // Anti-fiche de lecture
+  if(page === 0){
+    showResume(profil,
+      '<p style="font-family:var(--serif);font-size:18px;color:var(--txt);margin-bottom:8px">Vous vous int\u00E9ressez \u00E0 <em>' + titre + '</em>\u00A0?</p>'
+      + '<p style="font-size:14px;color:var(--txt2);line-height:1.7;margin-bottom:16px">C\u2019est une belle intention. Avant de commencer, voulez-vous que Liro vous donne envie d\u2019ouvrir ce livre\u00A0?</p>'
+      + '<button onclick="motiverDepart()" style="display:block;width:100%;background:#8b3a1a;color:#fff;border:none;border-radius:var(--r-sm);padding:12px;font-size:14px;font-weight:500;font-family:var(--sans);cursor:pointer;margin-bottom:8px">Oui, convaincs-moi \u2192</button>'
+      + '<button onclick="appTab(0)" style="display:block;width:100%;background:none;border:0.5px solid var(--border);border-radius:var(--r-sm);padding:10px;font-size:13px;font-family:var(--sans);cursor:pointer;color:var(--txt3)">Je commence directement</button>'
+    );
+    return;
+  }
   if(page < 3 && total > 20){
-    showResume(profil, '<p>Vous \u00eates au tout d\u00e9but de <strong>' + titre + '</strong>.</p><p>Liro est l\u00e0 pour vous aider \u00e0 <em>reprendre</em> votre lecture \u2014 pas \u00e0 la remplacer. Plongez-vous dedans, Liro sera l\u00e0 quand vous reviendrez.</p><p style="color:#8b3a1a;font-weight:500">Bonne lecture !</p>');
+    showResume(profil, '<p>Vous \u00EAtes au tout d\u00E9but de <strong>' + titre + '</strong>.</p><p>Liro est l\u00E0 pour vous aider \u00E0 <em>reprendre</em> votre lecture \u2014 pas \u00E0 la remplacer. Plongez-vous dedans, Liro sera l\u00E0 quand vous reviendrez.</p><p style="color:#8b3a1a;font-weight:500">Bonne lecture !</p>');
     return;
   }
 
@@ -1329,37 +1509,141 @@ var SIMILAR = {
 };
 
 function renderConseil(){
-  var c=CONSEILS[curProfil]; if(!c) return;
-  var color=PROF_COLOR[curProfil];
-  var bg=curProfil==='attn'?'var(--bl3)':curProfil==='memoire'?'var(--ru3)':'var(--vt3)';
-  var brd=curProfil==='attn'?'var(--bl2)':curProfil==='memoire'?'var(--ru2)':'var(--vt2)';
-  // V\u00E9rifier livres abandonn\u00E9s (3+ en cours sans aucun termin\u00E9)
-  var books = curUser ? getBooks(curUser.id) : [];
-  var inProgress = books.filter(function(b){ return !b.done && b.page > 0; });
-  var done = books.filter(function(b){ return b.done; });
-  if(inProgress.length >= 3 && done.length === 0){
-    renderAbandonedBooks(inProgress, color, bg, brd);
-    return;
-  }
-  var intro=document.getElementById('conseil-intro');
-  if(intro) intro.innerHTML='<div style="font-family:var(--serif);font-size:22px;color:var(--txt);margin-bottom:8px">'+c.intro+'</div>'
-    +'<div style="font-size:14px;color:var(--txt2);line-height:1.7;margin-bottom:4px">'+c.sub+'</div>';
-  var list=document.getElementById('conseil-items'); if(!list) return;
-  list.innerHTML='';
-  // Questionnaire ouvert directement
-  var qDiv=document.createElement('div'); qDiv.id='q-wrap';
-  qDiv.style.cssText='background:var(--card);border-radius:var(--r);border:0.5px solid var(--border);padding:16px;margin-bottom:14px';
-  qDiv.innerHTML=buildQuestionnaire(color,bg,brd);
-  list.appendChild(qDiv);
-  var resDiv=document.createElement('div'); resDiv.id='q-results'; resDiv.style.display='none';
-  list.appendChild(resDiv);
-  var aiDiv=document.createElement('div'); aiDiv.id='ai-results';
-  list.appendChild(aiDiv);
-  var aiBtnWrap=document.createElement('div'); aiBtnWrap.style.cssText='margin:12px 0 8px';
-  aiBtnWrap.innerHTML='<button id="ai-suggest-btn" onclick="getAISuggestions()" style="width:100%;background:var(--card);border:0.5px solid var(--border);border-radius:var(--r);padding:12px 16px;font-size:13px;font-weight:500;font-family:var(--sans);color:'+color+';cursor:pointer;display:flex;align-items:center;gap:10px"><span>&#10024;</span><span style="flex:1;text-align:left">Liro choisit pour moi</span></button>';
-  list.appendChild(aiBtnWrap);
-  // D\u00E9clencher l'\u00E9tape 0 du questionnaire
-  goQStep(0);
+  var color = PROF_COLOR[curProfil];
+  var intro = document.getElementById('conseil-intro');
+  if(intro) intro.innerHTML = '<div style="font-size:13px;color:var(--txt2);line-height:1.6;margin-bottom:12px">Gratuits, libres de droits, disponibles sur Project Gutenberg. Class\u00E9s du plus court au plus long.</div>'
+    + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px">'
+    + '<button id="filtre-tous" onclick="filtreConseil(null)" style="background:'+color+';color:#fff;border:none;border-radius:20px;padding:5px 14px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--sans)">Tous</button>'
+    + '<button id="filtre-attn" onclick="filtreConseil(&apos;attn&apos;)" style="background:var(--card);color:var(--txt2);border:0.5px solid var(--border);border-radius:20px;padding:5px 14px;font-size:12px;cursor:pointer;font-family:var(--sans)">Attention \u26A1</button>'
+    + '<button id="filtre-memoire" onclick="filtreConseil(&apos;memoire&apos;)" style="background:var(--card);color:var(--txt2);border:0.5px solid var(--border);border-radius:20px;padding:5px 14px;font-size:12px;cursor:pointer;font-family:var(--sans)">M\u00E9moire</button>'
+    + '<button id="filtre-plaisir" onclick="filtreConseil(&apos;plaisir&apos;)" style="background:var(--card);color:var(--txt2);border:0.5px solid var(--border);border-radius:20px;padding:5px 14px;font-size:12px;cursor:pointer;font-family:var(--sans)">Plaisir \u2728</button>'
+    + '</div>';
+  var list = document.getElementById('conseil-items');
+  if(!list) return;
+  list.innerHTML = '';
+  renderCatalogueFiltre(null, list);
+}
+
+function filtreConseil(profil){
+  var list = document.getElementById('conseil-items');
+  if(!list) return;
+  var color = PROF_COLOR[curProfil];
+  ['tous','attn','memoire','plaisir'].forEach(function(f){
+    var btn = document.getElementById('filtre-'+f);
+    if(!btn) return;
+    var isActive = (profil === null && f === 'tous') || profil === f;
+    btn.style.background = isActive ? color : 'var(--card)';
+    btn.style.color = isActive ? '#fff' : 'var(--txt2)';
+    btn.style.border = isActive ? 'none' : '0.5px solid var(--border)';
+  });
+  list.innerHTML = '';
+  renderCatalogueFiltre(profil, list);
+}
+
+function renderCatalogueFiltre(profil, list){
+  var color = PROF_COLOR[curProfil];
+  NIVEAUX.forEach(function(niv){
+    var livres = CATALOGUE.filter(function(l){
+      return l.niveau === niv.n && (!profil || l.profils.indexOf(profil) >= 0);
+    });
+    if(!livres.length) return;
+    // S\u00E9parateur de niveau
+    var sep = document.createElement('div');
+    sep.style.cssText = 'margin:14px 0 4px;display:flex;align-items:center;gap:8px';
+    sep.innerHTML = '<div style="height:1px;flex:1;background:var(--border)"></div>'
+      + '<span style="font-size:10px;font-weight:500;color:'+niv.color+';text-transform:uppercase;letter-spacing:.08em;white-space:nowrap">Niveau '+niv.n+' \u2014 '+niv.label+'</span>'
+      + '<div style="height:1px;flex:1;background:var(--border)"></div>';
+    list.appendChild(sep);
+    var desc = document.createElement('p');
+    desc.style.cssText = 'font-size:12px;color:var(--txt3);margin:0 0 10px;line-height:1.5';
+    desc.textContent = niv.desc;
+    list.appendChild(desc);
+    // Premier livre = recommand\u00E9 si correspond au profil actif
+    livres.forEach(function(l, i){
+      var isReco = i === 0 && l.profils.indexOf(curProfil) >= 0;
+      var card = document.createElement('div');
+      card.style.cssText = 'border:'+(isReco?'1.5px solid '+color:'0.5px solid var(--border)')+';border-radius:var(--r-sm);padding:12px 14px;margin-bottom:8px;background:'+(isReco?'var(--bl3, #f0f4fb)':'var(--card)')+';cursor:pointer;position:relative';
+      if(isReco){
+        var badge = document.createElement('div');
+        badge.style.cssText = 'position:absolute;top:-1px;left:12px;background:'+color+';color:#fff;font-size:10px;font-weight:500;padding:2px 8px;border-radius:0 0 6px 6px';
+        badge.textContent = 'Recommand\u00E9 pour vous';
+        card.appendChild(badge);
+      }
+      var inner = document.createElement('div');
+      inner.style.cssText = 'display:flex;gap:12px;align-items:flex-start'+(isReco?';margin-top:8px':'');
+      var cover = document.createElement('div');
+      cover.style.cssText = 'width:44px;height:60px;border-radius:5px;flex-shrink:0;background:'+l.bg;
+      var info = document.createElement('div');
+      info.style.cssText = 'flex:1;min-width:0';
+      info.innerHTML = '<div style="font-family:var(--serif);font-size:15px;color:var(--txt);margin-bottom:2px">'+l.titre+'</div>'
+        + '<div style="font-size:12px;color:var(--txt3);margin-bottom:4px">'+l.auteur+' \u00B7 '+l.annee+(l.pages?' \u00B7 <span style="color:#2d7a2d;font-weight:500">'+l.pages+'&nbsp;p.</span>':'')+'</div>'
+        + '<div style="font-size:12px;color:var(--txt2);line-height:1.5">'+l.desc+'</div>';
+      var arr = document.createElement('span');
+      arr.style.cssText = 'font-size:18px;color:var(--txt3);flex-shrink:0';
+      arr.textContent = '\u203A';
+      inner.appendChild(cover);
+      inner.appendChild(info);
+      if(!isReco) inner.appendChild(arr);
+      card.appendChild(inner);
+      if(isReco){
+        var btns = document.createElement('div');
+        btns.style.cssText = 'display:flex;gap:8px;margin-top:10px';
+        var b1 = document.createElement('button');
+        b1.style.cssText = 'flex:1;background:'+color+';color:#fff;border:none;border-radius:var(--r-sm);padding:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--sans)';
+        b1.textContent = 'Commencer avec Liro';
+        (function(livre){ b1.onclick = function(e){ e.stopPropagation(); lancerLivre(livre); }; })(l);
+        var b2 = document.createElement('button');
+        b2.style.cssText = 'background:var(--bg);color:'+color+';border:0.5px solid '+color+';border-radius:var(--r-sm);padding:8px 12px;font-size:12px;cursor:pointer;font-family:var(--sans)';
+        b2.textContent = 'Lire sur Gutenberg \u2192';
+        (function(livre){ b2.onclick = function(e){ e.stopPropagation(); window.open(livre.gut,'_blank'); }; })(l);
+        btns.appendChild(b1); btns.appendChild(b2);
+        card.appendChild(btns);
+      } else {
+        (function(livre){ card.onclick = function(){ ouvrirFicheLivre(livre); }; })(l);
+      }
+      list.appendChild(card);
+    });
+  });
+  var note = document.createElement('p');
+  note.style.cssText = 'font-size:11px;color:var(--txt3);text-align:center;margin:16px 0 24px';
+  note.textContent = 'Toutes ces \u0153uvres sont gratuites sur Project Gutenberg';
+  list.appendChild(note);
+}
+
+function lancerLivre(livre){
+  appTab(1);
+  setTimeout(function(){
+    toggleAddForm();
+    var si = document.getElementById('add-search-input');
+    var tf = document.getElementById('add-title-field');
+    var af = document.getElementById('add-author-field');
+    var pf = document.getElementById('add-total-field');
+    if(si) si.value = livre.titre;
+    if(tf) tf.value = livre.titre;
+    if(af) af.value = livre.auteur;
+    if(pf && livre.pages) pf.value = livre.pages;
+    toast2('\u201C' + livre.titre + '\u201D \u2014 indiquez votre page actuelle');
+  }, 200);
+}
+
+function ouvrirFicheLivre(livre){
+  var color = PROF_COLOR[curProfil];
+  var d = document.getElementById('drawer-content');
+  if(!d) return;
+  d.innerHTML = '<div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:16px">'
+    + '<div style="width:64px;height:90px;border-radius:8px;flex-shrink:0;background:'+livre.bg+'"></div>'
+    + '<div><div style="font-family:var(--serif);font-size:18px;color:var(--txt);line-height:1.2;margin-bottom:4px">'+livre.titre+'</div>'
+    + '<div style="font-size:13px;color:var(--txt3);margin-bottom:6px">'+livre.auteur+' \u00B7 '+livre.annee+(livre.pages?' \u00B7 '+livre.pages+' pages':'')+'</div>'
+    + '<div style="font-size:11px;background:#e8f5e8;color:#2d7a2d;border-radius:4px;padding:2px 8px;display:inline-block;font-weight:500">domaine public \u2014 gratuit</div>'
+    + '</div></div>'
+    + '<div style="font-size:11px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">R\u00E9sum\u00E9</div>'
+    + '<div style="font-size:14px;color:var(--txt2);line-height:1.75;font-style:italic;margin-bottom:16px">'+livre.desc+'</div>'
+    + '<a href="'+livre.gut+'" target="_blank" style="display:block;background:#2d7a2d;color:#fff;border-radius:var(--r-sm);padding:12px;text-align:center;font-size:14px;font-weight:500;font-family:var(--sans);text-decoration:none;margin-bottom:8px">Lire gratuitement sur Gutenberg \u2192</a>'
+    + '<button id="btn-start-catalogue" style="width:100%;background:'+color+';color:#fff;border:none;border-radius:var(--r-sm);padding:12px;font-size:14px;font-weight:500;font-family:var(--sans);cursor:pointer">J\u2019ai ce livre \u2014 commencer avec Liro \u2192</button>';
+  var ov = document.getElementById('overlay');
+  if(ov) ov.style.display = 'block';
+  var b = document.getElementById('btn-start-catalogue');
+  if(b){ (function(l){ b.onclick = function(){ closeDrawer(); lancerLivre(l); }; })(livre); }
 }
 
 
@@ -1759,6 +2043,30 @@ function showAbandonedChoice(book, color, bg, brd){
     otherBtn.onclick = function(){ renderConseil(); };
     card.appendChild(otherBtn);
     list.appendChild(card);
+  });
+}
+
+
+function motiverDepart(){
+  if(!curBook) return;
+  var profil = curProfil;
+  var color = PROF_COLOR[profil];
+  var zone = document.getElementById('resume-body-'+profil) || document.getElementById('resume-wrap-'+profil);
+  var prompt = 'Tu es Liro, compagnon de lecture bienveillant. Le lecteur vient d\u2019ajouter "' + curBook.title + '" de ' + (curBook.author||'cet auteur') + ' mais n\u2019a pas encore commenc\u00E9 (page 0). \u00C9cris un message chaleureux et enthousiaste de 3-4 phrases pour lui donner envie d\u2019ouvrir ce livre maintenant. Mentionne quelque chose de sp\u00E9cifique et attrayant des premi\u00E8res pages. Termine par une phrase courte qui incite \u00E0 commencer. Ton : complice, jamais condescendant. HTML simple (p, em, strong).';
+  callLiro(prompt, function(answer){
+    var wrap = document.getElementById('resume-wrap-'+profil);
+    if(!wrap) return;
+    var rb = wrap.querySelector('.resume-body') || wrap;
+    var motivDiv = document.createElement('div');
+    motivDiv.style.cssText = 'font-size:14px;color:var(--txt2);line-height:1.75;margin-bottom:16px';
+    motivDiv.innerHTML = answer || '';
+    var startBtn = document.createElement('button');
+    startBtn.style.cssText = 'display:block;width:100%;background:'+color+';color:#fff;border:none;border-radius:var(--r-sm);padding:12px;font-size:14px;font-weight:500;font-family:var(--sans);cursor:pointer;margin-top:12px';
+    startBtn.textContent = 'C\u2019est parti \u2014 j\u2019ouvre le livre \u2192';
+    startBtn.onclick = function(){ toast2('Bonne lecture\u00A0! Liro vous attend \u00E0 votre retour.'); };
+    rb.innerHTML = '';
+    rb.appendChild(motivDiv);
+    rb.appendChild(startBtn);
   });
 }
 
