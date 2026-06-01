@@ -677,9 +677,12 @@ body{font-family:'DM Sans',sans-serif;display:flex;justify-content:center;align-
 
 <!-- ═══ DRAWER LIVRE ═══ -->
 <div class="overlay" id="overlay" onclick="closeDrawer()">
-  <div class="drawe
-
-</div></div></div>
+  <div class="drawer" onclick="event.stopPropagation()">
+    <div class="handle"></div>
+    <div id="drawer-content"></div>
+  </div>
+</div>
+</div><!-- fin .phone -->
 <script>
 // ============================================================
 // LIRO v17 - JavaScript complet
