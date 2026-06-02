@@ -479,7 +479,8 @@ body{font-family:'DM Sans',sans-serif;display:flex;justify-content:center;align-
     <!-- Formulaire ajout livre -->
     <div id="add-form" style="display:none;background:var(--card);border-radius:var(--r);border:0.5px solid var(--border);padding:16px;margin-bottom:12px">
       <div style="font-family:var(--serif);font-size:16px;color:var(--txt);margin-bottom:12px">Ajouter un livre</div>
-      <div class="lbl">Rechercher par titre ou auteur</div>
+      <button onclick="openCamera()" style="display:block;width:100%;background:var(--card);border:0.5px solid var(--border);border-radius:var(--r-sm);padding:10px 14px;font-size:13px;cursor:pointer;font-family:var(--sans);color:var(--txt2);text-align:left;margin-bottom:10px">&#128247;&#160; Identifier par photo de couverture</button>
+      <div class="lbl">Ou rechercher par titre / auteur</div>
       <input type="text" id="add-search-input" placeholder="ex : Victor Hugo, Madame Bovary..." class="inp" style="margin-bottom:6px" oninput="onAddInput(this.value)" autocomplete="off">
       <div id="add-suggestions" style="margin-bottom:10px"></div>
       <div class="lbl">Titre *</div>
@@ -2203,6 +2204,50 @@ async function enrichWithOpenLibrary(title, author, profil){
 
 function toggleAppMenu(){var m=document.getElementById('app-menu');if(m)m.style.display=m.style.display==='block'?'none':'block';}
 function closeAppMenu(){var m=document.getElementById('app-menu');if(m)m.style.display='none';}
+
+var _addInputTimer = null;
+function onAddInput(val){
+  clearTimeout(_addInputTimer);
+  var sug = document.getElementById('add-suggestions');
+  if(!val || val.length < 2){ if(sug) sug.innerHTML=''; return; }
+  _addInputTimer = setTimeout(function(){ fetchSmartSuggestions(val); }, 500);
+}
+
+async function loadAuthorWorks(authorKey, authorName){
+  var sug=document.getElementById('add-suggestions');
+  if(!sug) return;
+  sug.innerHTML='<div style="font-size:12px;color:var(--txt3);padding:6px 0">Chargement...</div>';
+  try{
+    var key=authorKey.replace('/authors/','');
+    var resp=await fetch('https://openlibrary.org/authors/'+key+'/works.json?limit=10');
+    var data=await resp.json();
+    var works=(data.entries||[]).slice(0,8);
+    sug.innerHTML='';
+    var back=document.createElement('div');
+    back.style.cssText='font-size:12px;color:var(--ru);cursor:pointer;margin-bottom:10px';
+    back.textContent='\u2190 Retour';
+    back.onclick=function(){sug.innerHTML='';};
+    sug.appendChild(back);
+    works.forEach(function(w){
+      var item=document.createElement('div');
+      item.style.cssText='display:flex;align-items:center;gap:10px;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;cursor:pointer;margin-bottom:5px';
+      item.innerHTML='<div style="flex:1"><div style="font-family:var(--serif);font-size:14px;color:var(--txt)">'+(w.title||'')+'</div>'
+        +'<div style="font-size:11px;color:var(--txt3)">'+(w.first_publish_year||'')+'</div></div>';
+      (function(t){item.onclick=function(){
+        sug.innerHTML='';
+        var tf=document.getElementById('add-title-field');
+        var af=document.getElementById('add-author-field');
+        var si=document.getElementById('add-search-input');
+        if(tf)tf.value=t; if(af)af.value=authorName; if(si)si.value=t;
+        toast2('\u201C'+t+'\u201D s\u00E9lectionn\u00E9');
+      };})(w.title||'');
+      sug.appendChild(item);
+    });
+    if(!works.length) sug.innerHTML='<div style="font-size:12px;color:var(--txt3)">Aucune \u0153uvre trouv\u00E9e.</div>';
+  }catch(e){ sug.innerHTML='<div style="font-size:12px;color:var(--txt3)">Erreur.</div>'; }
+}
+
+
 document.addEventListener('DOMContentLoaded', function(){
   init();
   startTemo();
