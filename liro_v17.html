@@ -2300,79 +2300,77 @@ function closeDrawer(){var ov=document.getElementById('overlay');if(ov)ov.style.
 // ----------------------------------------
 async function fetchSmartSuggestions(q){
   var sug=document.getElementById('add-suggestions');
-  if(!sug) return;
-  sug.innerHTML='<div style="font-size:12px;color:var(--txt3);padding:6px 0">Recherche en cours...</div>';
-  try{
-    var rT = await fetch('https://openlibrary.org/search.json?q='+encodeURIComponent(q)+'&limit=6&fields=title,author_name,key,cover_i,number_of_pages_median,first_publish_year');
-    var rA = await fetch('https://openlibrary.org/search/authors.json?q='+encodeURIComponent(q)+'&limit=2');
-    var dT = await rT.json();
-    var dA = await rA.json();
-    sug.innerHTML='';
-    var color=PROF_COLOR[curProfil];
-
-    // Auteurs
-    var authors=(dA.docs||[]).slice(0,2);
-    if(authors.length){
-      var al=document.createElement('div');
-      al.style.cssText='font-size:10px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px';
-      al.textContent='Auteurs';
-      sug.appendChild(al);
-      authors.forEach(function(a){
-        var item=document.createElement('div');
-        item.style.cssText='display:flex;align-items:center;gap:10px;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;cursor:pointer;margin-bottom:5px';
-        item.innerHTML='<div style="width:32px;height:32px;border-radius:50%;background:var(--card);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">\uD83D\uDC64</div>'
-          +'<div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--txt)">'+a.name+'</div>'
-          +'<div style="font-size:11px;color:var(--txt3)">'+(a.work_count||0)+' \u0153uvres</div></div>'
-          +'<span style="font-size:12px;color:var(--txt3)">\u2192</span>';
-        (function(au){item.onclick=function(){loadAuthorWorks(au.key,au.name);};})(a);
-        sug.appendChild(item);
-      });
-    }
-
-    // Livres \u2014 afficher titre + auteur + pages m\u00E9dian, PAS d'\u00E9ditions
-    var books=(dT.docs||[]).slice(0,5);
-    if(books.length){
-      if(authors.length){
-        var bl=document.createElement('div');
-        bl.style.cssText='font-size:10px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin:10px 0 6px';
-        bl.textContent='Livres';
-        sug.appendChild(bl);
-      }
-      books.forEach(function(d){
-        var author=d.author_name?d.author_name[0]:'';
-        var pages=d.number_of_pages_median||'';
-        var year=d.first_publish_year||'';
-        var covId=d.cover_i;
-        var item=document.createElement('div');
-        item.style.cssText='display:flex;align-items:center;gap:10px;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;cursor:pointer;margin-bottom:5px';
-        var covHtml=covId
-          ? '<img src="https://covers.openlibrary.org/b/id/'+covId+'-S.jpg" style="width:32px;height:44px;object-fit:cover;border-radius:3px;flex-shrink:0">'
-          : '<div style="width:32px;height:44px;border-radius:3px;background:var(--card);flex-shrink:0"></div>';
-        item.innerHTML=covHtml
-          +'<div style="flex:1;min-width:0"><div style="font-family:var(--serif);font-size:14px;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+d.title+'</div>'
-          +'<div style="font-size:11px;color:var(--txt3);margin-top:1px">'+author+(year?' \u00B7 '+year:'')+'</div>'
-          +(pages?'<div style="font-size:11px;color:#2d7a2d;font-weight:500;margin-top:2px">'+pages+' pages</div>':'')
-          +'</div>';
-        (function(t,a,p){item.onclick=function(){
-          sug.innerHTML='';
-          var si=document.getElementById('add-search-input');
-          var tf=document.getElementById('add-title-field');
-          var af=document.getElementById('add-author-field');
-          var pf=document.getElementById('add-total-field');
-          if(si)si.value=t;if(tf)tf.value=t;if(af)af.value=a;
-          if(pf&&p)pf.value=p;
-          toast2('\u201C'+t+'\u201D \u2014 v\u00E9rifiez et ajustez le nombre de pages');
-        };})(d.title,author,pages);
-        sug.appendChild(item);
-      });
-    }
-    if(!authors.length&&!books.length)
-      sug.innerHTML='<div style="font-size:12px;color:var(--txt3);padding:6px 0">Aucun r\u00E9sultat. Saisissez directement.</div>';
-  }catch(e){
-    sug.innerHTML='<div style="font-size:12px;color:var(--txt3);padding:6px 0">Recherche indisponible. Saisissez directement.</div>';
+  if(!sug)return;
+  var LB=[
+    ['Le Petit Prince','Saint-Exupery',96],['Les Miserables','Victor Hugo',1900],
+    ['Madame Bovary','Gustave Flaubert',468],['Candide','Voltaire',120],
+    ['Monte-Cristo','Alexandre Dumas',1200],['Germinal','Emile Zola',592],
+    ['Les Trois Mousquetaires','Alexandre Dumas',700],['Bel-Ami','Maupassant',374],
+    ['Notre-Dame de Paris','Victor Hugo',700],['Le Rouge et le Noir','Stendhal',576],
+    ['Le Pere Goriot','Balzac',350],['Eugenie Grandet','Balzac',250],
+    ['Vingt Mille Lieues','Jules Verne',400],['Tour du Monde 80 Jours','Jules Verne',256],
+    ['Crime et Chatiment','Dostoievski',550],['Guerre et Paix','Tolstoi',1440],
+    ['Anna Karenine','Tolstoi',900],["L Etranger",'Albert Camus',186],
+    ['La Peste','Albert Camus',330],['Bonjour Tristesse','Sagan',189],
+    ['La Vie devant soi','Romain Gary',272],['Le Grand Meaulnes','Alain-Fournier',200],
+    ['Manon Lescaut','Prevost',160],['Carmen','Merimee',120],
+    ['Lettres de mon Moulin','Daudet',220],['Le Horla','Maupassant',40],
+    ['Colomba','Merimee',180],['Une Vie','Maupassant',280],
+    ["L elegance du Herisson",'Muriel Barbery',358],['Les Freres Karamazov','Dostoievski',900]
+  ];
+  var qn=q.toLowerCase();
+  var matches=LB.filter(function(b){return b[0].toLowerCase().indexOf(qn)>=0||b[1].toLowerCase().indexOf(qn)>=0;}).slice(0,5);
+  sug.innerHTML='';
+  if(matches.length){
+    matches.forEach(function(b){
+      var item=document.createElement('div');
+      item.style.cssText='display:flex;align-items:center;gap:10px;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;cursor:pointer;margin-bottom:5px';
+      item.innerHTML='<div style="flex:1"><div style="font-family:var(--serif);font-size:14px;color:var(--txt)">'+b[0]+'</div><div style="font-size:11px;color:var(--txt3)">'+b[1]+'</div></div><span style="font-size:11px;color:#2d7a2d;font-weight:500">'+b[2]+' p.</span>';
+      (function(book){item.onclick=function(){
+        sug.innerHTML='';
+        var si=document.getElementById('add-search-input'),tf=document.getElementById('add-title-field'),af=document.getElementById('add-author-field'),pf=document.getElementById('add-total-field');
+        if(si)si.value=book[0];if(tf)tf.value=book[0];if(af)af.value=book[1];if(pf)pf.value=book[2];
+        toast2('"'+book[0]+'" selectionne');
+      };})(b);
+      sug.appendChild(item);
+    });
   }
+  try{
+    var resp=await fetch('https://openlibrary.org/search.json?q='+encodeURIComponent(q)+'&limit=5&fields=title,author_name,number_of_pages_median,first_publish_year');
+    var data=await resp.json();var olBooks=(data.docs||[]).slice(0,4);
+    if(olBooks.length){
+      var bl=document.createElement('div');bl.style.cssText='font-size:10px;font-weight:500;color:var(--txt3);text-transform:uppercase;margin:'+(matches.length?'10px':'0')+' 0 6px';bl.textContent='Open Library';sug.appendChild(bl);
+      olBooks.forEach(function(d){
+        var author=d.author_name?d.author_name[0]:'';var pages=d.number_of_pages_median||'';
+        var item=document.createElement('div');item.style.cssText='display:flex;align-items:center;gap:10px;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;cursor:pointer;margin-bottom:5px';
+        item.innerHTML='<div style="flex:1;min-width:0"><div style="font-family:var(--serif);font-size:14px;color:var(--txt)">'+d.title+'</div><div style="font-size:11px;color:var(--txt3)">'+author+(d.first_publish_year?' - '+d.first_publish_year:'')+'</div></div>'+(pages?'<span style="font-size:11px;color:#2d7a2d;font-weight:500">'+pages+' p.</span>':'');
+        (function(t,a,p){item.onclick=function(){sug.innerHTML='';var si=document.getElementById('add-search-input'),tf=document.getElementById('add-title-field'),af=document.getElementById('add-author-field'),pf=document.getElementById('add-total-field');if(si)si.value=t;if(tf)tf.value=t;if(af)af.value=a;if(pf&&p)pf.value=p;toast2('"'+t+'" selectionne');};})(d.title,author,pages);sug.appendChild(item);
+      });
+    }else if(!matches.length){sug.innerHTML='<div style="font-size:12px;color:var(--txt3);padding:4px 0">Aucun resultat. Saisissez directement.</div>';}
+  }catch(e){if(!matches.length)sug.innerHTML='<div style="font-size:12px;color:var(--txt3);padding:4px 0">Aucun resultat. Saisissez directement.</div>';}
 }
 
+function submitAddBook(){
+  var title=(document.getElementById('add-title-field')||{}).value||'';
+  var author=(document.getElementById('add-author-field')||{}).value||'';
+  var page=parseInt((document.getElementById('add-page-field')||{}).value)||0;
+  var total=parseInt((document.getElementById('add-total-field')||{}).value)||0;
+  title=title.trim();author=author.trim();
+  if(!title){toast2('Titre obligatoire.');return;}
+  if(!total){toast2('Pages totales obligatoires.');return;}
+  var books=getBooks(curUser.id);
+  if(books.find(function(b){return b.title.toLowerCase()===title.toLowerCase();})){toast2('"'+title+'" deja dans la bibliotheque.');return;}
+  var book={id:'b'+Date.now(),title:title,author:author,page:page,total:total,done:false,addedAt:Date.now()};
+  books.push(book);setBooks(curUser.id,books);
+  toggleAddForm();
+  ['add-title-field','add-author-field','add-page-field','add-total-field','add-search-input'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  var sug=document.getElementById('add-suggestions');if(sug)sug.innerHTML='';
+  renderLib();
+  toast2('"'+title+'" ajoute !');
+  if(page===0&&typeof motiverDepart==='function')motiverDepart();
+  var all=getBooks(curUser.id);
+  if(all.length===1)setTimeout(function(){if(typeof showProfileSuggestion==='function')showProfileSuggestion();},1500);
+}
 
 </script>
 </body>
