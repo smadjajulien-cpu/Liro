@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Liro — Démonstration · Congrès Psychiatrie</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f0eb;--card:#fff;--border:#e0d8d0;
+  --txt:#1a1a1a;--txt2:#4a4540;--txt3:#9a9490;
+  --ru:#8b3a1a;--ru2:#c4724a;--ru3:#fdf0e8;
+  --bl:#2d4a8b;--bl2:#5b7ab8;--bl3:#eef2fb;
+  --vt:#2d6a3a;--vt2:#5b9a6a;--vt3:#eef6f0;
+  --navy:#0f1729;--navy2:#1a2540;
+  --gold:#c9a84c;--gold2:#e8c97a;
+  --cream:#f8f4ee;--cream2:#ede6d8;
+  --slate:#8b99b5;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'DM Sans',-apple-system,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  background:#0c1018;
+  font-family:var(--sans);
+  overflow:hidden;
+  height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+}
+
+/* ── GRAIN ── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;
+}
+
+/* ── PROGRESS ── */
+.prog-wrap{position:fixed;top:0;left:0;right:0;height:2px;background:rgba(255,255,255,.05);z-index:200;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .6s ease;}
+
+/* ── NAV ── */
+.nav-bar{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  background:rgba(255,255,255,.06);backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.1);border-radius:24px;
+  padding:8px 20px;display:flex;gap:20px;align-items:center;
+  z-index:200;transition:opacity .4s;
+}
+.nav-bar.hide{opacity:0;pointer-events:none;}
+.nav-dots{display:flex;gap:5px;}
+.nav-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:all .25s;}
+.nav-dot.on{background:var(--gold);width:16px;border-radius:3px;}
+.nav-key{background:rgba(255,255,255,.1);border-radius:5px;padding:3px 9px;font-size:10px;color:rgba(255,255,255,.5);}
+.nav-label{font-size:11px;color:rgba(255,255,255,.3);}
+.play-btn{background:var(--gold);color:var(--navy);border:none;border-radius:14px;padding:5px 14px;font-size:11px;font-weight:500;cursor:pointer;font-family:var(--sans);}
+
+/* ── SCENES ── */
+.scene{
+  position:fixed;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:opacity .7s ease;
+  pointer-events:none;z-index:1;
+}
+.scene.active{opacity:1;pointer-events:all;}
+
+/* ── PHONE ── */
+.phone{
+  width:260px;height:520px;
+  background:#0a0a0a;border-radius:38px;padding:8px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.06),
+    0 40px 80px rgba(0,0,0,.8),
+    0 0 60px rgba(201,168,76,.04);
+  flex-shrink:0;position:relative;
+}
+.phone-glow{
+  position:absolute;inset:-20px;
+  background:radial-gradient(circle at 50% 50%,rgba(201,168,76,.05),transparent 70%);
+  pointer-events:none;border-radius:60px;
+}
+.ps{width:100%;height:100%;background:var(--bg);border-radius:30px;overflow:hidden;display:flex;flex-direction:column;}
+.notch{width:80px;height:20px;background:#0a0a0a;border-radius:0 0 12px 12px;margin:0 auto;z-index:5;flex-shrink:0;}
+
+/* ── SLIDE PANEL ── */
+.slide-panel{
+  background:var(--navy);border-radius:14px;
+  padding:44px 52px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.05),0 40px 100px rgba(0,0,0,.7);
+  position:relative;overflow:hidden;
+  max-height:90vh;
+}
+.slide-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),var(--gold2),var(--gold),transparent);}
+.sp-glow{position:absolute;border-radius:50%;pointer-events:none;}
+
+/* ── TWO COL SCENE ── */
+.two-col{display:flex;gap:60px;align-items:center;}
+.col-text{flex:1;}
+.col-phone{flex-shrink:0;}
+
+/* ── TEXT ELEMENTS ── */
+.scene-tag{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;}
+.scene-h{font-family:var(--serif);font-size:36px;font-weight:300;color:var(--cream);line-height:1.2;margin-bottom:10px;}
+.scene-h em{font-style:italic;color:var(--gold2);}
+.scene-sub{font-size:13px;color:rgba(255,255,255,.45);line-height:1.75;margin-bottom:24px;}
+.scene-sub strong{color:rgba(255,255,255,.75);font-weight:500;}
+
+/* Timeline */
+.tl{display:flex;flex-direction:column;gap:0;}
+.tl-item{display:flex;gap:14px;padding-bottom:18px;position:relative;}
+.tl-item:not(:last-child)::before{content:'';position:absolute;left:8px;top:18px;bottom:0;width:1px;background:linear-gradient(to bottom,rgba(201,168,76,.4),transparent);}
+.tl-dot{width:17px;height:17px;border-radius:50%;border:1.5px solid var(--gold);background:var(--navy2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+.tl-inner{width:5px;height:5px;border-radius:50%;background:var(--gold);}
+.tl-lbl{font-size:8px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;margin-bottom:2px;}
+.tl-txt{font-size:12px;color:rgba(255,255,255,.6);line-height:1.55;}
+
+/* Quote */
+.quote{background:rgba(255,255,255,.03);border:1px solid rgba(201,168,76,.2);border-left:3px solid var(--gold);border-radius:8px;padding:14px 16px;}
+.quote-text{font-family:var(--serif);font-size:16px;font-style:italic;color:var(--cream2);line-height:1.65;margin-bottom:6px;}
+.quote-cite{font-size:10px;color:var(--gold);letter-spacing:.06em;}
+
+/* Pill */
+.pill{display:inline-flex;align-items:center;gap:6px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);border-radius:16px;padding:5px 14px;font-size:10px;color:var(--gold2);font-weight:500;}
+.pill-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);}
+
+/* Feature list */
+.feat{display:flex;flex-direction:column;gap:11px;}
+.feat-item{display:flex;gap:10px;align-items:flex-start;}
+.feat-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);margin-top:5px;flex-shrink:0;}
+.feat-txt{font-size:12px;color:rgba(255,255,255,.5);line-height:1.6;}
+.feat-txt strong{color:rgba(255,255,255,.8);font-weight:500;}
+
+/* Stat */
+.stats-row{display:flex;gap:12px;}
+.stat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:14px 16px;flex:1;text-align:center;}
+.stat-n{font-family:var(--serif);font-size:30px;color:var(--gold2);line-height:1;margin-bottom:4px;}
+.stat-l{font-size:10px;color:rgba(255,255,255,.35);line-height:1.4;}
+
+/* Opening card */
+.opening{text-align:center;max-width:640px;}
+.opening-logo{font-family:var(--serif);font-size:72px;font-style:italic;color:var(--gold2);margin-bottom:8px;line-height:1;}
+.opening-tag{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:24px;opacity:.7;}
+.opening-quote{font-family:var(--serif);font-size:22px;font-style:italic;color:var(--cream2);line-height:1.6;margin-bottom:32px;}
+.opening-author{font-size:12px;color:rgba(255,255,255,.35);}
+
+/* App micro-components */
+.ahdr{background:#fff;border-bottom:1px solid #e0d8d0;padding:24px 10px 6px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.alogo{font-family:var(--serif);font-size:13px;font-style:italic;color:#8b3a1a;}
+.alogo em{color:#c4724a;}
+.atabs{display:grid;grid-template-columns:1fr 1fr 1fr;background:#fff;border-bottom:1px solid #e0d8d0;flex-shrink:0;}
+.atab{padding:5px 2px;text-align:center;font-size:8px;font-weight:500;color:#9a9490;border-bottom:2px solid transparent;}
+.atab.on{color:#2d4a8b;border-bottom-color:#2d4a8b;}
+.atab.ru{color:#8b3a1a;border-bottom-color:#8b3a1a;}
+.atab.vt{color:#2d6a3a;border-bottom-color:#2d6a3a;}
+.apad{padding:9px;flex:1;overflow:hidden;}
+
+.bkcrd{background:#fff;border:1px solid #e0d8d0;border-radius:9px;padding:9px;margin-bottom:7px;}
+.bkrow{display:flex;gap:7px;}
+.bcov{width:34px;height:48px;border-radius:4px;flex-shrink:0;}
+.bey{font-size:7px;color:#9a9490;text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px;}
+.bti{font-family:var(--serif);font-size:11px;color:#1a1a1a;margin-bottom:1px;}
+.bau{font-size:8px;color:#9a9490;margin-bottom:4px;}
+.bprg{height:3px;background:#e0d8d0;border-radius:2px;overflow:hidden;margin-bottom:2px;}
+.bpf{height:100%;border-radius:2px;}
+.bpl{font-size:7px;color:#9a9490;}
+.mbar{display:flex;gap:3px;margin-bottom:5px;}
+.mpill{flex:1;padding:4px 2px;border-radius:10px;border:1px solid #e0d8d0;font-size:7px;text-align:center;color:#9a9490;}
+.mpill.on{color:#fff;border-color:transparent;}
+.mbtn{width:100%;border:none;border-radius:6px;padding:8px;font-size:9px;font-weight:500;color:#fff;margin-bottom:2px;text-align:center;}
+.msub{font-size:7px;color:#9a9490;text-align:center;margin-bottom:5px;}
+.rescrd{background:#fff;border-radius:8px;padding:8px;margin-bottom:5px;}
+.restag{display:inline-block;font-size:6px;font-weight:500;padding:2px 6px;border-radius:5px;margin-bottom:4px;}
+.resbody{font-size:8px;color:#4a4540;line-height:1.7;}
+.resbody em{font-style:italic;}
+.sitgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:5px;}
+.sitbtn{background:#fff;border:1px solid #e0d8d0;border-radius:6px;padding:6px 5px;display:flex;align-items:center;gap:3px;}
+.slbl{font-size:8px;font-weight:500;color:#1a1a1a;}
+.ssub{font-size:6px;color:#9a9490;}
+.chatcrd{background:#fff;border:1px solid #e0d8d0;border-radius:8px;overflow:hidden;}
+.chdhd{padding:4px 8px;border-bottom:1px solid #e0d8d0;font-size:7px;font-weight:500;color:#4a4540;background:#f5f0eb;}
+.chmsg{padding:6px 6px 3px;display:flex;flex-direction:column;gap:3px;}
+.bbl{padding:5px 7px;border-radius:7px;font-size:7px;line-height:1.5;max-width:88%;}
+.bbl.u{align-self:flex-end;color:#fff;border-radius:7px 7px 2px 7px;}
+.bbl.l{align-self:flex-start;background:#f0ede9;color:#1a1a1a;border-radius:7px 7px 7px 2px;}
+.chin{display:flex;border-top:1px solid #e0d8d0;}
+.chfi{flex:1;padding:5px 7px;font-size:7px;border:none;background:#fff;color:#9a9490;}
+.chsb{border:none;padding:5px 9px;font-size:9px;color:#fff;}
+.lbbook{background:#fff;border:1px solid #e0d8d0;border-radius:7px;padding:8px;margin-bottom:5px;display:flex;gap:7px;}
+.lbcov{width:28px;height:40px;border-radius:3px;flex-shrink:0;}
+.lbti{font-family:var(--serif);font-size:9px;margin-bottom:1px;}
+.lbau{font-size:7px;color:#9a9490;margin-bottom:3px;}
+.lbprg{height:2px;background:#e0d8d0;border-radius:1px;overflow:hidden;margin-bottom:1px;}
+.lbpf{height:100%;border-radius:1px;}
+.lbpc{font-size:6px;color:#9a9490;}
+.nivsep{display:flex;align-items:center;gap:4px;margin:6px 0 3px;}
+.nivln{flex:1;height:1px;background:#e0d8d0;}
+.nivlb{font-size:6px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;}
+.catbk{background:#fff;border:1px solid #e0d8d0;border-radius:6px;padding:7px;margin-bottom:4px;display:flex;gap:5px;position:relative;}
+.catbk.reco{border-color:#2d6a3a;background:#eef6f0;}
+.recob{position:absolute;top:0;left:6px;background:#2d6a3a;color:#fff;font-size:5px;font-weight:500;padding:1px 5px;border-radius:0 0 3px 3px;}
+.catcv{width:22px;height:30px;border-radius:2px;flex-shrink:0;}
+.catti{font-family:var(--serif);font-size:8px;color:#1a1a1a;margin-bottom:1px;}
+.catme{font-size:6px;color:#9a9490;}
+.catbs{display:flex;gap:3px;margin-top:3px;}
+.catbs button{flex:1;border:none;border-radius:3px;padding:3px;font-size:6px;font-weight:500;color:#fff;}
+
+/* Spinner */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{width:14px;height:14px;border:1.5px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;}
+
+/* Cursor */
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.cur{display:inline-block;width:1.5px;height:11px;background:#8b3a1a;margin-left:1px;animation:blink .8s infinite;vertical-align:middle;}
+
+/* Fade anims */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.au{animation:fadeUp .65s ease forwards;opacity:0;}
+.ai{animation:fadeIn .5s ease forwards;opacity:0;}
+.d1{animation-delay:.1s}.d2{animation-delay:.3s}.d3{animation-delay:.55s}
+.d4{animation-delay:.75s}.d5{animation-delay:.95s}.d6{animation-delay:1.2s}
+
+/* Liro watermark */
+.wm{position:absolute;bottom:18px;right:22px;font-family:var(--serif);font-size:12px;font-style:italic;color:var(--gold);opacity:.35;}
+</style>
+</head>
+<body>
+<div class="prog-wrap"><div class="prog-fill" id="pbf" style="width:0%"></div></div>
+
+<!-- ══════════════════════════════════════════
+  SCÈNE 0 — OUVERTURE
+══════════════════════════════════════════ -->
+<div class="scene active" id="sc-0">
+  <div class="opening">
+    <div class="opening-logo au d1">Liro</div>
+    <div class="opening-tag au d2">Démonstration · Congrès de Psychiatrie de la Personne Âgée</div>
+    <div class="opening-quote au d3">« Ce qu'un psychiatre sans compétences techniques<br>peut construire aujourd'hui avec l'IA. »</div>
+    <div class="opening-author au d4">Dr. [Prénom Nom] · Psychiatre · Fondateur de Liro</div>
+    <div style="margin-top:32px" class="au d5">
+      <div class="pill"><div class="pill-dot"></div>Appuyer sur Espace pour démarrer · Flèches pour naviguer</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCÈNE 1 — L'OBSERVATION ══ -->
+<div class="scene" id="sc-1">
+  <div class="slide-panel" style="width:820px">
+    <div class="sp-glow" style="width:400px;height:400px;background:radial-gradient(circle,rgba(201,168,76,.07),transparent);top:-150px;left:-100px"></div>
+    <div class="wm">Liro</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start">
+      <div>
+        <div class="scene-tag au d1">L'observation clinique</div>
+        <div class="scene-h au d2" style="font-size:32px">Un problème que<br>vous voyez <em>chaque semaine.</em></div>
+        <div class="scene-sub au d3">Des patients qui abandonnent leurs livres — non par manque d'envie, mais par perte du fil. Entre deux sessions, les détails s'effacent.</div>
+        <div class="tl au d4">
+          <div class="tl-item">
+            <div class="tl-dot"><div class="tl-inner"></div></div>
+            <div><div class="tl-lbl">Le problème</div><div class="tl-txt">57% des adultes n'arrivent pas à maintenir une pratique de lecture régulière. Pour les personnes avec MCI légers, c'est encore plus fréquent.</div></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot"><div class="tl-inner"></div></div>
+            <div><div class="tl-lbl">Ce qui se passe</div><div class="tl-txt">Ils posent le livre. 5 jours passent. Ils ne savent plus où ils en sont. Ils ne se souviennent plus des personnages. Ils abandonnent.</div></div>
+          </div>
+          <div class="tl-item" style="padding-bottom:0">
+            <div class="tl-dot"><div class="tl-inner"></div></div>
+            <div><div class="tl-lbl">Ce qu'on sait</div><div class="tl-txt">La lecture est un facteur de stimulation cognitive reconnu. Mais sans accompagnement, elle est souvent la première activité abandonnée.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="au d5">
+        <div class="quote" style="margin-bottom:16px">
+          <div class="quote-text">« J'avais arrêté de lire depuis 2 ans.<br>Je ne me souvenais plus où j'en étais.<br>Liro m'a rappelé le fil — et j'ai repris. »</div>
+          <div class="quote-cite">— Marie, 71 ans · profil Mémoire</div>
+        </div>
+        <div class="quote">
+          <div class="quote-text">« Parfait quand la concentration est difficile à maintenir. Un résumé en 30 secondes et je suis de retour dans l'histoire. »</div>
+          <div class="quote-cite">— Thomas, 29 ans · profil Attention</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCÈNE 2 — QU'EST-CE QUE LIRO ══ -->
+<div class="scene" id="sc-2">
+  <div class="two-col">
+    <div class="col-text" style="max-width:360px">
+      <div class="scene-tag au d1">La solution</div>
+      <div class="scene-h au d2">Liro — compagnon de lecture <em>bienveillant.</em></div>
+      <div class="scene-sub au d3">Une app bien-être — pas un outil médical.<br><strong>Trois profils, un principe absolu :</strong> ne jamais dévoiler ce qui vient après la page actuelle.</div>
+      <div class="feat au d4">
+        <div class="feat-item"><div class="feat-dot"></div><div class="feat-txt"><strong>Profil Attention ⚡</strong> — L'essentiel en 30 secondes. Pour ceux qui décrochent facilement.</div></div>
+        <div class="feat-item"><div class="feat-dot"></div><div class="feat-txt"><strong>Profil Mémoire 🧠</strong> — Rappels doux et détaillés. Pour ceux qui oublient entre les sessions.</div></div>
+        <div class="feat-item"><div class="feat-dot"></div><div class="feat-txt"><strong>Profil Plaisir 🌱</strong> — Ambiance et émotions. Pour retrouver le goût de lire sans pression.</div></div>
+        <div class="feat-item"><div class="feat-dot"></div><div class="feat-txt"><strong>Chat libre</strong> — Poser des questions sur les personnages, l'intrigue, les lieux.</div></div>
+        <div class="feat-item"><div class="feat-dot"></div><div class="feat-txt"><strong>Audio natif</strong> — Le résumé peut être lu à voix haute pour les personnes qui peinent à lire l'écran.</div></div>
+      </div>
+    </div>
+    <div class="col-phone au d5">
+      <div class="phone">
+        <div class="phone-glow"></div>
+        <div class="ps">
+          <div class="notch"></div>
+          <div style="flex:1;overflow:hidden;padding:14px 12px 12px;display:flex;flex-direction:column;align-items:center">
+            <svg width="32" height="32" viewBox="0 0 38 38" style="margin-bottom:6px"><rect x="7" y="4" width="22" height="29" rx="3" fill="none" stroke="#8b3a1a" stroke-width="1.5"/><rect x="20" y="4" width="4" height="8" rx="1.5" fill="#c4724a"/></svg>
+            <div style="font-family:var(--serif);font-size:20px;font-style:italic;color:#8b3a1a;margin-bottom:3px">L<em style="color:#c4724a">i</em>ro</div>
+            <div style="font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:#9a9490;margin-bottom:12px">Compagnon de lecture</div>
+            <p style="font-size:9px;line-height:1.7;color:#4a4540;text-align:center;margin-bottom:13px">Vous posez votre livre.<br><strong style="color:#1a1a1a">Liro vous rappelle où vous en êtes</strong><br>— sans jamais dévoiler la suite.</p>
+            <div style="width:100%">
+              <div style="background:#fff;border:1px solid #e0d8d0;border-radius:8px;padding:8px 9px;margin-bottom:5px;display:flex;align-items:center;gap:7px">
+                <div style="width:26px;height:26px;border-radius:50%;background:#eef2fb;display:flex;align-items:center;justify-content:center;font-size:12px">&#x26A1;</div>
+                <div><div style="font-size:9px;font-weight:600;color:#2d4a8b;margin-bottom:1px">Mon attention est difficile</div><div style="font-size:7px;color:#9a9490">Liro me donne l'essentiel.</div></div>
+              </div>
+              <div style="background:#fff;border:1px solid #e0d8d0;border-radius:8px;padding:8px 9px;margin-bottom:5px;display:flex;align-items:center;gap:7px">
+                <div style="width:26px;height:26px;border-radius:50%;background:#fdf0e8;display:flex;align-items:center;justify-content:center;font-size:12px">&#x1F9E0;</div>
+                <div><div style="font-size:9px;font-weight:600;color:#8b3a1a;margin-bottom:1px">J'oublie ce que j'ai lu</div><div style="font-size:7px;color:#9a9490">Rappels doux, sans pression.</div></div>
+              </div>
+              <div style="background:#fff;border:1px solid #e0d8d0;border-radius:8px;padding:8px 9px;display:flex;align-items:center;gap:7px">
+                <div style="width:26px;height:26px;border-radius:50%;background:#eef6f0;display:flex;align-items:center;justify-content:center;font-size:12px">&#x1F331;</div>
+                <div><div style="font-size:9px;font-weight:600;color:#2d6a3a;margin-bottom:1px">J'ai perdu le goût de lire</div><div style="font-size:7px;color:#9a9490">Liro vous aide à y revenir.</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCÈNE 3 — MON LIVRE + RÉSUMÉ ══ -->
+<div class="scene" id="sc-3">
+  <div class="two-col">
+    <div class="col-text" style="max-width:340px">
+      <div class="scene-tag au d1">En pratique</div>
+      <div class="scene-h au d2" style="font-size:30px">Reprendre en <em>30 secondes.</em></div>
+      <div class="scene-sub au d3">L'utilisateur indique sa page. Liro génère un résumé sur mesure — adapté à son profil, jamais au-delà de sa page actuelle.</div>
+      <div class="tl au d4">
+        <div class="tl-item">
+          <div class="tl-dot"><div class="tl-inner"></div></div>
+          <div><div class="tl-lbl">La règle absolue</div><div class="tl-txt">Liro ne dévoile jamais ce qui se passe après la page actuelle du lecteur. C'est inscrit dans chaque prompt.</div></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"><div class="tl-inner"></div></div>
+          <div><div class="tl-lbl">L'IA derrière</div><div class="tl-txt">Claude (Anthropic) — réputé pour sa prudence et son alignement éthique. Pas de données de santé transmises.</div></div>
+        </div>
+        <div class="tl-item" style="padding-bottom:0">
+          <div class="tl-dot"><div class="tl-inner"></div></div>
+          <div><div class="tl-lbl">Le chat</div><div class="tl-txt">Après le résumé, l'utilisateur peut poser des questions libres — personnages, lieux, ambiance. Toujours dans les limites de sa page.</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-phone au d5">
+      <div class="phone">
+        <div class="phone-glow"></div>
+        <div class="ps">
+          <div class="notch"></div>
+          <div class="ahdr"><div class="alogo">L<em>i</em>ro</div><div style="font-size:8px;color:#9a9490">Marie</div></div>
+          <div class="atabs"><div class="atab ru on">Mon livre</div><div class="atab">Bibliothèque</div><div class="atab">Conseil</div></div>
+          <div class="apad">
+            <div class="bkcrd">
+              <div class="bkrow">
+                <div class="bcov" style="background:linear-gradient(135deg,#f9e4b7,#e0935a)"></div>
+                <div style="flex:1">
+                  <div class="bey">Vous lisez</div>
+                  <div class="bti">Madame Bovary</div>
+                  <div class="bau">Gustave Flaubert</div>
+                  <div class="bprg"><div class="bpf" style="width:62%;background:#8b3a1a"></div></div>
+                  <div class="bpl">Page 290 sur 468 · 62%</div>
+                </div>
+              </div>
+            </div>
+            <div class="mbar">
+              <div class="mpill">&#x26A1;</div>
+              <div class="mpill on" style="background:#8b3a1a">&#x1F9E0; Mémoire</div>
+              <div class="mpill">&#x1F331;</div>
+            </div>
+            <div class="rescrd" id="r3" style="border:1px solid #c4724a">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+                <div class="restag" style="background:#fdf0e8;color:#8b3a1a">&#10003; Sans dévoiler la suite</div>
+                <div style="border:1px solid #e0d8d0;border-radius:6px;padding:2px 6px;font-size:6px;color:#9a9490">&#128266; Lire</div>
+              </div>
+              <div class="resbody" id="r3b"></div>
+            </div>
+            <div class="chatcrd" id="c3" style="display:none">
+              <div class="chdhd">&#128172; Discuter avec Liro</div>
+              <div class="chmsg">
+                <div class="bbl u" style="background:#8b3a1a" id="q3"></div>
+                <div class="bbl l" id="a3" style="display:none"></div>
+              </div>
+              <div class="chin"><div class="chfi">Une question…</div><div class="chsb" style="background:#8b3a1a">→</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCÈNE 4 — BIBLIOTHÈQUE + CONSEIL ══ -->
+<div class="scene" id="sc-4">
+  <div style="display:flex;gap:40px;align-items:center">
+    <!-- Phone biblio -->
+    <div class="au d2">
+      <div class="phone">
+        <div class="phone-glow"></div>
+        <div class="ps">
+          <div class="notch"></div>
+          <div class="ahdr"><div class="alogo">L<em>i</em>ro</div><div style="font-size:8px;color:#9a9490">Marie</div></div>
+          <div class="atabs"><div class="atab">Mon livre</div><div class="atab on">Bibliothèque</div><div class="atab">Conseil</div></div>
+          <div class="apad">
+            <div class="lbbook" style="border-color:#8b3a1a">
+              <div class="lbcov" style="background:linear-gradient(135deg,#f9e4b7,#e0935a)"></div>
+              <div style="flex:1"><div class="lbti">Madame Bovary</div><div class="lbau">Flaubert</div><div class="lbprg"><div class="lbpf" style="width:62%;background:#8b3a1a"></div></div><div class="lbpc">290/468 · 62%</div></div>
+            </div>
+            <div class="lbbook">
+              <div class="lbcov" style="background:linear-gradient(135deg,#abebc6,#52be80)"></div>
+              <div style="flex:1"><div class="lbti">La Peste</div><div class="lbau">Albert Camus</div><div class="lbprg"><div class="lbpf" style="width:74%;background:#2d6a3a"></div></div><div class="lbpc">245/330 · 74%</div></div>
+            </div>
+            <div class="lbbook">
+              <div class="lbcov" style="background:linear-gradient(135deg,#d2b4de,#a88bcf)"></div>
+              <div style="flex:1"><div class="lbti">Le Petit Prince</div><div class="lbau">Saint-Exupéry</div><div class="lbprg"><div class="lbpf" style="width:58%;background:#2d4a8b"></div></div><div class="lbpc">56/96 · 58%</div></div>
+            </div>
+            <div class="lbbook">
+              <div class="lbcov" style="background:linear-gradient(135deg,#aed6f1,#5dade2)"></div>
+              <div style="flex:1"><div class="lbti">Les Misérables</div><div class="lbau">Victor Hugo</div><div class="lbprg"><div class="lbpf" style="width:38%;background:#2d4a8b"></div></div><div class="lbpc">722/1900 · 38%</div></div>
+            </div>
+            <button style="width:100%;border:1px solid #e0d8d0;border-radius:7px;padding:7px;font-size:8px;color:#4a4540;background:#fff;margin-top:3px">+ Ajouter un livre</button>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:10px;font-size:10px;color:rgba(255,255,255,.3)">Bibliothèque</div>
+    </div>
+
+    <!-- Centre text -->
+    <div style="max-width:280px;text-align:center">
+      <div class="scene-tag au d1" style="text-align:center">La bibliothèque</div>
+      <div class="scene-h au d2" style="font-size:26px;text-align:center">Tous les livres.<br><em>Une progression.</em><br>Un seul tap.</div>
+      <div style="margin:20px 0;opacity:0;animation:fadeIn .5s .6s forwards">
+        <div style="width:1px;height:40px;background:linear-gradient(to bottom,transparent,rgba(201,168,76,.4),transparent);margin:0 auto"></div>
+      </div>
+      <div class="scene-tag au d3" style="text-align:center;margin-bottom:8px">Le catalogue</div>
+      <div class="scene-h au d4" style="font-size:26px;text-align:center"><em>51 œuvres</em><br>domaine public.<br>4 niveaux.</div>
+    </div>
+
+    <!-- Phone conseil -->
+    <div class="au d3">
+      <div class="phone">
+        <div class="phone-glow"></div>
+        <div class="ps">
+          <div class="notch"></div>
+          <div class="ahdr"><div class="alogo">L<em>i</em>ro</div><div style="font-size:8px;color:#9a9490">Marie</div></div>
+          <div class="atabs"><div class="atab">Mon livre</div><div class="atab">Bibliothèque</div><div class="atab vt on">Conseil</div></div>
+          <div class="apad">
+            <div style="font-size:7px;color:#4a4540;line-height:1.5;margin-bottom:6px">Gratuits, libres de droits, sur Project Gutenberg.</div>
+            <div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:6px">
+              <div style="padding:3px 8px;border-radius:9px;background:#2d6a3a;color:#fff;font-size:7px;font-weight:500">Tous</div>
+              <div style="padding:3px 7px;border-radius:9px;border:1px solid #e0d8d0;font-size:7px;color:#9a9490">&#x26A1;</div>
+              <div style="padding:3px 7px;border-radius:9px;border:1px solid #e0d8d0;font-size:7px;color:#9a9490">&#x1F9E0;</div>
+              <div style="padding:3px 7px;border-radius:9px;border:1px solid #e0d8d0;font-size:7px;color:#9a9490">&#x1F331;</div>
+            </div>
+            <div class="nivsep"><div class="nivln"></div><div class="nivlb" style="color:#2d6a3a">Niveau 1 — Très courts</div><div class="nivln"></div></div>
+            <div style="font-size:6px;color:#9a9490;margin-bottom:5px">Nouvelles · moins de 80 pages</div>
+            <div class="catbk reco">
+              <div class="recob">Recommandé</div>
+              <div class="catcv" style="background:linear-gradient(135deg,#d2b4de,#a88bcf);margin-top:8px"></div>
+              <div style="margin-top:8px">
+                <div class="catti">Le Horla</div>
+                <div class="catme">Maupassant · <span style="color:#2d7a2d">40 p.</span></div>
+                <div class="catbs"><button style="background:#2d6a3a">Commencer</button><button style="border:1px solid #e0d8d0;background:#f5f0eb;color:#9a9490">Gutenberg</button></div>
+              </div>
+            </div>
+            <div class="catbk"><div class="catcv" style="background:linear-gradient(135deg,#f9e4b7,#e0935a)"></div><div><div class="catti">Candide</div><div class="catme">Voltaire · <span style="color:#2d7a2d">120 p.</span></div></div></div>
+            <button style="width:100%;border:1px solid #e0d8d0;border-radius:5px;padding:5px;font-size:7px;color:#9a9490;background:none;margin-top:2px">Voir les 12 livres ↓</button>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:10px;font-size:10px;color:rgba(255,255,255,.3)">Conseil</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCÈNE 5 — CE QUI EST MAINTENANT POSSIBLE ══ -->
+<div class="scene" id="sc-5">
+  <div class="slide-panel" style="width:860px">
+    <div class="sp-glow" style="width:500px;height:400px;background:radial-gradient(circle,rgba(45,74,139,.08),transparent);bottom:-100px;right:-100px"></div>
+    <div class="wm">Liro</div>
+    <div class="scene-tag au d1">Pour vos collègues cliniciens</div>
+    <div class="scene-h au d2" style="margin-bottom:6px">Votre observation clinique <em>devient un outil.</em></div>
+    <div class="scene-sub au d3" style="margin-bottom:28px">Ce que j'ai construit en quelques semaines — sans savoir coder — avec Claude comme partenaire technique.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px" class="au d4">
+      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:18px 16px">
+        <div style="font-family:var(--serif);font-size:28px;color:var(--gold);opacity:.3;margin-bottom:6px;font-weight:300">01</div>
+        <div style="font-family:var(--serif);font-size:15px;color:var(--cream);margin-bottom:8px">Observer<br>& Identifier</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.45);line-height:1.6">Vous avez des observations cliniques uniques. Des problèmes récurrents. C'est votre matière première — irremplaçable.</div>
+        <div style="margin-top:10px;display:inline-block;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);border-radius:10px;padding:3px 9px;font-size:8px;color:var(--gold2)">Votre expertise</div>
+      </div>
+      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:18px 16px">
+        <div style="font-family:var(--serif);font-size:28px;color:var(--gold);opacity:.3;margin-bottom:6px;font-weight:300">02</div>
+        <div style="font-family:var(--serif);font-size:15px;color:var(--cream);margin-bottom:8px">Concevoir<br>avec l'IA</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.45);line-height:1.6">L'IA traduit votre vision en produit fonctionnel. Interface, logique, intégrations. En langage naturel. Sans code.</div>
+        <div style="margin-top:10px;display:inline-block;background:rgba(139,58,26,.1);border:1px solid rgba(196,114,74,.2);border-radius:10px;padding:3px 9px;font-size:8px;color:var(--ru2)">Claude · Anthropic</div>
+      </div>
+      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:18px 16px">
+        <div style="font-family:var(--serif);font-size:28px;color:var(--gold);opacity:.3;margin-bottom:6px;font-weight:300">03</div>
+        <div style="font-family:var(--serif);font-size:15px;color:var(--cream);margin-bottom:8px">Diffuser<br>& Mesurer</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.45);line-height:1.6">Un fichier HTML suffit pour toucher des milliers d'utilisateurs. Les retours arrivent en jours, pas en années.</div>
+        <div style="margin-top:10px;display:inline-block;background:rgba(45,106,58,.1);border:1px solid rgba(91,154,106,.2);border-radius:10px;padding:3px 9px;font-size:8px;color:var(--vt2)">liro.app</div>
+      </div>
+    </div>
+    <div class="quote au d5">
+      <div class="quote-text" style="font-size:18px">« Le code n'est plus le frein. L'observation clinique, elle, reste irremplaçable.<br>Quelles idées avez-vous qui attendent depuis des années ? »</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCÈNE 6 — FERMETURE ══ -->
+<div class="scene" id="sc-6">
+  <div style="text-align:center;max-width:580px">
+    <div style="font-family:var(--serif);font-size:60px;font-style:italic;color:var(--gold2);margin-bottom:10px;line-height:1" class="au d1">Liro</div>
+    <div style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:28px;opacity:.7" class="au d2">App bien-être · Compagnon de lecture</div>
+    <div style="font-family:var(--serif);font-size:20px;font-style:italic;color:var(--cream2);line-height:1.6;margin-bottom:32px" class="au d3">« Reprendre un livre qu'on a en main,<br>sans spoiler. »</div>
+    <div style="display:flex;gap:16px;justify-content:center;margin-bottom:32px" class="au d4">
+      <div class="stat">
+        <div class="stat-n" style="font-size:24px">51</div>
+        <div class="stat-l">œuvres domaine public<br>cataloguées V1</div>
+      </div>
+      <div class="stat">
+        <div class="stat-n" style="font-size:24px">3</div>
+        <div class="stat-l">profils lecteurs<br>Attention · Mémoire · Plaisir</div>
+      </div>
+      <div class="stat">
+        <div class="stat-n" style="font-size:24px">0</div>
+        <div class="stat-l">donnée de santé<br>collectée</div>
+      </div>
+    </div>
+    <div class="au d5">
+      <div style="border:1px solid rgba(201,168,76,.3);border-radius:20px;padding:10px 28px;display:inline-block;font-size:14px;color:var(--gold2);font-family:var(--serif);font-style:italic;margin-bottom:16px">liro.app</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.25)">Questions ? Intéressé(e) pour tester avec vos patients ? contact@liro.app</div>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav-bar" id="nav-bar">
+  <div class="nav-dots" id="nav-dots"></div>
+  <div class="nav-label" id="nav-label"></div>
+  <button class="play-btn" onclick="togglePlay()" id="play-btn">▶ Auto</button>
+  <div style="display:flex;gap:6px">
+    <span class="nav-key">←</span>
+    <span class="nav-key">→</span>
+    <span class="nav-key">Espace</span>
+  </div>
+</div>
+
+<script>
+var SCENES = [
+  {id:'sc-0', label:'Ouverture', dur:4000},
+  {id:'sc-1', label:'L\'observation clinique', dur:7000},
+  {id:'sc-2', label:'Qu\'est-ce que Liro ?', dur:6000},
+  {id:'sc-3', label:'En pratique — résumé', dur:7000},
+  {id:'sc-4', label:'Bibliothèque & Conseil', dur:5500},
+  {id:'sc-5', label:'Ce qui est maintenant possible', dur:7000},
+  {id:'sc-6', label:'Conclusion', dur:8000}
+];
+var cur=0, playing=false, timer=null, inited={};
+
+// Build dots
+var dotWrap=document.getElementById('nav-dots');
+SCENES.forEach(function(_,i){
+  var d=document.createElement('div');
+  d.className='nav-dot';d.id='dot-'+i;
+  d.onclick=function(){go(i);};
+  dotWrap.appendChild(d);
+});
+
+function go(n){
+  document.querySelectorAll('.scene').forEach(function(s){s.classList.remove('active');});
+  var sc=document.getElementById(SCENES[n].id);
+  if(sc) sc.classList.add('active');
+  cur=n;
+  document.getElementById('pbf').style.width=((n/(SCENES.length-1))*100)+'%';
+  document.getElementById('nav-label').textContent=(n+1)+' / '+SCENES.length+' — '+SCENES[n].label;
+  SCENES.forEach(function(_,i){
+    var d=document.getElementById('dot-'+i);
+    d.className='nav-dot'+(i===n?' on':i<n?' done':'');
+    if(i<n) d.style.background='rgba(255,255,255,.35)'; else d.style.background='';
+  });
+  if(!inited[n]){inited[n]=true;initScene(n);}
+}
+function next(){if(cur<SCENES.length-1){go(cur+1);if(playing)schedule();}else stopPlay();}
+function prev(){if(cur>0)go(cur-1);}
+function togglePlay(){if(playing)stopPlay();else startPlay();}
+function startPlay(){playing=true;document.getElementById('play-btn').textContent='⏸ Pause';schedule();}
+function stopPlay(){playing=false;document.getElementById('play-btn').textContent='▶ Auto';clearTimeout(timer);}
+function schedule(){clearTimeout(timer);timer=setTimeout(function(){if(playing)next();},SCENES[cur].dur);}
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowRight'||e.key==='PageDown'){e.preventDefault();next();}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();prev();}
+  else if(e.key===' '){e.preventDefault();togglePlay();}
+});
+
+function typeText(id,text,speed,cb){
+  var el=document.getElementById(id);if(!el)return;
+  var i=0;var t=setInterval(function(){if(i<text.length){el.textContent+=text[i];i++;}else{clearInterval(t);if(cb)cb();}},speed);
+}
+
+function initScene(n){
+  if(n===3) initS3();
+}
+
+function initS3(){
+  var rb=document.getElementById('r3b'),chat=document.getElementById('c3'),q=document.getElementById('q3'),a=document.getElementById('a3');
+  // Show loading briefly then type resume
+  setTimeout(function(){
+    var text='Emma est de retour à Yonville après les Comices agricoles. Elle vient de croiser <em>Rodolphe</em>, un riche propriétaire terrien qui l\'a remarquée. La tension entre eux est manifeste.<br><br>Charles est absorbé par sa clientèle. <em>Emma s\'ennuie profondément</em> — le sentiment que sa vie ne ressemble pas à ce qu\'elle avait imaginé s\'intensifie.';
+    var i=0;
+    var t=setInterval(function(){i+=5;if(rb)rb.innerHTML=text.substring(0,i);if(i>=text.length){if(rb)rb.innerHTML=text;clearInterval(t);
+      setTimeout(function(){
+        if(chat)chat.style.display='block';
+        if(q)q.textContent='Qui est Rodolphe exactement ?';
+        setTimeout(function(){if(a){a.style.display='block';a.innerHTML='Rodolphe Boulanger est un propriétaire terrien aisé des environs. Emma vient tout juste de le croiser aux Comices — il est séduisant et l\'a manifestement remarquée.';}},1000);
+      },700);
+    }},18);
+  },400);
+}
+
+go(0);
+</script>
+</body>
+</html>
