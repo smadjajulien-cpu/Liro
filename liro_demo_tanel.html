@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Liro — Démo Tanel Petelot</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f0eb;--card:#fff;--border:#e0d8d0;
+  --txt:#1a1a1a;--txt2:#4a4540;--txt3:#9a9490;
+  --ru:#8b3a1a;--ru2:#c4724a;--ru3:#fdf0e8;
+  --bl:#2d4a8b;--bl2:#5b7ab8;--bl3:#eef2fb;
+  --vt:#2d6a3a;--vt2:#5b9a6a;--vt3:#eef6f0;
+  --navy:#0f1729;--gold:#c9a84c;--gold2:#e8c97a;
+  --serif:'Playfair Display',Georgia,serif;
+  --sans:'DM Sans',-apple-system,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  background:#0a0a0a;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:100vh;font-family:var(--sans);overflow:hidden;
+}
+
+/* ── SCÈNE ── */
+.scene{
+  position:fixed;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:opacity .6s ease;
+  pointer-events:none;
+}
+.scene.active{opacity:1;pointer-events:all;}
+
+/* ── PHONE ── */
+.phone{
+  width:280px;height:560px;
+  background:#0d0d0d;border-radius:40px;padding:9px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.07),0 40px 100px rgba(0,0,0,.85);
+  flex-shrink:0;
+}
+.phone-screen{
+  width:100%;height:100%;background:var(--bg);
+  border-radius:32px;overflow:hidden;position:relative;
+}
+.notch{
+  width:90px;height:24px;background:#0d0d0d;
+  border-radius:0 0 14px 14px;margin:0 auto;
+  position:relative;z-index:10;
+}
+
+/* ── APP COMPONENTS ── */
+.app-hdr{
+  background:var(--card);border-bottom:1px solid var(--border);
+  padding:28px 12px 7px;
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+}
+.llogo{font-family:var(--serif);font-size:14px;font-style:italic;color:var(--ru);}
+.llogo em{color:var(--ru2);}
+.usr-t{font-size:10px;color:var(--txt3);}
+.mtabs{display:grid;grid-template-columns:1fr 1fr 1fr;background:var(--card);border-bottom:1px solid var(--border);}
+.mtab{padding:6px 2px;text-align:center;font-size:9px;font-weight:500;color:var(--txt3);border-bottom:2px solid transparent;}
+.mtab.on{color:var(--bl);border-bottom-color:var(--bl);}
+.mtab.ru{color:var(--ru);border-bottom-color:var(--ru);}
+.mtab.vt{color:var(--vt);border-bottom-color:var(--vt);}
+.pad{padding:10px;overflow-y:hidden;flex:1;}
+
+/* Elements */
+.bk-crd{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px;}
+.bk-row{display:flex;gap:8px;}
+.cov{width:36px;height:52px;border-radius:4px;flex-shrink:0;}
+.bk-ey{font-size:7px;color:var(--txt3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px;}
+.bk-ti{font-family:var(--serif);font-size:12px;color:var(--txt);margin-bottom:1px;}
+.bk-au{font-size:9px;color:var(--txt3);margin-bottom:5px;}
+.prg{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:2px;}
+.prg-f{height:100%;border-radius:2px;}
+.prg-l{font-size:8px;color:var(--txt3);}
+.mod-bar{display:flex;gap:3px;margin-bottom:6px;}
+.mpill{flex:1;padding:4px 2px;border-radius:12px;border:1px solid var(--border);font-size:8px;text-align:center;color:var(--txt3);}
+.mpill.on{color:#fff;border-color:transparent;}
+.mbtn{width:100%;border:none;border-radius:7px;padding:9px;font-size:10px;font-weight:500;color:#fff;margin-bottom:3px;text-align:center;}
+.mbsub{font-size:8px;color:var(--txt3);text-align:center;margin-bottom:6px;}
+.sit-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px;}
+.sit-btn{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:7px 5px;display:flex;align-items:center;gap:4px;}
+.sit-lbl{font-size:9px;font-weight:500;color:var(--txt);}
+.sit-sub{font-size:7px;color:var(--txt3);}
+.res-crd{background:var(--card);border-radius:9px;padding:9px;margin-bottom:6px;}
+.res-tag{display:inline-block;font-size:7px;font-weight:500;padding:2px 6px;border-radius:6px;margin-bottom:5px;}
+.res-body{font-size:9px;color:var(--txt2);line-height:1.75;}
+.res-body em{font-style:italic;}
+.chat-crd{background:var(--card);border:1px solid var(--border);border-radius:9px;overflow:hidden;margin-bottom:6px;}
+.chat-hd{padding:5px 9px;border-bottom:1px solid var(--border);font-size:8px;font-weight:500;color:var(--txt2);background:var(--bg);}
+.chat-msgs{padding:7px 7px 3px;display:flex;flex-direction:column;gap:4px;}
+.bub{padding:6px 8px;border-radius:8px;font-size:8px;line-height:1.55;max-width:88%;}
+.bub.u{align-self:flex-end;color:#fff;border-radius:8px 8px 2px 8px;}
+.bub.l{align-self:flex-start;background:#f0ede9;color:var(--txt);border-radius:8px 8px 8px 2px;}
+.chat-in{display:flex;border-top:1px solid var(--border);}
+.chat-fi{flex:1;padding:6px 8px;font-size:8px;border:none;background:var(--card);color:var(--txt3);}
+.chat-sb{border:none;padding:6px 10px;font-size:10px;color:#fff;}
+.sug-item{display:flex;align-items:center;gap:7px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px 9px;margin-bottom:4px;}
+.si-ti{font-family:var(--serif);font-size:11px;color:var(--txt);}
+.si-me{font-size:8px;color:var(--txt3);margin-top:1px;}
+.si-pg{font-size:8px;color:#2d7a2d;font-weight:500;margin-left:auto;}
+.lb-book{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px;margin-bottom:6px;display:flex;gap:8px;}
+.lb-cov{width:32px;height:46px;border-radius:4px;flex-shrink:0;}
+.lb-ti{font-family:var(--serif);font-size:11px;margin-bottom:1px;}
+.lb-au{font-size:8px;color:var(--txt3);margin-bottom:4px;}
+.lb-prg{height:2px;background:var(--border);border-radius:1px;overflow:hidden;margin-bottom:2px;}
+.lb-pf{height:100%;border-radius:1px;}
+.lb-pc{font-size:7px;color:var(--txt3);}
+.niv-sep{display:flex;align-items:center;gap:5px;margin:8px 0 3px;}
+.niv-ln{flex:1;height:1px;background:var(--border);}
+.niv-lb{font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;}
+.cat-bk{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:8px;margin-bottom:4px;display:flex;gap:6px;}
+.cat-bk.reco{border-color:var(--vt);background:var(--vt3);position:relative;}
+.reco-b{position:absolute;top:0;left:7px;background:var(--vt);color:#fff;font-size:6px;font-weight:500;padding:1px 5px;border-radius:0 0 3px 3px;}
+.cat-cv{width:24px;height:34px;border-radius:3px;flex-shrink:0;}
+.cat-ti{font-family:var(--serif);font-size:9px;color:var(--txt);margin-bottom:1px;}
+.cat-me{font-size:7px;color:var(--txt3);}
+.cat-bs{display:flex;gap:3px;margin-top:4px;}
+.cat-bs button{flex:1;border:none;border-radius:4px;padding:4px;font-size:7px;font-weight:500;color:#fff;}
+.cat-bg{border:1px solid var(--border)!important;background:var(--bg)!important;color:var(--txt3)!important;}
+.share-ov{background:rgba(0,0,0,.45);padding:10px;border-radius:10px;}
+.share-mod{background:var(--card);border-radius:13px;padding:13px 11px 11px;text-align:center;position:relative;overflow:hidden;}
+.share-mod::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--ru),var(--ru2),var(--bl));}
+.s-card{border-radius:8px;padding:8px;margin-bottom:8px;text-align:left;border-left:3px solid var(--bl);}
+.add-form{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;}
+
+/* ── SPINNER ── */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:16px;height:16px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;}
+
+/* ── CURSOR ── */
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.cursor{display:inline-block;width:2px;height:12px;background:var(--ru);margin-left:1px;animation:blink .8s infinite;vertical-align:middle;}
+
+/* ── PITCH SLIDES ── */
+.pitch-slide{
+  width:900px;min-height:560px;
+  background:var(--navy);border-radius:16px;
+  padding:52px 60px;
+  box-shadow:0 40px 100px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.06);
+  position:relative;overflow:hidden;
+}
+.pitch-slide::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,transparent,var(--gold),var(--gold2),var(--gold),transparent);
+}
+.pitch-glow{
+  position:absolute;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(201,168,76,.08),transparent 70%);
+}
+
+/* ── LAYOUT PITCH ── */
+.pitch-layout{display:grid;gap:32px;height:100%;}
+.pitch-layout.two-col{grid-template-columns:1fr 1fr;align-items:start;}
+.pitch-layout.three-col{grid-template-columns:1fr 1fr 1fr;align-items:start;}
+.pitch-tag{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;}
+.pitch-h1{font-family:var(--serif);font-size:38px;font-weight:400;color:#f8f4ee;line-height:1.15;margin-bottom:8px;}
+.pitch-h1 em{font-style:italic;color:var(--gold2);}
+.pitch-sub{font-size:14px;color:rgba(255,255,255,.5);line-height:1.7;margin-bottom:28px;}
+.pitch-sub strong{color:rgba(255,255,255,.8);font-weight:500;}
+
+/* Stat block */
+.stat-block{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:20px;text-align:center;}
+.stat-num{font-family:var(--serif);font-size:44px;color:var(--gold2);line-height:1;margin-bottom:4px;}
+.stat-lbl{font-size:11px;color:rgba(255,255,255,.45);line-height:1.5;}
+.stat-flag{font-size:18px;margin-bottom:6px;}
+
+/* Feature list */
+.feat-list{display:flex;flex-direction:column;gap:12px;}
+.feat-item{display:flex;align-items:flex-start;gap:12px;}
+.feat-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);margin-top:5px;flex-shrink:0;}
+.feat-text{font-size:13px;color:rgba(255,255,255,.6);line-height:1.6;}
+.feat-text strong{color:rgba(255,255,255,.85);font-weight:500;}
+
+/* V2 card */
+.v2-card{background:rgba(255,255,255,.03);border:1px solid rgba(201,168,76,.2);border-radius:10px;padding:18px;margin-bottom:10px;}
+.v2-badge{display:inline-block;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.25);border-radius:12px;padding:3px 10px;font-size:9px;color:var(--gold2);font-weight:500;margin-bottom:8px;}
+.v2-title{font-family:var(--serif);font-size:16px;color:#f8f4ee;margin-bottom:5px;}
+.v2-body{font-size:12px;color:rgba(255,255,255,.45);line-height:1.6;}
+
+/* Revenue projection */
+.rev-bar{margin-bottom:10px;}
+.rev-lbl{font-size:10px;color:rgba(255,255,255,.4);margin-bottom:3px;display:flex;justify-content:space-between;}
+.rev-lbl strong{color:var(--gold2);}
+.rev-track{height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;}
+.rev-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gold),var(--gold2));}
+
+/* Green check */
+.gcheck{color:#4ade80;}
+.rcheck{color:var(--gold2);}
+
+/* Progress bar bottom */
+.progress-bar-wrap{
+  position:fixed;bottom:0;left:0;right:0;
+  height:3px;background:rgba(255,255,255,.06);
+  z-index:100;
+}
+.progress-bar-fill{
+  height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));
+  transition:width .5s ease;
+}
+
+/* Nav hint */
+.nav-hint{
+  position:fixed;bottom:16px;left:50%;transform:translateX(-50%);
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+  border-radius:20px;padding:7px 18px;
+  font-size:11px;color:rgba(255,255,255,.4);
+  display:flex;gap:16px;align-items:center;
+  transition:opacity .5s;
+  z-index:99;
+}
+.nav-hint.hidden{opacity:0;}
+.nav-key{background:rgba(255,255,255,.1);border-radius:4px;padding:2px 7px;font-size:10px;color:rgba(255,255,255,.6);}
+
+/* Side info */
+.side-info{
+  position:fixed;left:40px;top:50%;transform:translateY(-50%);
+  max-width:200px;
+  opacity:0;transition:opacity .6s .3s;
+}
+.scene.active .side-info{opacity:1;}
+.si-step{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
+.si-title{font-family:var(--serif);font-size:18px;color:rgba(255,255,255,.85);line-height:1.35;margin-bottom:8px;}
+.si-body{font-size:11px;color:rgba(255,255,255,.35);line-height:1.65;}
+
+/* Liro logo top left on pitch */
+.liro-watermark{
+  position:absolute;top:20px;right:28px;
+  font-family:var(--serif);font-size:14px;font-style:italic;color:var(--gold);opacity:.5;
+}
+
+/* Animations */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes typeIn{from{opacity:0;clip-path:inset(0 100% 0 0)}to{opacity:1;clip-path:inset(0 0% 0 0)}}
+@keyframes countUp{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+
+.anim-up{animation:fadeUp .6s ease forwards;}
+.anim-in{animation:fadeIn .5s ease forwards;}
+.d1{animation-delay:.1s;opacity:0;}
+.d2{animation-delay:.3s;opacity:0;}
+.d3{animation-delay:.5s;opacity:0;}
+.d4{animation-delay:.7s;opacity:0;}
+.d5{animation-delay:.9s;opacity:0;}
+.d6{animation-delay:1.1s;opacity:0;}
+</style>
+</head>
+<body>
+
+<!-- Progress -->
+<div class="progress-bar-wrap"><div class="progress-bar-fill" id="pbf" style="width:0%"></div></div>
+<div class="nav-hint" id="nav-hint">
+  <span>Navigation</span>
+  <span><span class="nav-key">→</span> Suivant</span>
+  <span><span class="nav-key">←</span> Précédent</span>
+  <span><span class="nav-key">Espace</span> Auto</span>
+</div>
+
+<!-- ══════════════════════════════════════════════
+  SCÈNE 1 — LANDING
+══════════════════════════════════════════════ -->
+<div class="scene active" id="sc-1">
+  <div class="side-info">
+    <div class="si-step">01 / 12</div>
+    <div class="si-title">Landing Page</div>
+    <div class="si-body">Liro accueille le lecteur avec une question simple : comment lisez-vous ?</div>
+  </div>
+  <div class="phone">
+    <div class="phone-screen">
+      <div class="notch"></div>
+      <div style="flex:1;overflow:hidden;padding:20px 14px 14px;display:flex;flex-direction:column;align-items:center;">
+        <svg width="38" height="38" viewBox="0 0 38 38" style="margin-bottom:8px"><rect x="7" y="4" width="22" height="29" rx="3" fill="none" stroke="#8b3a1a" stroke-width="1.5"/><rect x="20" y="4" width="4" height="8" rx="1.5" fill="#c4724a"/><line x1="11" y1="14" x2="25" y2="14" stroke="#8b3a1a" stroke-width="1" opacity=".3"/><line x1="11" y1="18" x2="25" y2="18" stroke="#8b3a1a" stroke-width="1" opacity=".3"/></svg>
+        <div style="font-family:var(--serif);font-size:24px;font-style:italic;color:var(--ru);margin-bottom:3px">L<em style="color:var(--ru2)">i</em>ro</div>
+        <div style="font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3);margin-bottom:14px">Compagnon de lecture</div>
+        <p style="font-size:10px;line-height:1.75;color:var(--txt2);text-align:center;margin-bottom:16px">Vous posez votre livre.<br><strong style="color:var(--txt)">Liro vous rappelle où vous en êtes</strong><br>— sans jamais dévoiler la suite.</p>
+        <p style="font-size:10px;font-weight:500;text-align:center;margin-bottom:10px;color:var(--txt)">Comment lisez-vous ?</p>
+        <div style="width:100%">
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:9px;padding:9px 10px;margin-bottom:6px;display:flex;align-items:center;gap:8px">
+            <div style="width:30px;height:30px;border-radius:50%;background:#eef2fb;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">&#x26A1;</div>
+            <div><div style="font-size:10px;font-weight:600;color:var(--bl);margin-bottom:1px">Mon attention est difficile</div><div style="font-size:8px;color:var(--txt3)">Je décroche, je perds le fil.</div></div>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:9px;padding:9px 10px;margin-bottom:6px;display:flex;align-items:center;gap:8px">
+            <div style="width:30px;height:30px;border-radius:50%;background:var(--ru3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">&#x1F9E0;</div>
+            <div><div style="font-size:10px;font-weight:600;color:var(--ru);margin-bottom:1px">J'oublie ce que j'ai lu</div><div style="font-size:8px;color:var(--txt3)">Liro me rappelle doucement.</div></div>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:9px;padding:9px 10px;display:flex;align-items:center;gap:8px">
+            <div style="width:30px;height:30px;border-radius:50%;background:var(--vt3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">&#x1F331;</div>
+            <div><div style="font-size:10px;font-weight:600;color:var(--vt);margin-bottom:1px">J'ai perdu le goût de lire</div><div style="font-size:8px;color:var(--txt3)">Liro vous aide à y revenir.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCÈNE 2 — PROFIL SÉLECTIONNÉ ══ -->
+<div class="scene" id="sc-2">
+  <div class="side-info">
+    <div class="si-step">02 / 12</div>
+    <div class="si-title">Choix du profil</div>
+    <div class="si-body">Le profil Attention est sélectionné. L'identité visuelle adopte le bleu marine.</div>
+  </div>
+  <div class="phone">
+    <div class="phone-screen">
+      <div class="notch"></div>
+      <div style="padding:28px 16px 16px;display:flex;flex-direction:column;">
+        <div style="font-family:var(--serif);font-size:18px;color:var(--txt);margin-bottom:6px">Comment vous appelez-vous ?</div>
+        <div style="font-size:11px;color:var(--txt2);line-height:1.6;margin-bottom:18px">Liro s'adressera à vous par votre prénom.</div>
+        <div style="border:1.5px solid var(--bl2);border-radius:9px;padding:10px 12px;font-size:14px;color:var(--txt);background:var(--card);margin-bottom:12px">
+          <span id="typed-name2"></span><span class="cursor"></span>
+        </div>
+        <button style="width:100%;background:var(--bl);color:#fff;border:none;border-radius:9px;padding:12px;font-size:12px;font-weight:500;opacity:0;transition:opacity .5s" id="btn-start2">Commencer avec Liro →</button>
+        <!-- Keyboard simulation -->
+        <div style="margin-top:auto;background:#d1d5db;border-radius:0 0 32px 32px;padding:8px 4px 16px;margin-bottom:-16px;margin-left:-16px;margin-right:-16px">
+          <div style="display:flex;gap:3px;justify-content:center;margin-bottom:5px">
+            <div style="background:#fff;border-radius:4px;height:26px;flex:1;max-width:24px;display:flex;align-items:center;justify-content:center;font-size:10px;box-shadow:0 1px 0 rgba(0,0,0,.3)">A</div>
+            <div style="background:#fff;border-radius:4px;height:26px;flex:1;max-width:24px;display:flex;align-items:center;justify-content:center;font-size:10px;box-shadow:0 1px 0 rgba(0,0,0,.3)">l</div>
+            <div style="background:#fff;border-radius:4px;height:26px;flex:1;max-width:24px;display:flex;align-items:center;justify-content:center;font-size:10px;box-shadow:0 1px 0 rgba(0,0,0,.3)">o</div>
+            <div style="background:#fff;border-radius:4px;height:26px;flex:1;max-width:24px;display:flex;align-items:center;justify-content:center;font-size:10px;box-shadow:0 1px 0 rgba(0,0,0,.3)">i</div>
+            <div style="background:#fff;border-radius:4px;height:26px;flex:1;max-width:24px;display:flex;align-items:center;justify-content:center;font-size:10px;box-shadow:0 1px 0 rgba(0,0,0,.3)">s</div>
+          </div>
+          <div style="display:flex;gap:3px;justify-content:center">
+            <div style="background:var(--bl);border-radius:4px;height:26px;width:120px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;box-shadow:0 1px 0 rgba(0,0,0,.3)">espace</div>
+            <div style="background:var(--bl);border-radius:4px;height:26px;width:60px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;box-shadow:0 1px 0 rgba(0,0,0,.3)">OK →</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCÈNE 3 — APP MON LIVRE (livre ajouté) ══ -->
+<div class="scene" id="sc-3">
+  <div class="side-info">
+    <div class="si-step">03 / 12</div>
+    <div class="si-title">Mon Livre</div>
+    <div class="si-body">Le livre est en cours. La barre de progression s'anime. Sélecteur de mode pour ce résumé.</div>
+  </div>
+  <div class="phone">
+    <div class="phone-screen" style="display:flex;flex-direction:column">
+      <div class="notch"></div>
+      <div class="app-hdr">
+        <div style="display:flex;align-items:center;gap:6px"><svg width="18" height="18" viewBox="0 0 38 38"><rect x="7" y="4" width="22" height="29" rx="3" fill="none" stroke="#8b3a1a" stroke-width="1.5"/><rect x="20" y="4" width="4" height="8" rx="1.5" fill="#c4724a"/></svg><div class="llogo">L<em>i</em>ro</div></div>
+        <div style="display:flex;align-items:center;gap:5px"><div class="usr-t">Alois</div><div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:2px 7px;font-size:10px;color:var(--txt3)">•••</div></div>
+      </div>
+      <div class="mtabs"><div class="mtab on">Mon livre</div><div class="mtab">Bibliothèque</div><div class="mtab">Conseil</div></div>
+      <div class="pad" style="overflow-y:hidden">
+        <div class="bk-crd">
+          <div class="bk-row">
+            <div class="cov" style="background:linear-gradient(135deg,#d2b4de,#a88bcf)"></div>
+            <div style="flex:1">
+              <div class="bk-ey">Vous lisez</div>
+              <div class="bk-ti">Le Petit Prince</div>
+              <div class="bk-au">Antoine de Saint-Exupéry</div>
+              <div class="prg"><div class="prg-f" id="pf3" style="width:0%;background:var(--bl)"></div></div>
+              <div class="prg-l" id="pl3">Page 0 sur 96</div>
+            </div>
+          </div>
+        </div>
+        <div class="mod-bar">
+          <div class="mpill on" style="background:var(--bl)">&#x26A1; Attention</div>
+          <div class="mpill">&#x1F9E0; Mémoire</div>
+          <div class="mpill">&#x1F331; Plaisir</div>
+        </div>
+        <div class="mbtn" style="background:var(--bl);opacity:0;transition:opacity .5s" id="mb3">Replonger en 30 secondes</div>
+        <div class="mbsub" style="opacity:0;transition:opacity .5s" id="ms3">Résumé bienveillant · sans spoiler</div>
+        <div class="sit-grid" style="opacity:0;transition:opacity .5s" id="sg3">
+          <div class="sit-btn"><span style="font-size:12px;color:var(--bl)">&#128100;</span><div><div class="sit-lbl">Personnages</div><div class="sit-sub">Qui est qui ?</div></div></div>
+          <div class="sit-btn"><span style="font-size:12px;color:var(--bl)">&#128269;</span><div><div class="sit-lbl">Intrigue</div><div class="sit-sub">Ce qui s'est passé</div></div></div>
+          <div class="sit-btn"><span style="font-size:12px;color:var(--bl)">&#127757;</span><div><div class="sit-lbl">Ambiance</div><div class="sit-sub">Les lieux</div></div></div>
+          <div class="sit-btn"><span style="font-size:12px;color:var(--bl)">&#9654;</span><div><div class="sit-lbl">Je veux finir</div><div class="sit-sub">Motivation</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCÈNE 4 — RÉSUMÉ LIRO ══ -->
+<div class="scene" id="sc-4">
+  <div class="side-info">
+    <div class="si-step">04 / 12</div>
+    <div class="si-title">Résumé Liro</div>
+    <div class="si-body">Claude génère un résumé personnalisé. Jamais au-delà de la page actuelle. Le chat s'ouvre ensuite.</div>
+  </div>
+  <div class="phone">
+    <div class="phone-screen" style="display:flex;flex-direction:column">
+      <div class="notch"></div>
+      <div class="app-hdr">
+        <div style="display:flex;align-items:center;gap:6px"><svg width="18" height="18" viewBox="0 0 38 38"><rect x="7" y="4" width="22" height="29" rx="3" fill="none" stroke="#8b3a1a" stroke-width="1.5"/><rect x="20" y="4" width="4" height="8" rx="1.5" fill="#c4724a"/></svg><div class="llogo">L<em>i</em>ro</div></div>
+        <div class="usr-t">Alois</div>
+      </div>
+      <div class="mtabs"><div class="mtab on">Mon livre</div><div class="mtab">Bibliothèque</div><div class="mtab">Conseil</div></div>
+      <div class="pad">
+        <div class="bk-crd" style="margin-bottom:6px">
+          <div class="bk-row">
+            <div class="cov" style="background:linear-gradient(135deg,#d2b4de,#a88bcf)"></div>
+            <div style="flex:1"><div class="bk-ti">Le Petit Prince</div><div class="bk-au">Saint-Exupéry</div><div class="prg"><div class="prg-f" style="width:58%;background:var(--bl)"></div></div><div class="prg-l">Page 56 · 58%</div></div>
+          </div>
+        </div>
+        <div class="mod-bar"><div class="mpill on" style="background:var(--bl)">&#x26A1; Attention</div><div class="mpill">&#x1F9E0;</div><div class="mpill">&#x1F331;</div></div>
+        <!-- Loading -->
+        <div id="load4" style="text-align:center;padding:16px 0;color:var(--txt3);font-size:10px">
+          <div class="spinner" style="color:var(--bl);margin:0 auto 6px"></div>
+          Liro réfléchit…
+        </div>
+        <!-- Resume -->
+        <div class="res-crd" id="res4" style="border:1px solid var(--bl2);display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+            <div class="res-tag" style="background:var(--bl3);color:var(--bl)">&#10003; Sans dévoiler la suite</div>
+            <div style="border:1px solid var(--border);border-radius:8px;padding:2px 7px;font-size:7px;color:var(--txt3)">&#128266; Lire</div>
+          </div>
+          <div class="res-body" id="res4-body"></div>
+        </div>
+        <!-- Chat -->
+        <div class="chat-crd" id="chat4" style="display:none">
+          <div class="chat-hd">&#128172; Discuter avec Liro</div>
+          <div class="chat-msgs">
+            <div class="bub u" style="background:var(--bl)" id="q4"></div>
+            <div class="bub l" id="a4" style="display:none"></div>
+          </div>
+          <div class="chat-in"><div class="chat-fi">Une question…</div><div class="chat-sb" style="background:var(--bl)">→</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCÈNE 5 — AJOUT LIVRE ══ -->
+<div class="scene" id="sc-5">
+  <div class="side-info">
+    <div class="si-step">05 / 12</div>
+    <div class="si-title">Ajouter un livre</div>
+    <div class="si-body">Recherche intelligente. La base locale propose des suggestions instantanées. Open Library enrichit en arrière-plan.</div>
+  </div>
+  <div class="phone">
+    <div class="phone-screen" style="display:flex;flex-direction:column">
+      <div class="notch"></div>
+      <div class="app-hdr">
+        <div class="llogo">L<em>i</em>ro</div><div class="usr-t">Alois</div>
+      </div>
+      <div class="mtabs"><div class="mtab">Mon livre</div><div class="mtab on">Bibliothèque</div><div class="mtab">Conseil</div></div>
+      <div class="pad">
+        <div class="add-form">
+          <div style="font-size:11px;font-weight:500;color:var(--txt);margin-bottom:10px">Ajouter un livre</div>
+          <div style="display:flex;gap:5px;margin-bottom:8px">
+            <button style="flex:1;border:1px solid var(--border);border-radius:7px;padding:7px;font-size:9px;background:var(--bg);color:var(--txt2)">&#128247; Photo</button>
+            <button style="flex:1;border:1px solid var(--border);border-radius:7px;padding:7px;font-size:9px;background:var(--bg);color:var(--txt2)">&#128444; Photothèque</button>
+          </div>
+          <div style="border:1.5px solid var(--ru2);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--txt);background:var(--card);margin-bottom:6px">
+            <span id="typed-search5"></span><span class="cursor" id="sc5-cur"></span>
+          </div>
+          <div id="sugs5"></div>
+          <div id="fields5" style="opacity:0;transition:opacity .5s">
+            <div style="font-size:8px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">Titre *</div>
+            <div style="border:1px solid var(--border);border-radius:7px;padding:7px 9px;font-size:11px;color:var(--txt);margin-bottom:6px">Madame Bovary</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              <div>
+                <div style="font-size:8px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">Page</div>
+                <div style="border:1px solid var(--border);border-radius:7px;padding:7px 9px;font-size:11px;color:var(--txt)">0</div>
+              </div>
+              <div>
+                <div style="font-size:8px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">Total *</div>
+                <div style="border:1px solid var(--border);border-radius:7px;padding:7px 9px;font-size:11px;color:var(--txt)">468</div>
+              </div>
+            </div>
+          </div>
+          <div id="addbtn5" style="display:flex;gap:5px;margin-top:8px;opacity:0;transition:opacity .5s">
+            <button style="flex:2;background:var(--ru);color:#fff;border:none;border-radius:7px;padding:9px;font-size:10px;font-weight:500">Ajouter ce livre →</button>
+            <button style="flex:1;border:1px solid var(--border);border-radius:7px;padding:9px;font-size:9px;color:var(--txt3);background:var(--card)">Annuler</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCÈNE 6 — BIBLIOTHÈQUE COMPLÈTE ══ -->
+<div class="scene" id="sc-6">
+  <div class="side-info">
+    <div class="si-step">06 / 12</div>
+    <div class="si-title">Bibliothèque</div>
+    <div class="si-body">Tous les livres en cours. Progression visible. Un tap pour reprendre avec Liro.</div>
+  </div>
+  <div class="phone">
+    <div class="phone-screen" style="display:flex;flex-direction:column">
+      <div class="notch"></div>
+      <div class="app-hdr"><div class="llogo">L<em>i</em>ro</div><div class="usr-t">Alois</div></div>
+      <div class="mtabs"><div class="mtab">Mon livre</div><div class="mtab on">Bibliothèque</div><div class="mtab">Conseil</div></div>
+      <div class="pad">
+        <div class="lb-book" style="border-color:var(--bl)">
+          <div class="lb-cov" style="background:linear-gradient(135deg,#d2b4de,#a88bcf)"></div>
+          <div style="flex:1"><div class="lb-ti">Le Petit Prince</div><div class="lb-au">Saint-Exupéry</div><div class="lb-prg"><div class="lb-pf" style="width:58%;background:var(--bl)"></div></div><div class="lb-pc">56/96 · 58%</div></div>
+          <div style="font-size:16px;color:var(--txt3)">›</div>
+        </div>
+        <div class="lb-book">
+          <div class="lb-cov" style="background:linear-gradient(135deg,#f9e4b7,#e0935a)"></div>
+          <div style="flex:1"><div class="lb-ti">Madame Bovary</div><div class="lb-au">Gustave Flaubert</div><div class="lb-prg"><div class="lb-pf" style="width:22%;background:var(--ru)"></div></div><div class="lb-pc">103/468 · 22%</div></div>
+          <div style="font-size:16px;color:var(--txt3)">›</div>
+        </div>
+        <div class="lb-book">
+          <div class="lb-cov" style="background:linear-gradient(135deg,#abebc6,#52be80)"></div>
+          <div style="flex:1"><div class="lb-ti">La Peste</div><div class="lb-au">Albert Camus</div><div class="lb-prg"><div class="lb-pf" style="width:74%;background:var(--vt)"></div></div><div class="lb-pc">245/330 · 74%</div></div>
+          <div style="font-size:16px;color:var(--txt3)">›</div>
+        </div>
+        <div class="lb-book">
+          <div class="lb-cov" style="background:linear-gradient(135deg,#aed6f1,#5dade2)"></div>
+          <div style="flex:1"><div class="lb-ti">Les Misérables</div><div class="lb-au">Victor Hugo</div><div class="lb-prg"><div class="lb-pf" style="width:38%;background:var(--bl)"></div></div><div class="lb-pc">722/1900 · 38%</div></div>
+          <div style="font-size:16px;color:var(--txt3)">›</div>
+        </div>
+        <div class="lb-book">
+          <div class="lb-cov" style="background:linear-gradient(135deg,#d7bde2,#9b59b6)"></div>
+          <div style="flex:1"><div class="lb-ti">Crime et Châtiment</div><div class="lb-au">Dostoïevski</div><div class="lb-prg"><div class="lb-pf" style="width:5%;background:var(--ru)"></div></div><div class="lb-pc">28/550 · 5%</div></div>
+          <div style="font-size:16px;color:var(--txt3)">›</div>
+        </div>
+        <button style="width:100%;border:1px solid var(--border);border-radius:8px;padding:9px;font-size:10px;color:var(--txt2);background:var(--card);margin-top:4px">+ Ajouter un livre</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCÈNE 7 — CONSEIL ══ -->
+<div class="scene" id="sc-7">
+  <div class="side-info">
+    <div class="si-step">07 / 12</div>
+    <div class="si-title">Je ne sais pas quoi lire</div>
+    <div class="si-body">51 œuvres du domaine public. 4 niveaux. Gratuites sur Gutenberg. Filtrées par profil.</div>
+  </div>
+  <div class="phone">
+    <div class="phone-screen" style="display:flex;flex-direction:column">
+      <div class="notch"></div>
+      <div class="app-hdr"><div class="llogo">L<em>i</em>ro</div><div class="usr-t">Alois</div></div>
+      <div class="mtabs"><div class="mtab">Mon livre</div><div class="mtab">Bibliothèque</div><div class="mtab vt on">Conseil</div></div>
+      <div class="pad">
+        <div style="font-size:9px;color:var(--txt2);line-height:1.5;margin-bottom:7px">Gratuits, libres de droits, sur Project Gutenberg. Classés du plus court au plus long.</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
+          <div style="padding:4px 10px;border-radius:10px;background:var(--vt);color:#fff;font-size:8px;font-weight:500">Tous</div>
+          <div style="padding:4px 9px;border-radius:10px;border:1px solid var(--border);font-size:8px;color:var(--txt3)">&#x26A1; Attention</div>
+          <div style="padding:4px 9px;border-radius:10px;border:1px solid var(--border);font-size:8px;color:var(--txt3)">&#x1F9E0; Mémoire</div>
+          <div style="padding:4px 9px;border-radius:10px;border:1px solid var(--border);font-size:8px;color:var(--txt3)">&#x1F331; Plaisir</div>
+        </div>
+        <div class="niv-sep"><div class="niv-ln"></div><div class="niv-lb" style="color:var(--vt)">Niveau 1 — Très courts</div><div class="niv-ln"></div></div>
+        <div style="font-size:7px;color:var(--txt3);margin-bottom:7px">Nouvelles · moins de 80 pages · idéal pour reprendre</div>
+        <div class="cat-bk reco">
+          <div class="reco-b">Recommandé</div>
+          <div class="cat-cv" style="background:linear-gradient(135deg,#d2b4de,#a88bcf);margin-top:9px"></div>
+          <div style="margin-top:9px">
+            <div class="cat-ti">Le Horla</div>
+            <div class="cat-me">Maupassant · <span style="color:#2d7a2d">40 p.</span></div>
+            <div style="font-size:7px;color:var(--txt2);margin-top:2px">Une présence invisible. 40 pages de tension.</div>
+            <div class="cat-bs"><button style="background:var(--vt)">Commencer</button><button class="cat-bg">Gutenberg →</button></div>
+          </div>
+        </div>
+        <div class="cat-bk">
+          <div class="cat-cv" style="background:linear-gradient(135deg,#abebc6,#52be80)"></div>
+          <div><div class="cat-ti">La Parure</div><div class="cat-me">Maupassant · <span style="color:#2d7a2d">15 p.</span></div></div>
+        </div>
+        <button style="width:100%;border:1px solid var(--border);border-radius:7px;padding:6px;font-size:8px;color:var(--txt3);background:none;margin-top:2px">Voir les 12 livres de ce niveau ↓</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCÈNE 8 — FIN DE LIVRE / PARTAGE ══ -->
+<div class="scene" id="sc-8">
+  <div class="side-info">
+    <div class="si-step">08 / 12</div>
+    <div class="si-title">Livre terminé !</div>
+    <div class="si-body">Une carte partageable générée automatiquement. Distribution organique sur les réseaux sociaux.</div>
+  </div>
+  <div class="phone">
+    <div class="phone-screen" style="display:flex;flex-direction:column">
+      <div class="notch"></div>
+      <div class="app-hdr"><div class="llogo">L<em>i</em>ro</div><div class="usr-t">Alois</div></div>
+      <div class="mtabs"><div class="mtab on">Mon livre</div><div class="mtab">Bibliothèque</div><div class="mtab">Conseil</div></div>
+      <div class="pad">
+        <div class="share-ov">
+          <div class="share-mod">
+            <div style="font-size:28px;margin-bottom:5px">&#127881;</div>
+            <div style="font-family:var(--serif);font-size:14px;margin-bottom:2px">Livre terminé !</div>
+            <div style="font-size:9px;color:var(--txt3);margin-bottom:10px">Félicitations. Chaque livre terminé compte.</div>
+            <div class="s-card" style="background:var(--bl3)">
+              <div style="font-family:var(--serif);font-size:8px;color:var(--ru);font-style:italic;margin-bottom:5px;opacity:.7">Liro</div>
+              <div style="display:flex;gap:7px;margin-bottom:6px">
+                <div style="width:28px;height:40px;border-radius:3px;background:linear-gradient(135deg,#d2b4de,#a88bcf);flex-shrink:0"></div>
+                <div>
+                  <div style="font-family:var(--serif);font-size:10px;color:var(--txt);margin-bottom:1px">Le Petit Prince</div>
+                  <div style="font-size:7px;color:var(--txt3);margin-bottom:4px">Saint-Exupéry · 1943</div>
+                  <div style="display:inline-flex;align-items:center;gap:3px;background:var(--bl);color:#fff;font-size:7px;font-weight:500;padding:2px 6px;border-radius:7px">&#10003; Terminé · 96 pages</div>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;padding-top:5px;border-top:1px solid rgba(0,0,0,.06)">
+                <div style="font-size:7px;color:var(--bl);font-style:italic;font-family:var(--serif)">Repris et terminé avec Liro</div>
+                <div style="font-size:7px;color:var(--txt3)">liro.app</div>
+              </div>
+            </div>
+            <button style="width:100%;background:var(--bl);color:#fff;border:none;border-radius:7px;padding:9px;font-size:10px;font-weight:500;margin-bottom:5px;display:flex;align-items:center;justify-content:center;gap:4px">&#8679; Partager ma réussite</button>
+            <button style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:7px;font-size:9px;color:var(--txt3);margin-bottom:4px">Télécharger l'image</button>
+            <button style="background:none;border:none;font-size:8px;color:var(--txt3)">Continuer sans partager</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCÈNE 9 — PITCH : MARCHÉ ══ -->
+<div class="scene" id="sc-9">
+  <div class="pitch-slide">
+    <div class="pitch-glow" style="width:500px;height:500px;top:-150px;left:-100px"></div>
+    <div class="liro-watermark">Liro</div>
+    <div class="pitch-tag anim-up d1">Le marché</div>
+    <div class="pitch-h1 anim-up d2">Un problème <em>universel.</em><br>Une solution <em>accessible.</em></div>
+    <div class="pitch-sub anim-up d3">57% des adultes dans le monde abandonnent les livres qu'ils commencent.<br><strong>Pas par manque d'envie — par perte du fil.</strong></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px" class="anim-up d4">
+      <div class="stat-block">
+        <div class="stat-flag">&#127467;&#127479;</div>
+        <div class="stat-num">68M</div>
+        <div class="stat-lbl">francophones<br>lecteurs potentiels</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-flag">&#127468;&#127463; &#127482;&#127480;</div>
+        <div class="stat-num">380M</div>
+        <div class="stat-lbl">anglophones<br>lecteurs potentiels</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-flag">&#127466;&#127480; &#127474;&#127485;</div>
+        <div class="stat-num">280M</div>
+        <div class="stat-lbl">hispanophones<br>lecteurs potentiels</div>
+      </div>
+    </div>
+    <div style="margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:16px" class="anim-up d5">
+      <div class="stat-block" style="text-align:left;padding:16px 18px">
+        <div style="font-size:11px;color:var(--gold);margin-bottom:6px;font-weight:500">Marché adressable total</div>
+        <div style="font-family:var(--serif);font-size:28px;color:var(--gold2)">728M</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px">lecteurs potentiels · 3 langues · V1</div>
+      </div>
+      <div class="stat-block" style="text-align:left;padding:16px 18px">
+        <div style="font-size:11px;color:var(--gold);margin-bottom:6px;font-weight:500">À 0,1% de pénétration</div>
+        <div style="font-family:var(--serif);font-size:28px;color:var(--gold2)">728 000</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px">abonnés · ~18M€/an à 24,99€/an</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCÈNE 10 — PITCH : PROJECTIONS ══ -->
+<div class="scene" id="sc-10">
+  <div class="pitch-slide">
+    <div class="pitch-glow" style="width:400px;height:400px;bottom:-100px;right:-80px;background:radial-gradient(circle,rgba(139,58,26,.08),transparent 70%)"></div>
+    <div class="liro-watermark">Liro</div>
+    <div class="pitch-tag anim-up d1">Projections financières</div>
+    <div class="pitch-h1 anim-up d2">Des chiffres <em>qui font rêver.</em></div>
+    <div class="pitch-sub anim-up d3">Modèle SaaS · 24,99€/an · Coût marginal quasi nul</div>
+    <div style="margin-bottom:28px" class="anim-up d3">
+      <div class="rev-bar">
+        <div class="rev-lbl"><span>Scénario médian · 12 mois</span><strong>2 000 abonnés · 50 000€/an</strong></div>
+        <div class="rev-track"><div class="rev-fill" style="width:15%"></div></div>
+      </div>
+      <div class="rev-bar">
+        <div class="rev-lbl"><span>Scénario médian · 24 mois</span><strong>15 000 abonnés · 375 000€/an</strong></div>
+        <div class="rev-track"><div class="rev-fill" style="width:40%"></div></div>
+      </div>
+      <div class="rev-bar">
+        <div class="rev-lbl"><span>Scénario optimiste · 36 mois</span><strong>50 000 abonnés · 1,25M€/an</strong></div>
+        <div class="rev-track"><div class="rev-fill" style="width:65%"></div></div>
+      </div>
+      <div class="rev-bar">
+        <div class="rev-lbl"><span>Scénario optimiste · 5 ans</span><strong>150 000 abonnés · 3,75M€/an</strong></div>
+        <div class="rev-track"><div class="rev-fill" style="width:100%"></div></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px" class="anim-up d4">
+      <div class="stat-block">
+        <div class="stat-num" style="font-size:32px">~0€</div>
+        <div class="stat-lbl">Infrastructure<br>GitHub Pages · Cloudflare</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-num" style="font-size:32px">65%</div>
+        <div class="stat-lbl">Marge nette<br>estimée à maturité</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-num" style="font-size:32px">Exit</div>
+        <div class="stat-lbl">Audible · Kindle · Kobo<br>cibles d'acquisition naturelles</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCÈNE 11 — PITCH : DÉPLOIEMENT ══ -->
+<div class="scene" id="sc-11">
+  <div class="pitch-slide">
+    <div class="liro-watermark">Liro</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;height:100%">
+      <div>
+        <div class="pitch-tag anim-up d1">Déploiement</div>
+        <div class="pitch-h1 anim-up d2" style="font-size:30px">Pas une app <em>médicale.</em><br>Pas de contraintes.</div>
+        <div class="pitch-sub anim-up d3" style="margin-bottom:20px">Liro est une app <strong>bien-être grand public</strong> — comme Headspace ou Duolingo. Aucune autorisation réglementaire requise.</div>
+        <div class="feat-list anim-up d4">
+          <div class="feat-item"><div class="feat-dot"></div><div class="feat-text"><span class="gcheck">&#10003;</span> <strong>PWA</strong> — fonctionne sur tout navigateur, iOS, Android. Zéro App Store obligatoire pour lancer.</div></div>
+          <div class="feat-item"><div class="feat-dot"></div><div class="feat-text"><span class="gcheck">&#10003;</span> <strong>GitHub Pages</strong> — hébergement gratuit, déploiement en 2 minutes, zéro serveur.</div></div>
+          <div class="feat-item"><div class="feat-dot"></div><div class="feat-text"><span class="gcheck">&#10003;</span> <strong>Aucune donnée de santé</strong> — titre du livre et page actuelle uniquement. RGPD simple.</div></div>
+          <div class="feat-item"><div class="feat-dot"></div><div class="feat-text"><span class="gcheck">&#10003;</span> <strong>Pas de validation clinique</strong> — outil de bien-être, pas dispositif médical. Time-to-market immédiat.</div></div>
+          <div class="feat-item"><div class="feat-dot"></div><div class="feat-text"><span class="gcheck">&#10003;</span> <strong>International en semaines</strong> — UI + catalogue traduits en anglais/espagnol. Open Library multilingue.</div></div>
+        </div>
+      </div>
+      <div class="anim-up d5">
+        <div style="font-size:11px;color:var(--gold);font-weight:500;margin-bottom:14px;letter-spacing:.08em;text-transform:uppercase">Comparaison</div>
+        <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;overflow:hidden">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.05);font-size:9px;color:rgba(255,255,255,.35);font-weight:500">
+            <div></div><div style="text-align:center;color:var(--gold2)">Liro</div><div style="text-align:center">App médicale</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.05);font-size:10px">
+            <div style="color:rgba(255,255,255,.4)">Autorisation CE/FDA</div>
+            <div style="text-align:center;color:#4ade80">✗ Non requis</div>
+            <div style="text-align:center;color:rgba(255,255,255,.3)">3-5 ans</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.05);font-size:10px">
+            <div style="color:rgba(255,255,255,.4)">Essais cliniques</div>
+            <div style="text-align:center;color:#4ade80">✗ Non requis</div>
+            <div style="text-align:center;color:rgba(255,255,255,.3)">2-8 ans</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.05);font-size:10px">
+            <div style="color:rgba(255,255,255,.4)">Budget réglementaire</div>
+            <div style="text-align:center;color:#4ade80">~0€</div>
+            <div style="text-align:center;color:rgba(255,255,255,.3)">500K-5M€</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:9px 12px;font-size:10px">
+            <div style="color:rgba(255,255,255,.4)">Time to market</div>
+            <div style="text-align:center;color:#4ade80;font-weight:500">Immédiat</div>
+            <div style="text-align:center;color:rgba(255,255,255,.3)">5-10 ans</div>
+          </div>
+        </div>
+        <div style="margin-top:14px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:8px;padding:12px 14px">
+          <div style="font-size:10px;font-weight:500;color:var(--gold2);margin-bottom:4px">Positionnement</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.5);line-height:1.6">Comme <strong style="color:rgba(255,255,255,.75)">Headspace</strong> (méditation), <strong style="color:rgba(255,255,255,.75)">Duolingo</strong> (apprentissage) ou <strong style="color:rgba(255,255,255,.75)">Calm</strong> — des milliards de valeur créés sans contrainte médicale.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCÈNE 12 — PITCH : V2 ══ -->
+<div class="scene" id="sc-12">
+  <div class="pitch-slide">
+    <div class="pitch-glow" style="width:600px;height:400px;top:-100px;right:-150px;background:radial-gradient(circle,rgba(45,74,139,.1),transparent 70%)"></div>
+    <div class="liro-watermark">Liro</div>
+    <div class="pitch-tag anim-up d1">Vision V2 · 2027</div>
+    <div class="pitch-h1 anim-up d2" style="font-size:30px;margin-bottom:20px">Liro devient votre <em>bibliothèque intelligente.</em></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px" class="anim-up d3">
+      <div class="v2-card">
+        <div class="v2-badge">V2 · IA</div>
+        <div class="v2-title">« Je ne sais pas quoi lire »</div>
+        <div class="v2-body">Liro recommande le prochain livre selon votre profil, vos lectures passées, votre état du moment. Votre bibliothécaire IA personnel.</div>
+      </div>
+      <div class="v2-card">
+        <div class="v2-badge">V2 · Social</div>
+        <div class="v2-title">Clubs de lecture IA</div>
+        <div class="v2-body">Plusieurs lecteurs, un même livre, Liro facilite les échanges. Résumés collectifs, questions partagées, sans spoiler.</div>
+      </div>
+      <div class="v2-card">
+        <div class="v2-badge">V2 · Stats</div>
+        <div class="v2-title">Votre journal de lecture</div>
+        <div class="v2-body">Statistiques de lecture, livres terminés, séries, humeur. Un bilan annuel partageable — votre Spotify Wrapped de la lecture.</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" class="anim-up d4">
+      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:16px 18px">
+        <div style="font-size:10px;color:var(--gold);font-weight:500;margin-bottom:10px;text-transform:uppercase;letter-spacing:.08em">Prochaines étapes · V1</div>
+        <div class="feat-list">
+          <div class="feat-item"><div class="feat-dot"></div><div class="feat-text"><strong>Backend proxy</strong> — clé API cachée, système de paiement Stripe</div></div>
+          <div class="feat-item"><div class="feat-dot"></div><div class="feat-text"><strong>Version anglaise</strong> — UI + catalogue + Open Library EN</div></div>
+          <div class="feat-item"><div class="feat-dot"></div><div class="feat-text"><strong>Notifications de relance</strong> — l'effet Duolingo, jamais culpabilisant</div></div>
+          <div class="feat-item"><div class="feat-dot"></div><div class="feat-text"><strong>App Store</strong> — Capacitor.js, wrapping natif iOS/Android</div></div>
+        </div>
+      </div>
+      <div style="background:linear-gradient(135deg,rgba(201,168,76,.08),rgba(139,58,26,.06));border:1px solid rgba(201,168,76,.2);border-radius:10px;padding:20px 22px;display:flex;flex-direction:column;justify-content:center;text-align:center">
+        <div style="font-family:var(--serif);font-size:40px;font-style:italic;color:var(--gold2);margin-bottom:8px">Liro</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.4);font-style:italic;font-family:var(--serif);margin-bottom:16px">« Reprendre un livre qu'on a en main, sans spoiler. »</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.6);line-height:1.65;margin-bottom:16px">Construit avec <strong style="color:rgba(255,255,255,.85)">Claude · Anthropic</strong>.<br>Déployé en quelques semaines.<br>Sans équipe technique dédiée.</div>
+        <div style="border:1px solid rgba(201,168,76,.3);border-radius:20px;padding:8px 20px;font-size:11px;color:var(--gold2);display:inline-block;margin:0 auto">liro.app</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ───────────────────────────────────────────────────
+var TOTAL = 12;
+var cur = 1;
+var playing = false;
+var autoTimer = null;
+var inited = {};
+
+var DURATIONS = [4000,4500,4000,6000,5000,4000,4500,4000,5000,5000,5500,8000];
+
+function show(n){
+  document.querySelectorAll('.scene').forEach(function(s){ s.classList.remove('active'); });
+  var sc = document.getElementById('sc-'+n);
+  if(sc) sc.classList.add('active');
+  cur = n;
+  document.getElementById('pbf').style.width = ((n-1)/(TOTAL-1)*100)+'%';
+  if(!inited[n]){ inited[n]=true; initScene(n); }
+}
+
+function next(){ if(cur<TOTAL){ show(cur+1); if(playing) schedule(); } else stopPlay(); }
+function prev(){ if(cur>1) show(cur-1); }
+
+function togglePlay(){
+  if(playing) stopPlay();
+  else startPlay();
+}
+function startPlay(){
+  playing=true;
+  document.getElementById('nav-hint').classList.add('hidden');
+  schedule();
+}
+function stopPlay(){
+  playing=false;
+  clearTimeout(autoTimer);
+  document.getElementById('nav-hint').classList.remove('hidden');
+}
+function schedule(){
+  clearTimeout(autoTimer);
+  autoTimer=setTimeout(function(){ if(playing) next(); },DURATIONS[cur-1]||4000);
+}
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowRight'||e.key==='PageDown') next();
+  else if(e.key==='ArrowLeft'||e.key==='PageUp') prev();
+  else if(e.key===' '){ e.preventDefault(); togglePlay(); }
+});
+
+// ── SCENE INITS ─────────────────────────────────────────────
+function initScene(n){
+  if(n===2) initS2();
+  if(n===3) initS3();
+  if(n===4) initS4();
+  if(n===5) initS5();
+}
+
+function typeText(elId, text, speed, cb){
+  var el=document.getElementById(elId);
+  if(!el) return;
+  var i=0;
+  var t=setInterval(function(){
+    if(i<text.length){ el.textContent+=text[i]; i++; }
+    else{ clearInterval(t); if(cb) cb(); }
+  },speed);
+}
+
+function initS2(){
+  setTimeout(function(){
+    typeText('typed-name2','Alois',110,function(){
+      setTimeout(function(){
+        var kb=document.getElementById('btn-start2');
+        if(kb) kb.style.opacity='1';
+      },400);
+    });
+  },500);
+}
+
+function initS3(){
+  setTimeout(function(){
+    var pf=document.getElementById('pf3'), pl=document.getElementById('pl3');
+    var pct=0;
+    var t=setInterval(function(){
+      pct+=2;
+      if(pf) pf.style.width=pct+'%';
+      if(pl) pl.textContent='Page '+Math.round(pct*.96)+' sur 96 · '+pct+'%';
+      if(pct>=58){ clearInterval(t); if(pl) pl.textContent='Page 56 sur 96 · 58%';
+        setTimeout(function(){
+          var mb=document.getElementById('mb3'), ms=document.getElementById('ms3'), sg=document.getElementById('sg3');
+          if(mb) mb.style.opacity='1'; if(ms) ms.style.opacity='1'; if(sg) sg.style.opacity='1';
+        },400);
+      }
+    },25);
+  },600);
+}
+
+function initS4(){
+  var load=document.getElementById('load4'), res=document.getElementById('res4');
+  var rb=document.getElementById('res4-body'), chat=document.getElementById('chat4');
+  var q=document.getElementById('q4'), a=document.getElementById('a4');
+  setTimeout(function(){
+    if(load) load.style.display='none';
+    if(res) res.style.display='block';
+    var text='Le Petit Prince vient de rencontrer le <em>renard</em>. Il comprend ce que signifie apprivoiser — créer des liens, devenir unique pour quelqu\'un.<br><br>Il pense à sa rose, restée seule. Il réalise qu\'elle lui est <em>précieuse</em> — pas parce qu\'elle est unique, mais parce que c\'est la sienne.';
+    var i=0, raw=text.replace(/<[^>]+>/g,'');
+    var t=setInterval(function(){
+      i+=4; if(rb) rb.innerHTML=text.substring(0,i);
+      if(i>=text.length){ if(rb) rb.innerHTML=text; clearInterval(t);
+        setTimeout(function(){
+          if(chat) chat.style.display='block';
+          if(q){ q.textContent='Le renard, c\'est qui déjà ?'; }
+          setTimeout(function(){
+            if(a){ a.style.display='block'; a.innerHTML='Le renard est un personnage sage que le Petit Prince vient de rencontrer. Il lui apprend la valeur de l\'amitié et des liens qu\'on crée.'; }
+          },1200);
+        },800);
+      }
+    },20);
+  },2200);
+}
+
+function initS5(){
+  var sc=document.getElementById('sc5-cur');
+  if(sc) sc.style.display='inline-block';
+  setTimeout(function(){
+    typeText('typed-search5','Madame Bovary',80,function(){
+      if(sc) sc.style.display='none';
+      setTimeout(showSugs5, 500);
+    });
+  },400);
+}
+
+function showSugs5(){
+  var list=document.getElementById('sugs5');
+  if(!list) return;
+  var sugs=[
+    {t:'Madame Bovary',a:'Gustave Flaubert',p:468},
+    {t:'Un cœur simple',a:'Gustave Flaubert',p:50}
+  ];
+  sugs.forEach(function(s,i){
+    setTimeout(function(){
+      var el=document.createElement('div');
+      el.className='sug-item';
+      el.innerHTML='<div style="flex:1"><div class="si-ti">'+s.t+'</div><div class="si-me">'+s.a+'</div></div><div class="si-pg">'+s.p+' p.</div>';
+      list.appendChild(el);
+      if(i===0){
+        setTimeout(function(){
+          el.style.background='var(--bl3)';el.style.borderColor='var(--bl2)';
+          setTimeout(function(){
+            var f=document.getElementById('fields5'), b=document.getElementById('addbtn5');
+            if(f) f.style.opacity='1'; if(b) b.style.opacity='1';
+          },500);
+        },700);
+      }
+    },i*200);
+  });
+}
+
+// Init
+show(1);
+</script>
+</body>
+</html>
